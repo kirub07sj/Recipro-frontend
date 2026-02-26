@@ -1,0 +1,174 @@
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import './RegisterPage.css';
+
+const RegisterPage = () => {
+    const navigate = useNavigate();
+    const [showPassword, setShowPassword] = useState(false);
+
+    const onFinish = (e: React.FormEvent) => {
+        e.preventDefault();
+        // Mock registration logic
+        navigate("/home");
+    };
+
+    return (
+        <div className="register-layout">
+            <div className="register-container-wrapper">
+                <div className="register-card">
+
+                    {/* Left Hero Section */}
+                    <div className="register-hero">
+                        <div className="hero-texture"></div>
+
+                        <div className="register-brand">
+                            <div className="brand-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+                                    <line x1="6" y1="17" x2="18" y2="17" />
+                                </svg>
+                            </div>
+                            <span>Recipro</span>
+                        </div>
+
+                        <div className="hero-text">
+                            <h2>Join the<br />Culinary Revolution.</h2>
+                            <p>Create an account to stop wasting ingredients, start saving money, and eat healthier every single day.</p>
+                        </div>
+
+                        <div className="feature-tags">
+                            <div className="feature-tag">
+                                <div className="tag-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                                </div>
+                                AI-Powered Recipe Generation
+                            </div>
+                            <div className="feature-tag">
+                                <div className="tag-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
+                                </div>
+                                Unlimited Personal Cookbook
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Right Form Section */}
+                    <div className="register-form-section">
+                        <div className="form-header">
+                            <h3>Create an account</h3>
+                            <p>Let's get started with your 14-day free trial.</p>
+                        </div>
+
+                        <form className="register-form" onSubmit={onFinish}>
+                            <div className="form-row">
+                                <div className="form-group">
+                                    <label>First Name</label>
+                                    <div className="input-container">
+                                        <svg className="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="John"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                                <div className="form-group">
+                                    <label>Last Name</label>
+                                    <div className="input-container">
+                                        <svg className="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            placeholder="Doe"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Email address</label>
+                                <div className="input-container">
+                                    <svg className="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect width="20" height="16" x="2" y="4" rx="2" />
+                                        <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                    </svg>
+                                    <input
+                                        type="email"
+                                        className="form-input"
+                                        placeholder="Enter your email"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Password</label>
+                                <div className="input-container">
+                                    <svg className="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                    </svg>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        className="form-input"
+                                        placeholder="Create a password"
+                                        required
+                                        minLength={8}
+                                    />
+                                    <button
+                                        type="button"
+                                        className="password-toggle"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                    >
+                                        {showPassword ? (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" /><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" /><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" /><line x1="2" y1="2" x2="22" y2="22" /></svg>
+                                        ) : (
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" /><circle cx="12" cy="12" r="3" /></svg>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="terms-container">
+                                <label className="remember-me">
+                                    <input type="checkbox" required />
+                                    <span>I agree to the <a href="#" className="terms-link">Terms of Service</a> and <a href="#" className="terms-link">Privacy Policy</a></span>
+                                </label>
+                            </div>
+
+                            <button type="submit" className="submit-btn">
+                                Create Account
+                            </button>
+                        </form>
+
+                        <div className="auth-divider">Or sign up with</div>
+
+                        <div className="social-login-grid">
+                            <button className="social-btn" type="button">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z" />
+                                </svg>
+                                Google
+                            </button>
+                            <button className="social-btn" type="button">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                                    <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.93 1.932-1.31 2.926-1.31.12 0 .23.01.28.02.01.03.09.04.09.04zm-11.81 9.06c.01 3.01 2.8 4.6 2.8 4.6l-.18 1.44c-1.31.09-2.27.43-2.73.66-.46-.35-1.28-1.02-1.92-2.43-.89-1.97-.87-4.1-.11-5.7.54-1.13 1.4-2.05 2.53-2.61.02-.01.03-.02.04-.02zM8.32 1.6c.71-.48 1.57-.75 2.52-.75 1.35 0 2.56.55 3.44 1.43.91.9 1.47 2.14 1.47 3.52 0 1.26-.53 2.4-1.38 3.23-.84.82-1.97 1.34-3.23 1.34-1.15 0-2.2-.42-3.01-1.13-.81-.72-1.33-1.74-1.33-2.88 0-1.15.42-2.2 1.13-3.01.62-.64 1.42-1.15 2.39-1.75zm12.67 7.07c.01 3.01-2.8 4.6-2.8 4.6l.18 1.44c1.31.09 2.27.43 2.73.66.46-.35 1.28-1.02 1.92-2.43.89-1.97.87-4.1.11-5.7-.54-1.13-1.4-2.05-2.53-2.61-.02-.01-.03-.02-.04-.02zm-5.76 3.65c.57.8 1.47 1.53 2.38 2.34.86.76 1.7 1.6 2.13 2.65.65 1.58.55 3.44-.27 5.09-.76 1.54-2.06 2.72-3.66 3.32-1.45.54-3.13.56-4.66.02-1.41-.5-2.6-1.54-3.32-2.92-.76-1.47-.9-3.21-.36-4.76.49-1.41 1.51-2.56 2.84-3.24.9-.46 1.9-.71 2.92-.71 1.05 0 2.08.3 2.97.86.8.51 1.49 1.18 2.05 1.96.42.59 1.01 1.46 1.12 1.83.13.43-.09.91-.53 1.04-.43.13-.91-.09-1.04-.53-.08-.26-.55-.99-.87-1.45-.45-.63-1.01-1.17-1.65-1.58-.71-.45-1.53-.69-2.38-.69-.82 0-1.62.2-2.34.57-1.06.54-1.87 1.46-2.27 2.59-.43 1.24-.32 2.63.29 3.8.57 1.1 1.52 1.93 2.65 2.33 1.22.43 2.56.41 3.73-.01 1.28-.48 2.32-1.42 2.93-2.65.65-1.32.73-2.81.21-4.08-.34-.84-1.02-1.51-1.71-2.12-.73-.65-1.45-1.24-1.91-1.88-1.17-1.65-.67-3.95.84-5.18.35-.29.74-.52 1.14-.68z" />
+                                </svg>
+                                Apple
+                            </button>
+                        </div>
+
+                        <div className="bottom-link">
+                            Already have an account?
+                            <button type="button" onClick={() => navigate("/login")}>Sign in</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default RegisterPage;
