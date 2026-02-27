@@ -2,9 +2,9 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Public imports
-import Login from '../pages/Auth/Login';
-import Register from '../pages/Auth/Register';
-import ForgetPassword from '../pages/Auth/ForgetPassword';
+import Login from '../pages/Auth/LoginPage';
+import Register from '../pages/Auth/RegisterPage';
+import ForgetPassword from '../pages/Auth/ForgotPasswordPage';
 
 // Protected imports
 import Dashboard from '../pages/Dashboard/Dashboard';
