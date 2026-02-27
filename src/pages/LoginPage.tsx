@@ -108,7 +108,7 @@ const LoginPage = () => {
                                     <input type="checkbox" />
                                     Remember me
                                 </label>
-                                <button type="button" className="forgot-pwd">Forgot Password?</button>
+                                <button type="button" className="forgot-pwd" onClick={() => navigate('/forgot-password')}>Forgot Password?</button>
                             </div>
 
                             <button type="submit" className="submit-btn">

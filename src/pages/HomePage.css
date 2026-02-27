@@ -330,18 +330,29 @@
     font-weight: 700;
 }
 
-.view-all {
-    color: #00ff84;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
+.recipes-grid.horizontal-scroll {
     display: flex;
-    align-items: center;
-    gap: 4px;
+    overflow-x: auto;
+    gap: 24px;
+    padding-bottom: 24px;
+    /* Space for scrollbar */
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
 }
 
-.view-all:hover {
-    text-decoration: underline;
+.recipes-grid.horizontal-scroll::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari and Opera */
+}
+
+.recipes-grid.horizontal-scroll .recipe-card {
+    min-width: 300px;
+    /* Fixed width for scrolling cards */
+    flex: 0 0 auto;
+    scroll-snap-align: start;
 }
 
 .recipes-grid {

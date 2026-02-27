@@ -1,7 +1,44 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './HomePage.css';
 
+const MOCK_RECIPES = [
+    {
+        id: 1,
+        title: "Zesty Lemon Chicken Salad",
+        rating: 4.8,
+        time: "15 min",
+        calories: "350 kcal",
+        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        id: 2,
+        title: "Avocado Toast with Egg",
+        rating: 4.9,
+        time: "10 min",
+        calories: "420 kcal",
+        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        id: 3,
+        title: "Spicy Quinoa Bowl",
+        rating: 4.7,
+        time: "20 min",
+        calories: "450 kcal",
+        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    },
+    {
+        id: 4,
+        title: "Berry Acai Smoothie",
+        rating: 4.9,
+        time: "5 min",
+        calories: "280 kcal",
+        image: "https://images.unsplash.com/photo-1556881286-fc6915169721?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+    }
+];
+
 const HomePage = () => {
+    const [showAllRecipes, setShowAllRecipes] = useState(false);
+
     return (
         <div className="home-layout">
             {/* Sidebar */}
@@ -119,58 +156,49 @@ const HomePage = () => {
                 <section>
                     <div className="section-header">
                         <h2>Cook it again</h2>
-                        <a href="#" className="view-all">
-                            View all
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-                        </a>
+                        <button className="view-all" onClick={() => setShowAllRecipes(!showAllRecipes)}>
+                            {showAllRecipes ? 'View less' : 'View all'}
+                            <svg
+                                width="16"
+                                height="16"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{ transform: showAllRecipes ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }}
+                            >
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </button>
                     </div>
 
-                    <div className="recipes-grid">
-                        <div className="recipe-card">
-                            <div className="recipe-image-container">
-                                <div className="recipe-rating">
-                                    <svg className="star-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                                    4.8
-                                </div>
-                                <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Zesty Lemon Chicken Salad" className="recipe-image" />
-                            </div>
-                            <div className="recipe-content">
-                                <h3 className="recipe-title">Zesty Lemon Chicken Salad</h3>
-                                <div className="recipe-meta">
-                                    <div className="meta-item">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        15 min
+                    <div className={`recipes-grid ${showAllRecipes ? 'horizontal-scroll' : ''}`}>
+                        {(showAllRecipes ? MOCK_RECIPES : MOCK_RECIPES.slice(0, 2)).map((recipe) => (
+                            <div key={recipe.id} className="recipe-card">
+                                <div className="recipe-image-container">
+                                    <div className="recipe-rating">
+                                        <svg className="star-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+                                        {recipe.rating}
                                     </div>
-                                    <div className="meta-item">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
-                                        350 kcal
-                                    </div>
+                                    <img src={recipe.image} alt={recipe.title} className="recipe-image" />
                                 </div>
-                            </div>
-                        </div>
-
-                        <div className="recipe-card">
-                            <div className="recipe-image-container">
-                                <div className="recipe-rating">
-                                    <svg className="star-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
-                                    4.9
-                                </div>
-                                <img src="https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Avocado Toast with Egg" className="recipe-image" />
-                            </div>
-                            <div className="recipe-content">
-                                <h3 className="recipe-title">Avocado Toast with Egg</h3>
-                                <div className="recipe-meta">
-                                    <div className="meta-item">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        10 min
-                                    </div>
-                                    <div className="meta-item">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
-                                        420 kcal
+                                <div className="recipe-content">
+                                    <h3 className="recipe-title">{recipe.title}</h3>
+                                    <div className="recipe-meta">
+                                        <div className="meta-item">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                            {recipe.time}
+                                        </div>
+                                        <div className="meta-item">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+                                            {recipe.calories}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
                 </section>
             </main>
