@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Login from '../pages/Auth/LoginPage';
 import Register from '../pages/Auth/RegisterPage';
 import ForgetPassword from '../pages/Auth/ForgotPasswordPage';
+import LandingPage from '../pages/LandingPage';
+import HomePage from '../pages/HomePage';
 
 // Protected imports
 import Dashboard from '../pages/Dashboard/Dashboard';
@@ -20,7 +22,8 @@ const AppRoute = () => {
         <BrowserRouter>
             <Routes>
                 {/* Public Routes */}
-                <Route path="/" element={<div>Home</div>} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/home" element={<HomePage />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgetPassword />} />
