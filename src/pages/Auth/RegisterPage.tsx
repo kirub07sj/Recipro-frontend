@@ -8,7 +8,7 @@ const RegisterPage = () => {
     const onFinish = (e: React.FormEvent) => {
         e.preventDefault();
         // Mock registration logic
-        navigate("/home");
+        navigate("/dashboard");
     };
 
     return (

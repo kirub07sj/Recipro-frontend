@@ -1,140 +1,92 @@
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-
-const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        {isOpen ? (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        ) : (
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-        )}
-    </svg>
-);
-
-const ChefHatIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 2 7.034 4 7.034 6A3.996 3.996 0 004 9.5C4 11.233 5.023 12.721 6.5 13.33V19C6.5 20.104 7.396 21 8.5 21H15.5C16.604 21 17.5 20.104 17.5 19V13.33C18.977 12.721 20 11.233 20 9.5A3.996 3.996 0 0016.966 6C16.966 4 15 2 12 2Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.5 17H17.5" />
-    </svg>
-);
-
-const HomeIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-    </svg>
-);
-
-const SparklesIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-    </svg>
-);
-
-const HeartIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
-
-const UserIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-    </svg>
-);
-
-const LogoutIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-    </svg>
-);
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
-    const [isOpen, setIsOpen] = useState(false);
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        // Perform logout logic here (e.g., clear localStorage, context)
-        navigate('/login');
-    };
-
-    const navItems = [
-        { name: 'Home', path: '/dashboard', icon: HomeIcon },
-        { name: 'Discover', path: '/generate-recipe', icon: SparklesIcon },
-        { name: 'Saved', path: '/saved-recipes', icon: HeartIcon },
-        { name: 'Profile', path: '/profile', icon: UserIcon },
-    ];
-
     return (
-        <>
-            {/* Mobile Toggle Button */}
-            <button
-                className="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-300 hover:text-white bg-[#03100B] rounded-lg shadow-lg border border-[#0A2A1E]"
-                onClick={() => setIsOpen(!isOpen)}
-                aria-label="Toggle Sidebar"
-            >
-                <MenuIcon isOpen={isOpen} />
-            </button>
+        <aside className="w-[260px] bg-[#080d0a] border-r border-white/5 flex flex-col p-6 h-full">
+            <div className="flex items-center gap-3 text-2xl font-bold mb-10">
+                <div className="w-9 h-9 bg-[#00ff84] rounded-[10px] flex items-center justify-center text-black">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z" />
+                        <line x1="6" y1="17" x2="18" y2="17" />
+                    </svg>
+                </div>
+                <span>Recipro</span>
+            </div>
 
-            {/* Mobile Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
+            <nav className="flex flex-col gap-1 flex-1">
+                <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
+                    Home
+                </NavLink>
+                <NavLink
+                    to="/discover"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                    Discover
+                </NavLink>
+                <NavLink
+                    to="/saved-recipes"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>
+                    My Cookbook
+                </NavLink>
+                <NavLink
+                    to="/favorites"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+                    Favorites
+                </NavLink>
+                <NavLink
+                    to="/profile"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                    Profile
+                </NavLink>
+            </nav>
 
-            {/* Sidebar Container */}
-            <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-[#03100B] border-r border-[#0A2A1E] 
-        transform transition-transform duration-300 ease-in-out flex flex-col
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0
-      `}>
-                {/* Logo Section */}
-                <div className="flex items-center gap-3 px-8 py-8">
-                    <div className="bg-[#00E676] p-2 rounded-full shadow-[0_0_15px_rgba(0,230,118,0.4)]">
-                        <ChefHatIcon className="w-6 h-6 text-[#03100B]" />
+            <div className="flex flex-col gap-4 mt-auto">
+                <NavLink
+                    to="/settings"
+                    className={({ isActive }) =>
+                        `flex items-center gap-4 py-3.5 px-4 rounded-xl font-medium transition-colors text-[15px] ${isActive ? "bg-[#00ff84]/10 text-[#00ff84]" : "text-[#8b9a91] hover:text-white hover:bg-white/5"
+                        }`
+                    }
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>
+                    Settings
+                </NavLink>
+
+                <div className="bg-white/5 rounded-2xl p-3 flex items-center gap-3">
+                    <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80" alt="Alex Doe" className="w-10 h-10 rounded-full object-cover" />
+                    <div className="flex flex-col">
+                        <h4 className="font-semibold text-sm m-0">Alex Doe</h4>
+                        <p className="text-[10px] font-bold text-[#00ff84] mt-0.5 mb-0 tracking-wide">HEALTH SCORE: 85</p>
                     </div>
-                    <span className="text-white text-xl font-bold tracking-wide">Recipro</span>
                 </div>
-
-                {/* Navigation Links */}
-                <nav className="flex-1 px-4 py-2 space-y-2 mt-2">
-                    {navItems.map((item) => {
-                        const Icon = item.icon;
-                        return (
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) => `
-                  flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300
-                  ${isActive
-                                        ? 'bg-[#002C1B] text-white font-semibold border border-[#005C3A] shadow-[0_0_20px_rgba(0,230,118,0.05)]'
-                                        : 'text-gray-400 hover:text-gray-200 hover:bg-[#061B12]'
-                                    }
-                `}
-                            >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
-                                <span>{item.name}</span>
-                            </NavLink>
-                        );
-                    })}
-                </nav>
-
-                {/* Bottom Section */}
-                <div className="p-4 mb-2">
-                    {/* We could also add a user profile mini-card here if needed, but the prompt just specified "Logout" at the bottom */}
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-400 hover:text-red-400 hover:bg-[#120808] rounded-2xl transition-all duration-300"
-                    >
-                        <LogoutIcon className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-medium">Logout</span>
-                    </button>
-                </div>
-            </aside>
-        </>
+            </div>
+        </aside>
     );
 };
 

@@ -8,7 +8,7 @@ const LoginPage = () => {
     const onFinish = (e: React.FormEvent) => {
         e.preventDefault();
         // Mock login
-        navigate("/home");
+        navigate("/dashboard");
     };
 
     return (
