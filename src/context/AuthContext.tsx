@@ -1,4 +1,5 @@
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
 interface AuthContextType {
     isAuthenticated: boolean;
@@ -9,7 +10,7 @@ interface AuthContextType {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
 
     useEffect(() => {
         // Check localStorage for token on initial load
