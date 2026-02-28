@@ -1,4 +1,4 @@
-import React from "react";
+
 import { useNavigate } from "react-router-dom";
 
 const LandingPage = () => {
@@ -53,7 +53,7 @@ const LandingPage = () => {
             </a>
             <button
               onClick={() => navigate("/login")}
-              className="text-sm font-medium px-5 py-2 hover:bg-white/5 rounded-full transition-all bg-black/0 hover:outline-none
+              className="text-sm font-medium px-5 py-2 hover:bg-white/5 rounded-full transition-all bg-black/0 border-0
               "
             >
               Login
@@ -554,10 +554,10 @@ const LandingPage = () => {
                 Empowering your kitchen with the intelligence of tomorrow.
                 Healthy eating, simplified by AI.
               </p>
-              <div className="flex gap-4">
+              <div className="flex gap-4 ">
                 <a
                   href="#"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
+                  className="text-white w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -577,7 +577,7 @@ const LandingPage = () => {
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
+                  className="text-white w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -606,7 +606,7 @@ const LandingPage = () => {
                 </a>
                 <a
                   href="#"
-                  className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
+                  className="text-white w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-[#00ff73]/20 hover:text-[#00ff73] transition-all"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -628,24 +628,24 @@ const LandingPage = () => {
             </div>
             <div>
               <h4 className="font-bold mb-6">Product</h4>
-              <ul className="space-y-4" style={{ color: "rgb(255, 255, 255)" }}>
+              <ul className="space-y-4 text-white">
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     AI Engine
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Recipe Database
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Mobile App
                   </a>
                 </li>
@@ -655,22 +655,22 @@ const LandingPage = () => {
               <h4 className="font-bold mb-6">Support</h4>
               <ul className="space-y-4" style={{ color: "rgb(255, 255, 255)" }}>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-[#00ff73] transition-colors">
+                  <a href="#" className="text-white/50 hover:text-[#00ff73] transition-colors">
                     Cookie Settings
                   </a>
                 </li>
@@ -704,13 +704,13 @@ const LandingPage = () => {
               className="flex gap-8 text-sm"
               style={{ color: "rgb(255, 255, 255)" }}
             >
-              <a href="#" className="hover:text-[#00ff73]">
+              <a href="#" className="text-white/50 hover:text-[#00ff73]">
                 Privacy
               </a>
-              <a href="#" className="hover:text-[#00ff73]">
+              <a href="#" className="text-white/50 hover:text-[#00ff73]">
                 Terms
               </a>
-              <a href="#" className="hover:text-[#00ff73]">
+              <a href="#" className="text-white/50 hover:text-[#00ff73]">
                 Contact
               </a>
             </div>
