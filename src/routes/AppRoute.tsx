@@ -1,11 +1,11 @@
-import React from 'react';
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 // Public imports
 import Login from '../pages/Auth/LoginPage';
 import Register from '../pages/Auth/RegisterPage';
 import ForgetPassword from '../pages/Auth/ForgotPasswordPage';
-import LandingPage from '../pages/LandingPage';
+import LandingPage from '../pages/public/LandingPage';
 import HomePage from '../pages/HomePage';
 
 // Protected imports

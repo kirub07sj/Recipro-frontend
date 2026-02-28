@@ -19,7 +19,7 @@ const RegisterPage = () => {
                 <div className="w-full max-w-[1000px] my-5 md:my-10 bg-[#0b110d] border border-white/5 rounded-[32px] flex flex-col md:flex-row overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.5)] md:min-h-[600px]">
 
                     {/* Left Hero Section */}
-                    <div className="flex-1 bg-[#111a14] px-12 py-[60px] flex flex-col justify-between relative border-b md:border-b-0 md:border-r border-white/2 overflow-hidden">
+                    <div className="flex-1 bg-[#111a14] px-12 py-[60px] flex flex-col justify-between relative border-b md:border-b-0 md:border-r border-white/25 overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(#00ff84_1px,transparent_1px)] bg-[length:24px_24px] opacity-5 z-0"></div>
 
                         <div className="relative z-10 flex items-center gap-3 text-2xl font-extrabold text-white">
