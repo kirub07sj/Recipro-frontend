@@ -1,5 +1,3 @@
-import React, { useState } from 'react'
-
 
 const MOCK_RECIPES = [
     {
@@ -38,7 +36,7 @@ const MOCK_RECIPES = [
 
 
 const Dashboard = () => {
-    const [showAllRecipes, setShowAllRecipes] = useState(false);
+
 
     return (
         <div>
