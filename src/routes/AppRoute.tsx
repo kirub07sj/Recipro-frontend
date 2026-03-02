@@ -6,6 +6,8 @@ import Login from '../pages/Auth/LoginPage';
 import Register from '../pages/Auth/RegisterPage';
 import ForgetPassword from '../pages/Auth/ForgotPasswordPage';
 import LandingPage from '../pages/public/LandingPage';
+import OtpPage from '../pages/Auth/OtpPage';
+import ResetPassword from '../pages/Auth/ResetPassword';
 
 // Protected imports
 import Dashboard from '../pages/Dashboard/Dashboard';
@@ -26,6 +28,8 @@ const AppRoute = () => {
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgetPassword />} />
+                <Route path="/otp" element={<OtpPage />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
 
                 {/* Protected Routes */}
                 <Route element={
