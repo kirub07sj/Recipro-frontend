@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { loginService } from '../../services/authService';
+
 const LoginPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -15,19 +17,12 @@ const LoginPage = () => {
         setError('');
 
         try {
-            // Integration-ready block:
-            // const response = await loginService({ email, password });
-            // localStorage.setItem('token', response.token);
-
-            // Mock integration logic delay
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Mock validation
-            if (email && password) {
-                navigate('/dashboard');
-            } else {
+            if (!email || !password) {
                 throw new Error('Please fill all fields');
             }
+            const response = await loginService({ email, password });
+            localStorage.setItem('token', response.token);
+            navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Failed to sign in');
         } finally {
@@ -139,7 +134,7 @@ const LoginPage = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`w-full py-4 bg-green-600 hover:bg-green-400 text-[#05160b] rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] bg-transparent border-none ${loading ? 'opacity-80 cursor-not-allowed' : ''}`}
+                            className={`w-full py-4 bg-green-500 hover:bg-green-400 text-[#05160b] rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98]  border-none ${loading ? 'opacity-80 cursor-not-allowed' : ''}`}
                         >
                             {loading ? (
                                 <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -155,14 +150,14 @@ const LoginPage = () => {
                         </button>
                     </form>
 
-                    <div className="mt-8 text-center flex items-center justify-center gap-2">
+                    <div className="mt-4 text-center flex items-center justify-center gap-2">
                         <p className="text-sm text-[#8ba494]">
                             Don't have an account?
                         </p>
                         <p onClick={() => navigate('/register')} className="text-green-500 font-bold hover:text-green-400 transition-colors bg-transparent border-0 outline-none cursor-pointer">Join now</p>
                     </div>
 
-                    <div className="mt-6 flex items-center justify-between p-4 bg-[#0d2d18]/50 rounded-2xl border border-[#143d22]/50 cursor-pointer hover:bg-[#143d22]/50 transition-colors group">
+                    <div className="mt-4 flex items-center justify-between p-4 bg-[#0d2d18]/50 rounded-2xl border border-[#143d22]/50 cursor-pointer hover:bg-[#143d22]/50 transition-colors group">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-green-500/10 rounded-lg group-hover:bg-green-500/20 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chef-hat text-green-500" aria-hidden="true"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"></path><path d="M6 17h12"></path></svg>

@@ -1,19 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
+import { forgotPasswordService } from '../../services/authService';
+
 const ForgotPasswordPage = () => {
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const [error, setError] = useState('');
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
+        setError('');
         try {
-            // Mock sending password reset email
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await forgotPasswordService({ email });
             setIsSubmitted(true);
+            setTimeout(() => {
+                navigate('/otp', { state: { email } });
+            }, 1000);
+        } catch (err: any) {
+            setError(err.message || 'Error sending reset email');
+            setIsSubmitted(false);
         } finally {
             setLoading(false);
         }
@@ -57,6 +66,12 @@ const ForgotPasswordPage = () => {
 
                     {!isSubmitted ? (
                         <>
+                            {error && (
+                                <div className="mb-4 text-red-500 text-sm font-medium text-center">
+                                    {error}
+                                </div>
+                            )}
+
                             <form className="space-y-4" onSubmit={onSubmit}>
                                 <div className="relative group">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail absolute left-4 top-1/2 -translate-y-1/2 text-[#8ba494] group-focus-within:text-green-500 transition-colors" aria-hidden="true">
