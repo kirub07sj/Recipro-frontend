@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { resetPasswordService } from '../../services/authService';
 
 const ResetPassword = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+
+    // In real flow, email and otp will be in location state
+    const email = location.state?.email || '';
+    const otp = location.state?.otp || '';
+
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +17,12 @@ const ResetPassword = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
+
+    useEffect(() => {
+        if (!email || !otp) {
+            navigate('/forgot-password');
+        }
+    }, [email, otp, navigate]);
 
     const onFinish = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,8 +36,7 @@ const ResetPassword = () => {
         }
 
         try {
-            // Mock API delay for resetting password
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            await resetPasswordService({ email, otp, newPassword: password });
             setSuccess(true);
             setTimeout(() => {
                 navigate('/login');

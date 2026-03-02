@@ -84,7 +84,7 @@ const OtpPage = () => {
 
         try {
             await verifyOtp({ email, otp: otpCode });
-            navigate('/reset-password');
+            navigate('/reset-password', { state: { email, otp: otpCode } });
         } catch (err: any) {
             setError(err.message || 'Verification failed. Please try again.');
         } finally {
@@ -115,16 +115,16 @@ const OtpPage = () => {
             <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-[#1fff66]/5 blur-[100px] rounded-full"></div>
 
             {/* Header */}
-            <div className="w-full max-w-md flex items-center justify-between mb-12 relative z-10">
+            <div className="w-full max-w-md flex items-center justify-center mb-12 relative z-10">
                 <button
                     onClick={() => navigate(-1)}
-                    className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors"
+                    className="p-2 -ml-2 rounded-full hover:bg-white/5 transition-colors hidden max-md:flex"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-6 h-6 text-white/60">
                         <path d="m15 18-6-6 6-6"></path>
                     </svg>
                 </button>
-                <div className="bg-[#1fff66]/20 p-2.5 rounded-2xl border border-[#1fff66]/30">
+                <div className="bg-[#1fff66]/20 p-2.5 rounded-2xl border border-[#1fff66]/30 ml-10">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shield-check w-6 h-6 text-[#1fff66]">
                         <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
                         <path d="m9 12 2 2 4-4"></path>
@@ -180,12 +180,12 @@ const OtpPage = () => {
                             <span className="text-[#1fff66] font-mono">{formatTime(timer)}</span>
                         </div>
                     ) : (
-                        <button
+                        <p
                             onClick={handleResend}
-                            className="text-[#1fff66] text-sm font-bold hover:underline transition-all"
+                            className="text-[#1fff66] text-sm font-bold hover:underline transition-all cursor-pointer"
                         >
                             Resend Code
-                        </button>
+                        </p>
                     )}
                 </div>
 

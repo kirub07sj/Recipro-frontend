@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 
+import { registerService } from '../../services/authService';
+
 const RegisterPage = () => {
     const navigate = useNavigate();
     const [firstName, setFirstName] = useState('');
@@ -17,8 +19,12 @@ const RegisterPage = () => {
         setError('');
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            // Mock registration logic
+            const data = await registerService({
+                name: `${firstName} ${lastName}`.trim(),
+                email,
+                password
+            });
+            localStorage.setItem('token', data.token);
             navigate("/dashboard");
         } catch (err: any) {
             setError(err.message || 'Registration failed');
