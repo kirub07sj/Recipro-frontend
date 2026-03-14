@@ -15,6 +15,7 @@ import Profile from '../pages/Dashboard/Profile';
 import GenerateRecipe from '../pages/Recipe/GenerateRecipe';
 import RecipeDetails from '../pages/Recipe/RecipeDetails';
 import SavedRecipe from '../pages/Recipe/SavedRecipe';
+import HealthProfile from '../pages/Dashboard/HealthProfile';
 
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/layout/MainLayout';
@@ -30,6 +31,8 @@ const AppRoute = () => {
                 <Route path="/forgot-password" element={<ForgetPassword />} />
                 <Route path="/otp" element={<OtpPage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/health-profile" element={<HealthProfile />} />
+
 
                 {/* Protected Routes */}
                 <Route element={
