@@ -1,9 +1,5 @@
-
-
 const CookingGuide = () => {
-    return (
-        <div>CookingGuide</div>
-    )
-}
+    return null;
+};
 
-export default CookingGuide
+export default CookingGuide;

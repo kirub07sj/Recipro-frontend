@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { loginService } from '../../services/authService';
+//import { loginService } from '../../services/authService';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -20,8 +20,8 @@ const LoginPage = () => {
             if (!email || !password) {
                 throw new Error('Please fill all fields');
             }
-            const response = await loginService({ email, password });
-            localStorage.setItem('token', response.token);
+            //const response = await loginService({ email, password });
+            //localStorage.setItem('token', response.token);
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Failed to sign in');
