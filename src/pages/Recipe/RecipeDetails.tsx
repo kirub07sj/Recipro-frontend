@@ -14,8 +14,11 @@ const RecipeDetails = () => {
     // Find the recipe or default to the first one
     const recipeData = MOCK_RECIPES.find(r => r.id.toString() === id) || MOCK_RECIPES[0];
 
-    // State for selected ingredients
+    // State for interactive features
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
+    const [currentComplexity, setCurrentComplexity] = useState(recipeData.difficulty);
+    const [currentDietary, setCurrentDietary] = useState(recipeData.dietary);
+    const [activePicker, setActivePicker] = useState<'complexity' | 'dietary' | null>(null);
 
     const toggleIngredient = (ingredientId: string) => {
         setSelectedIngredients(prev => {
@@ -202,29 +205,90 @@ const RecipeDetails = () => {
 
                         {/* Additional Info Cards */}
                         <div className="pt-10 grid grid-cols-1 gap-4">
-                            <div className="w-full flex items-center justify-between p-6 bg-[#0d2114] border border-white/5 rounded-3xl hover:bg-white/5 transition-colors group cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-black/40 flex items-center justify-center group-hover:bg-[#00ff84]/10 transition-colors">
-                                        <Activity className="w-6 h-6 text-[#00ff84]" />
+                            {/* Complexity Card */}
+                            <div className="relative">
+                                <div 
+                                    onClick={() => setActivePicker(activePicker === 'complexity' ? null : 'complexity')}
+                                    className={`w-full flex items-center justify-between p-6 bg-[#0d2114] border rounded-3xl transition-all group cursor-pointer
+                                        ${activePicker === 'complexity' ? 'border-[#00ff84]/50 bg-[#0d2114]/80' : 'border-white/5 hover:bg-white/5'}
+                                    `}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
+                                            ${activePicker === 'complexity' ? 'bg-[#00ff84]/20' : 'bg-black/40 group-hover:bg-[#00ff84]/10'}`}
+                                        >
+                                            <Activity className="w-6 h-6 text-[#00ff84]" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Complexity</p>
+                                            <p className="text-lg font-bold text-gray-200">{currentComplexity}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Complexity</p>
-                                        <p className="text-lg font-bold text-gray-200">{recipeData.difficulty}</p>
-                                    </div>
+                                    <ChevronLeft className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${activePicker === 'complexity' ? 'rotate-90 text-[#00ff84]' : 'rotate-180'}`} />
                                 </div>
-                                <ChevronLeft className="w-5 h-5 text-gray-500 rotate-180" />
+                                
+                                {/* Complexity Options */}
+                                {activePicker === 'complexity' && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0d2114]/95 backdrop-blur-xl border border-[#00ff84]/20 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {['Beginner', 'Intermediate', 'Advanced'].map((lvl) => (
+                                            <button 
+                                                key={lvl}
+                                                onClick={() => {
+                                                    setCurrentComplexity(lvl);
+                                                    setActivePicker(null);
+                                                }}
+                                                className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-white/5 last:border-0
+                                                    ${currentComplexity === lvl ? 'text-[#00ff84] bg-[#00ff84]/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                                `}
+                                            >
+                                                {lvl}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                            <div className="w-full flex items-center justify-between p-6 bg-[#0d2114] border border-white/5 rounded-3xl hover:bg-white/5 transition-colors group cursor-pointer">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-2xl bg-black/40 flex items-center justify-center group-hover:bg-[#00ff84]/10 transition-colors">
-                                        <Heart className="w-6 h-6 text-[#00ff84]" />
+
+                            {/* Dietary Card */}
+                            <div className="relative">
+                                <div 
+                                    onClick={() => setActivePicker(activePicker === 'dietary' ? null : 'dietary')}
+                                    className={`w-full flex items-center justify-between p-6 bg-[#0d2114] border rounded-3xl transition-all group cursor-pointer
+                                        ${activePicker === 'dietary' ? 'border-[#00ff84]/50 bg-[#0d2114]/80' : 'border-white/5 hover:bg-white/5'}
+                                    `}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors
+                                            ${activePicker === 'dietary' ? 'bg-[#00ff84]/20' : 'bg-black/40 group-hover:bg-[#00ff84]/10'}`}
+                                        >
+                                            <Heart className="w-6 h-6 text-[#00ff84]" />
+                                        </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Dietary</p>
+                                            <p className="text-lg font-bold text-gray-200">{currentDietary}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="text-[10px] font-bold text-gray-500 tracking-widest uppercase">Dietary</p>
-                                        <p className="text-lg font-bold text-gray-200">{recipeData.dietary}</p>
-                                    </div>
+                                    <ChevronLeft className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${activePicker === 'dietary' ? 'rotate-90 text-[#00ff84]' : 'rotate-180'}`} />
                                 </div>
-                                <ChevronLeft className="w-5 h-5 text-gray-500 rotate-180" />
+
+                                {/* Dietary Options */}
+                                {activePicker === 'dietary' && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-[#0d2114]/95 backdrop-blur-xl border border-[#00ff84]/20 rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-top-2 duration-200">
+                                        {['Omnivore', 'Vegetarian', 'Vegan'].map((diet) => (
+                                            <button 
+                                                key={diet}
+                                                onClick={() => {
+                                                    setCurrentDietary(diet);
+                                                    setActivePicker(null);
+                                                }}
+                                                className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-white/5 last:border-0
+                                                    ${currentDietary === diet ? 'text-[#00ff84] bg-[#00ff84]/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}
+                                                `}
+                                            >
+                                                {diet}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
