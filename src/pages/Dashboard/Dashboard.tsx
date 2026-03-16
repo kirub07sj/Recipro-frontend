@@ -50,7 +50,7 @@ const Dashboard = () => {
                                     Good Evening
                                 </p>
                                 <h1 className="text-3xl font-bold text-white mb-1">
-                                    Ready to cook, Alex?
+                                    Ready to cook, {localStorage.getItem('userName') || 'Alex'}?
                                 </h1>
                                 <div className="flex items-center gap-2 mt-2">
                                     <span className="px-3 py-1 bg-[#00ff84]/10 text-[#00ff84] text-[10px] font-bold rounded-full border border-[#00ff84]/20 flex items-center gap-1.5">

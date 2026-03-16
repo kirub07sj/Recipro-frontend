@@ -25,6 +25,9 @@ const RegisterPage = () => {
                 password
             });
             localStorage.setItem('token', data.token);
+            if (data.user && data.user.username) {
+                localStorage.setItem('userName', data.user.username);
+            }
             navigate("/dashboard");
         } catch (err: any) {
             setError(err.message || 'Registration failed');
