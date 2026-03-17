@@ -15,6 +15,8 @@ import Profile from '../pages/Dashboard/Profile';
 import GenerateRecipe from '../pages/Recipe/GenerateRecipe';
 import RecipeDetails from '../pages/Recipe/RecipeDetails';
 import SavedRecipe from '../pages/Recipe/SavedRecipe';
+import HealthProfile from '../pages/Dashboard/HealthProfile';
+import CookingGuide from '../pages/Recipe/CookingGuide';
 
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/layout/MainLayout';
@@ -30,6 +32,8 @@ const AppRoute = () => {
                 <Route path="/forgot-password" element={<ForgetPassword />} />
                 <Route path="/otp" element={<OtpPage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/health-profile" element={<HealthProfile />} />
+
 
                 {/* Protected Routes */}
                 <Route element={
@@ -42,6 +46,7 @@ const AppRoute = () => {
                     <Route path="/generate-recipe" element={<GenerateRecipe />} />
                     <Route path="/recipe/:id" element={<RecipeDetails />} />
                     <Route path="/saved-recipes" element={<SavedRecipe />} />
+                    <Route path="/cooking-guide" element={<CookingGuide />} />
                 </Route>
             </Routes>
         </BrowserRouter>
