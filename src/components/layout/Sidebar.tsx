@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,9 +52,10 @@ const LogoutIcon = ({ className }: { className?: string }) => (
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        // Perform logout logic here (e.g., clear localStorage, context)
+        logout();
         navigate('/login');
     };
 
