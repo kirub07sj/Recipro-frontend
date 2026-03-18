@@ -1,5 +1,3 @@
-
-
 const CookingGuide = () => {
   return (
     <div className="min-h-screen w-full bg-[#05160b] text-white font-sans selection:bg-[#15803d] selection:text-white flex flex-col items-center justify-start overflow-hidden">
@@ -180,4 +178,4 @@ const CookingGuide = () => {
   )
 }
 
-export default CookingGuide
+export default CookingGuide;
