@@ -20,8 +20,11 @@ const LoginPage = () => {
             if (!email || !password) {
                 throw new Error('Please fill all fields');
             }
-            //const response = await loginService({ email, password });
-            //localStorage.setItem('token', response.token);
+            const response = await loginService({ email, password });
+            localStorage.setItem('token', response.token);
+            if (response.user && response.user.username) {
+                localStorage.setItem('userName', response.user.username);
+            }
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Failed to sign in');
