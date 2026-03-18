@@ -61,7 +61,7 @@ const Sidebar = () => {
 
     const navItems = [
         { name: 'Home', path: '/dashboard', icon: HomeIcon },
-        { name: 'Discover', path: '/generate-recipe', icon: SparklesIcon },
+        { name: 'Discover', path: '/discovery', icon: SparklesIcon },
         { name: 'Saved', path: '/saved-recipes', icon: HeartIcon },
         { name: 'Profile', path: '/profile', icon: UserIcon },
     ];
