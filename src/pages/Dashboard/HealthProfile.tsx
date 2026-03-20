@@ -1,11 +1,51 @@
-
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useHealthProfileStore } from '../../store/healthProfileStore';
+import { useAuth } from '../../hooks/useAuth';
 
 const HealthProfile = () => {
+    const navigate = useNavigate();
+    const { userId } = useAuth();
+    const { createProfile, isLoading } = useHealthProfileStore();
+
+    const [weight, setWeight] = useState(72);
+    const [dietMode, setDietMode] = useState('');
+    const [allergies, setAllergies] = useState<string[]>([]);
+    const [conditions, setConditions] = useState<string[]>([]);
+
+    const toggleArray = (arr: string[], setArr: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
+        if (arr.includes(item)) {
+            setArr(arr.filter(i => i !== item));
+        } else {
+            setArr([...arr, item]);
+        }
+    };
+
+    const handleSave = async () => {
+        if (!userId) return;
+        try {
+            await createProfile({
+                user: userId,
+                weight,
+                dietMode,
+                allergies,
+                dislikes: [], // Dislikes can be managed later from the full profile page
+                conditions,
+                healthScore: 85, // Default base score
+                dailyGoal: 2200 // Default base goal
+            });
+            // Profile setup complete, navigate to dashboard or profile
+            navigate('/profile');
+        } catch (err) {
+            console.error("Failed to create profile:", err);
+        }
+    };
+
     return (
         <div>
             <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#00ff88]/30" style={{ background: 'rgb(5, 22, 11)' }}>
                 <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md px-6 py-4 flex items-center gap-4">
-                    <button className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-6 h-6 text-[#00ff88]" aria-hidden="true">
                             <path d="m15 18-6-6 6-6"></path>
                         </svg>
@@ -20,6 +60,7 @@ const HealthProfile = () => {
                         <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Set Up Your Health Profile</h2>
                         <p className="text-sm text-zinc-400 leading-relaxed">We use this data to calculate your macros and filter recipes that match your lifestyle perfectly.</p>
                     </section>
+                    
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-scale w-5 h-5" aria-hidden="true">
@@ -34,11 +75,18 @@ const HealthProfile = () => {
                         <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
                             <label className="block text-sm text-zinc-400 mb-3">Current Weight (kg)</label>
                             <div className="relative flex items-center">
-                                <input className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none" placeholder="70" type="number" defaultValue="72" />
+                                <input 
+                                    className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none" 
+                                    placeholder="70" 
+                                    type="number" 
+                                    value={weight}
+                                    onChange={(e) => setWeight(Number(e.target.value))} 
+                                />
                                 <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
                             </div>
                         </div>
                     </section>
+                    
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-leaf w-5 h-5" aria-hidden="true">
@@ -48,14 +96,18 @@ const HealthProfile = () => {
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Dietary Preferences</h3>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">Vegetarian</button>
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">Vegan</button>
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">Low Carb</button>
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">High Protein</button>
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">Keto</button>
-                            <button className="px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20">Paleo</button>
+                            {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein', 'Keto', 'Paleo'].map(diet => (
+                                <button 
+                                    key={diet}
+                                    onClick={() => setDietMode(diet)}
+                                    className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                >
+                                    {diet}
+                                </button>
+                            ))}
                         </div>
                     </section>
+                    
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-alert w-5 h-5" aria-hidden="true">
@@ -66,14 +118,19 @@ const HealthProfile = () => {
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Allergies &amp; Intolerances</h3>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Nuts</button>
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Dairy</button>
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Gluten</button>
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Eggs</button>
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Seafood</button>
-                            <button className="p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]"><div className="w-2 h-2 rounded-full bg-zinc-700"></div>Soy</button>
+                            {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Seafood', 'Soy'].map(allergy => (
+                                <button 
+                                    key={allergy}
+                                    onClick={() => toggleArray(allergies, setAllergies, allergy)}
+                                    className={`p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]'}`}
+                                >
+                                    <div className={`w-2 h-2 rounded-full ${allergies.includes(allergy) ? 'bg-[#00ff88]' : 'bg-zinc-700'}`}></div>
+                                    {allergy}
+                                </button>
+                            ))}
                         </div>
                     </section>
+                    
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-stethoscope w-5 h-5" aria-hidden="true">
@@ -86,12 +143,27 @@ const HealthProfile = () => {
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Medical Conditions</h3>
                         </div>
                         <div className="space-y-3">
-                            <button className="w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20"><span className="font-medium">Diabetes</span><div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all border-zinc-700 group-hover:border-zinc-500"></div></button>
-                            <button className="w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20"><span className="font-medium">Hypertension</span><div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all border-zinc-700 group-hover:border-zinc-500"></div></button>
-                            <button className="w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20"><span className="font-medium">Heart Condition</span><div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all border-zinc-700 group-hover:border-zinc-500"></div></button>
-                            <button className="w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20"><span className="font-medium">None</span><div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all border-zinc-700 group-hover:border-zinc-500"></div></button>
+                            {['Diabetes', 'Hypertension', 'Heart Condition', 'None'].map(condition => (
+                                <button 
+                                    key={condition}
+                                    onClick={() => {
+                                        if (condition === 'None') setConditions(['None']);
+                                        else {
+                                            const newConds = conditions.filter(c => c !== 'None');
+                                            toggleArray(newConds, setConditions, condition);
+                                        }
+                                    }}
+                                    className={`w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${conditions.includes(condition) ? 'bg-green-500/10 border-[#00ff88] text-white' : 'bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20'}`}
+                                >
+                                    <span className="font-medium">{condition}</span>
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${conditions.includes(condition) ? 'border-[#00ff88] bg-[#00ff88]/20' : 'border-zinc-700 group-hover:border-zinc-500'}`}>
+                                        {conditions.includes(condition) && <div className="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></div>}
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </section>
+                    
                     <div className="bg-[#00ff88] p-5 rounded-3xl text-black flex items-start gap-4 shadow-[0_10px_30px_rgba(0,255,136,0.15)]">
                         <div className="bg-black/10 p-2 rounded-xl mt-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info w-5 h-5" aria-hidden="true">
@@ -106,13 +178,20 @@ const HealthProfile = () => {
                         </div>
                     </div>
                 </main>
+                
                 <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50" style={{ background: 'rgba(5, 22, 11, 0.2)' }}>
                     <div className="max-w-2xl mx-auto">
-                        <button className="w-full bg-[#00ff88] text-black font-bold py-5 rounded-2xl shadow-[0_15px_30px_rgba(0,255,136,0.2)] flex items-center justify-center gap-2 text-lg active:brightness-90 transition-all" tabIndex={0}>
-                            Save &amp; Continue
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right w-5 h-5" aria-hidden="true">
-                                <path d="m9 18 6-6-6-6"></path>
-                            </svg>
+                        <button 
+                            onClick={handleSave}
+                            disabled={isLoading}
+                            className={`w-full bg-[#00ff88] text-black font-bold py-5 rounded-2xl shadow-[0_15px_30px_rgba(0,255,136,0.2)] flex items-center justify-center gap-2 text-lg active:brightness-90 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        >
+                            {isLoading ? 'Saving...' : 'Save & Continue'}
+                            {!isLoading && (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right w-5 h-5" aria-hidden="true">
+                                    <path d="m9 18 6-6-6-6"></path>
+                                </svg>
+                            )}
                         </button>
                     </div>
                 </footer>

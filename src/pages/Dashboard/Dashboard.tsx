@@ -153,13 +153,8 @@ const Dashboard = () => {
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
-                                        <div className="p-2 bg-[#00ff84] text-[#051109] rounded-xl">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"></path><circle cx="12" cy="13" r="3"></circle></svg>
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-lg">Snap Ingredients</p>
-                                            <p className="text-xs opacity-70">Use camera to scan food</p>
-                                        </div>
+
+                                        <p className="font-bold text-lg">Enter Ingredients to get recipes</p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
@@ -209,10 +204,10 @@ const Dashboard = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {MOCK_RECIPES.map((recipe, idx) => (
-                                    <div 
-                                        key={recipe.id} 
+                                    <div
+                                        key={recipe.id}
                                         onClick={() => navigate(`/recipe/${recipe.id}`)}
-                                        className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer" 
+                                        className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
                                         style={{ transform: idx === 2 ? 'translateY(-0.0078834px)' : 'none' }}
                                     >
                                         <div className="relative aspect-[4/3]">
