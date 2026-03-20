@@ -147,7 +147,7 @@ const Dashboard = () => {
                         </header>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
+                            <div onClick={() => navigate('/generate-recipe')} className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
                                 <div className="relative z-10">
                                     <h2 className="text-3xl font-extrabold text-[#051109] mb-2 leading-tight">
                                         What's in your<br />fridge today?
@@ -163,7 +163,7 @@ const Dashboard = () => {
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <div className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'none' }}>
+                                <div onClick={() => navigate('/generate-recipe')} className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'none' }}>
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
