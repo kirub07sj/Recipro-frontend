@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
@@ -6,12 +6,21 @@ import { useAuth } from '../../hooks/useAuth';
 const HealthProfile = () => {
     const navigate = useNavigate();
     const { userId } = useAuth();
-    const { createProfile, isLoading } = useHealthProfileStore();
+    const { profile, createProfile, updateProfile, isLoading } = useHealthProfileStore();
 
-    const [weight, setWeight] = useState(72);
-    const [dietMode, setDietMode] = useState('');
-    const [allergies, setAllergies] = useState<string[]>([]);
-    const [conditions, setConditions] = useState<string[]>([]);
+    const [weight, setWeight] = useState(profile?.weight || 72);
+    const [dietMode, setDietMode] = useState(profile?.dietMode || '');
+    const [allergies, setAllergies] = useState<string[]>(profile?.allergies || []);
+    const [conditions, setConditions] = useState<string[]>(profile?.conditions || []);
+
+    useEffect(() => {
+        if (profile) {
+            setWeight(profile.weight || 72);
+            setDietMode(profile.dietMode || '');
+            setAllergies(profile.allergies || []);
+            setConditions(profile.conditions || []);
+        }
+    }, [profile]);
 
     const toggleArray = (arr: string[], setArr: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
         if (arr.includes(item)) {
@@ -24,24 +33,31 @@ const HealthProfile = () => {
     const handleSave = async () => {
         if (!userId) return;
         try {
-            await createProfile({
-                user: userId,
-                weight,
-                dietMode,
-                allergies,
-                dislikes: [], // Dislikes can be managed later from the full profile page
-                conditions,
-                healthScore: 85, // Default base score
-                dailyGoal: 2200 // Default base goal
-            });
+            if (profile) {
+                await updateProfile(userId, {
+                    weight,
+                    dietMode,
+                    allergies,
+                    conditions,
+                });
+            } else {
+                await createProfile({
+                    user: userId,
+                    weight,
+                    dietMode,
+                    allergies,
+                    dislikes: [], // Dislikes can be managed later from the full profile page
+                    conditions,
+                    healthScore: 85, // Default base score
+                    dailyGoal: 2200 // Default base goal
+                });
+            }
             // Profile setup complete, navigate to dashboard or profile
             navigate('/profile');
         } catch (err) {
-            console.error("Failed to create profile:", err);
+            console.error("Failed to save profile:", err);
         }
-    };
-
-    return (
+    }; return (
         <div>
             <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#00ff88]/30" style={{ background: 'rgb(5, 22, 11)' }}>
                 <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md px-6 py-4 flex items-center gap-4">
@@ -60,7 +76,7 @@ const HealthProfile = () => {
                         <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Set Up Your Health Profile</h2>
                         <p className="text-sm text-zinc-400 leading-relaxed">We use this data to calculate your macros and filter recipes that match your lifestyle perfectly.</p>
                     </section>
-                    
+
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-scale w-5 h-5" aria-hidden="true">
@@ -75,18 +91,18 @@ const HealthProfile = () => {
                         <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
                             <label className="block text-sm text-zinc-400 mb-3">Current Weight (kg)</label>
                             <div className="relative flex items-center">
-                                <input 
-                                    className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none" 
-                                    placeholder="70" 
-                                    type="number" 
+                                <input
+                                    className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none"
+                                    placeholder="70"
+                                    type="number"
                                     value={weight}
-                                    onChange={(e) => setWeight(Number(e.target.value))} 
+                                    onChange={(e) => setWeight(Number(e.target.value))}
                                 />
                                 <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
                             </div>
                         </div>
                     </section>
-                    
+
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-leaf w-5 h-5" aria-hidden="true">
@@ -97,7 +113,7 @@ const HealthProfile = () => {
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein', 'Keto', 'Paleo'].map(diet => (
-                                <button 
+                                <button
                                     key={diet}
                                     onClick={() => setDietMode(diet)}
                                     className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20'}`}
@@ -107,7 +123,7 @@ const HealthProfile = () => {
                             ))}
                         </div>
                     </section>
-                    
+
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-alert w-5 h-5" aria-hidden="true">
@@ -119,7 +135,7 @@ const HealthProfile = () => {
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Seafood', 'Soy'].map(allergy => (
-                                <button 
+                                <button
                                     key={allergy}
                                     onClick={() => toggleArray(allergies, setAllergies, allergy)}
                                     className={`p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]'}`}
@@ -130,7 +146,7 @@ const HealthProfile = () => {
                             ))}
                         </div>
                     </section>
-                    
+
                     <section className="space-y-4">
                         <div className="flex items-center gap-2 text-[#00ff88]">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-stethoscope w-5 h-5" aria-hidden="true">
@@ -144,7 +160,7 @@ const HealthProfile = () => {
                         </div>
                         <div className="space-y-3">
                             {['Diabetes', 'Hypertension', 'Heart Condition', 'None'].map(condition => (
-                                <button 
+                                <button
                                     key={condition}
                                     onClick={() => {
                                         if (condition === 'None') setConditions(['None']);
@@ -163,7 +179,7 @@ const HealthProfile = () => {
                             ))}
                         </div>
                     </section>
-                    
+
                     <div className="bg-[#00ff88] p-5 rounded-3xl text-black flex items-start gap-4 shadow-[0_10px_30px_rgba(0,255,136,0.15)]">
                         <div className="bg-black/10 p-2 rounded-xl mt-1">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info w-5 h-5" aria-hidden="true">
@@ -178,10 +194,10 @@ const HealthProfile = () => {
                         </div>
                     </div>
                 </main>
-                
+
                 <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50" style={{ background: 'rgba(5, 22, 11, 0.2)' }}>
                     <div className="max-w-2xl mx-auto">
-                        <button 
+                        <button
                             onClick={handleSave}
                             disabled={isLoading}
                             className={`w-full bg-[#00ff88] text-black font-bold py-5 rounded-2xl shadow-[0_15px_30px_rgba(0,255,136,0.2)] flex items-center justify-center gap-2 text-lg active:brightness-90 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
