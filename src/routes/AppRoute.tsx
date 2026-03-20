@@ -21,6 +21,7 @@ import SearchRecipe from '../pages/Recipe/SearchRecipe';
 
 
 import ProtectedRoute from './ProtectedRoute';
+import RequireHealthProfile from './RequireHealthProfile';
 import MainLayout from '../components/layout/MainLayout';
 import NotFound from '../pages/public/NotFound';
 
@@ -35,13 +36,16 @@ const AppRoute = () => {
                 <Route path="/forgot-password" element={<ForgetPassword />} />
                 <Route path="/otp" element={<OtpPage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/health-profile" element={<HealthProfile />} />
 
+                {/* Health Profile Setup Route - Protected but doesn't require health profile */}
+                <Route path="/health-profile" element={<ProtectedRoute><HealthProfile /></ProtectedRoute>} />
 
                 {/* Protected Routes */}
                 <Route element={
                     <ProtectedRoute>
-                        <MainLayout />
+                        <RequireHealthProfile>
+                            <MainLayout />
+                        </RequireHealthProfile>
                     </ProtectedRoute>
                 }>
                     <Route path="/dashboard" element={<Dashboard />} />
