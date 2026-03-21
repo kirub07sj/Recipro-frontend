@@ -1,6 +1,156 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
+const MOCK_STEPS = [
+  {
+    title: "Prepare the Base",
+    instruction: "Finely chop the shallots and mince the garlic. Heat 2 tablespoons of extra virgin olive oil in a large skillet over medium-low heat. Sauté until translucent but not browned.",
+    tip: "Don't rush this! Slow cooking shallots brings out their natural sweetness.",
+    timeSeconds: 180, // 3:00
+  },
+  {
+    title: "Toast the Aromatics",
+    instruction: "Add the spices and toast them in the hot oil for about 30 seconds until fragrant.",
+    tip: "Keep stirring constantly to prevent the spices from burning and turning bitter.",
+    timeSeconds: 30, // 0:30
+  },
+  {
+    title: "Simmer the Sauce",
+    instruction: "Pour in the crushed tomatoes and bring to a gentle simmer. Lower the heat and let it bubble away.",
+    tip: "A longer simmer leads to a deeper, more developed flavor.",
+    timeSeconds: 600, // 10:00
+  },
+  {
+    title: "Prepare the Pasta",
+    instruction: "While the sauce simmers, boil water in a large pot and salt generously. Cook pasta until al dente.",
+    tip: "Reserve half a cup of pasta water before draining to help thicken the sauce later.",
+    timeSeconds: 480, // 8:00
+  },
+  {
+    title: "Combine and Serve",
+    instruction: "Toss the pasta with the sauce, adding a splash of pasta water. Garnish with fresh basil and parmesan.",
+    tip: "Serve immediately while hot for the best texture and flavor.",
+    timeSeconds: 0, // No timer
+  }
+];
 
 const CookingGuide = () => {
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(MOCK_STEPS[0].timeSeconds);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isFinished, setIsFinished] = useState(false);
+
+  const stepData = MOCK_STEPS[currentStep];
+  const totalSteps = MOCK_STEPS.length;
+  const progressPercent = ((currentStep + 1) / totalSteps) * 100;
+
+  useEffect(() => {
+    // Reset timer when step changes
+    setTimeLeft(stepData.timeSeconds);
+    setIsRunning(false);
+  }, [currentStep, stepData.timeSeconds]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval>;
+    if (isRunning && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft(prev => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsRunning(false);
+    }
+    return () => clearInterval(timer);
+  }, [isRunning, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  const toggleTimer = () => {
+    if (timeLeft > 0) {
+      setIsRunning(!isRunning);
+    }
+  };
+
+  const resetTimer = () => {
+    setIsRunning(false);
+    setTimeLeft(stepData.timeSeconds);
+  };
+
+  const handleNext = () => {
+    if (currentStep < totalSteps - 1) {
+      setCurrentStep(currentStep + 1);
+    } else {
+      // Finished!
+      setIsFinished(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      navigate(-1);
+    }
+  };
+
+  const timerProgress = stepData.timeSeconds > 0 ? timeLeft / stepData.timeSeconds : 0;
+  const dashOffset = 439.8 * (1 - timerProgress);
+
+  if (isFinished) {
+    return (
+      <div className="min-h-screen w-full bg-[#05160b] text-white font-sans flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        {/* Background Glows */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#00ff88]/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <div className="relative z-10 flex flex-col items-center max-w-md w-full text-center">
+          <div className="w-24 h-24 bg-[#00ff88]/10 rounded-full flex items-center justify-center mb-6 border-[6px] border-[#00ff88]/20 relative">
+            <div className="w-14 h-14 bg-[#00ff88] rounded-full flex items-center justify-center shadow-[0_0_20px_#00ff88]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#05160b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+            </div>
+          </div>
+
+          <h1 className="text-[2rem] font-black mb-4 text-white tracking-tight">Recipe Completed!</h1>
+          <p className="text-zinc-400 mb-10 text-sm leading-relaxed max-w-xs mx-auto">
+            You've successfully mastered this dish. Time to plate up and enjoy your healthy creation!
+          </p>
+
+          <div className="flex gap-4 w-full mb-10">
+            <div className="flex-1 bg-[#0a1c11] border border-white/5 rounded-2xl py-6 px-4 flex flex-col items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
+              <div className="text-xl font-bold text-white leading-tight">420 kcal</div>
+              <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Per Serving</div>
+            </div>
+            <div className="flex-1 bg-[#0a1c11] border border-white/5 rounded-2xl py-6 px-4 flex flex-col items-center justify-center shadow-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+              <div className="text-xl font-bold text-white leading-tight">22 min</div>
+              <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Cooking Time</div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => { setIsFinished(false); setCurrentStep(0); setTimeLeft(MOCK_STEPS[0].timeSeconds); }}
+            className="w-full bg-white text-black font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-zinc-200 transition-colors shadow-lg active:scale-95"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+            Cook Again
+          </button>
+
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="text-zinc-500 text-xs font-semibold hover:text-white transition-colors flex items-center gap-1 group"
+          >
+            Back to My Cookbook
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:translate-x-1 transition-transform"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen w-full bg-[#05160b] text-white font-sans selection:bg-[#15803d] selection:text-white flex flex-col items-center justify-start overflow-hidden">
       {/* Background Glows */}
@@ -14,29 +164,14 @@ const CookingGuide = () => {
         <div className="mb-12">
           <div className="flex justify-between items-end mb-4">
             <div>
-              <h2 className="text-[#4ade80] text-sm font-bold tracking-[0.2em] uppercase mb-1">Step 1 of 5</h2>
+              <h2 className="text-[#4ade80] text-sm font-bold tracking-[0.2em] uppercase mb-1">Step {currentStep + 1} of {totalSteps}</h2>
               <div className="h-1 w-64 bg-white/10 rounded-full overflow-hidden">
-                <div className="h-full bg-[#4ade80]" style={{ width: '20%' }}></div>
+                <div className="h-full bg-[#4ade80] transition-all duration-300" style={{ width: `${progressPercent}%` }}></div>
               </div>
             </div>
-            <div className="flex items-center gap-2 text-white/40 text-xs font-medium bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="lucide lucide-chef-hat text-[#4ade80]"
-                aria-hidden="true"
-              >
-                <path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z"></path>
-                <path d="M6 17h12"></path>
-              </svg>
-              <span>IMMERSIVE MODE</span>
+            <div className="flex items-center gap-2 text-white/40 text-xs font-medium bg-white/5 px-3 py-1.5 rounded-full border border-white/10 relative z-20 hover:bg-white/10 cursor-pointer transition-colors" onClick={() => navigate(-1)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x text-white"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+              <span>EXIT TEXT</span>
             </div>
           </div>
         </div>
@@ -44,140 +179,112 @@ const CookingGuide = () => {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center flex-grow">
           <div className="space-y-6" style={{ opacity: 1, transform: 'none' }}>
-            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">Prepare the Base</h1>
+            <h1 className="text-5xl font-extrabold tracking-tight leading-tight">{stepData.title}</h1>
             <p className="text-xl text-white/70 leading-relaxed font-light">
-              Finely chop the shallots and mince the garlic. Heat 2 tablespoons of extra virgin olive oil in a large skillet over medium-low heat. Sauté until translucent but not browned.
+              {stepData.instruction}
             </p>
-            <div className="p-4 bg-[#15803d]/10 border-l-4 border-[#15803d] rounded-r-xl">
-              <p className="text-sm italic text-[#4ade80]">
-                <span className="font-bold not-italic mr-2">CHEF'S TIP:</span>
-                Don't rush this! Slow cooking shallots brings out their natural sweetness.
-              </p>
-            </div>
+            {stepData.tip && (
+              <div className="p-4 bg-[#15803d]/10 border-l-4 border-[#15803d] rounded-r-xl">
+                <p className="text-sm italic text-[#4ade80]">
+                  <span className="font-bold not-italic mr-2">CHEF'S TIP:</span>
+                  {stepData.tip}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Timer Section */}
-          <div className="flex flex-col items-center justify-center">
-            <div className="relative w-64 h-64 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-4 border-white/5 scale-110"></div>
-              <svg className="absolute inset-0 w-full h-full -rotate-90 transform">
-                <circle
-                  className="text-white/10"
-                  strokeWidth="6"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="70"
-                  cx="50%"
-                  cy="50%"
-                ></circle>
-                <circle
-                  className="text-[#4ade80]"
-                  strokeWidth="6"
-                  strokeDasharray="439.822971502571"
-                  strokeLinecap="round"
-                  stroke="currentColor"
-                  fill="transparent"
-                  r="70"
-                  cx="50%"
-                  cy="50%"
-                  strokeDashoffset="0"
-                ></circle>
-              </svg>
-              <div className="text-center">
-                <div className="text-5xl font-mono font-bold tracking-widest">3:00</div>
-                <div className="text-xs text-white/40 uppercase tracking-[0.3em] mt-1">Remaining</div>
+          {stepData.timeSeconds > 0 ? (
+            <div className="flex flex-col items-center justify-center">
+              <div className="relative w-64 h-64 flex items-center justify-center">
+                <div className="absolute inset-0 rounded-full border-4 border-white/5 scale-110 shadow-xl shadow-black/20"></div>
+                <svg className="absolute inset-0 w-full h-full -rotate-90 transform">
+                  <circle
+                    className="text-white/10"
+                    strokeWidth="6"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="70"
+                    cx="50%"
+                    cy="50%"
+                  ></circle>
+                  <circle
+                    className="text-[#4ade80] transition-all ease-linear"
+                    strokeWidth="6"
+                    strokeDasharray="439.8"
+                    strokeLinecap="round"
+                    stroke="currentColor"
+                    fill="transparent"
+                    r="70"
+                    cx="50%"
+                    cy="50%"
+                    strokeDashoffset={dashOffset}
+                  ></circle>
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-5xl font-mono font-bold tracking-widest leading-none drop-shadow-md">{formatTime(timeLeft)}</div>
+                  <div className="text-xs text-white/40 uppercase tracking-[0.3em] mt-3 font-semibold">{timeLeft === 0 ? "Done" : "Remaining"}</div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 mt-12 relative z-20">
+                <button
+                  onClick={resetTimer}
+                  className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                  title="Reset Timer"
+                  disabled={timeLeft === stepData.timeSeconds}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
+                </button>
+                <button
+                  onClick={toggleTimer}
+                  disabled={timeLeft === 0}
+                  className={`group relative flex items-center justify-center w-16 h-16 rounded-full transition-all active:scale-95 shadow-lg ${timeLeft === 0 ? 'bg-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-[#4ade80] hover:bg-[#22c55e] text-[#05160b]'}`}
+                >
+                  {isRunning ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg>
+                  )}
+                </button>
+                <div className="w-12 h-12 flex items-center justify-center"></div>
               </div>
             </div>
-
-            <div className="flex items-center gap-4 mt-8">
-              <button
-                className="p-3 rounded-full bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all active:scale-90"
-                title="Reset Timer"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-rotate-ccw"
-                  aria-hidden="true"
-                >
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-                  <path d="M3 3v5h5"></path>
-                </svg>
-              </button>
-              <button className="group relative flex items-center justify-center w-16 h-16 rounded-full transition-all active:scale-95 shadow-lg bg-[#4ade80] hover:bg-[#22c55e] text-[#05160b]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="28"
-                  height="28"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="lucide lucide-play ml-1"
-                  aria-hidden="true"
-                >
-                  <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path>
-                </svg>
-              </button>
-              <div className="w-12 h-12 flex items-center justify-center"></div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="w-64 h-64 flex flex-col items-center justify-center bg-white/5 rounded-full border-4 border-white/5">
+                <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-[#4ade80] mb-4"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span className="text-white/60 font-medium tracking-wider">NO TIMER</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Footer Navigation */}
         <div className="mt-auto pt-16 flex items-center justify-between">
           <button
-            disabled
-            className="flex items-center gap-2 px-6 py-4 rounded-2xl font-bold transition-all opacity-0 pointer-events-none"
+            onClick={handleBack}
+            className={`flex items-center gap-2 px-6 py-4 rounded-2xl font-bold transition-all ${currentStep === 0 ? 'text-white/40 hover:bg-white/5' : 'text-white hover:bg-white/10'}`}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-chevron-left"
-              aria-hidden="true"
-            >
-              <path d="m15 18-6-6 6-6"></path>
-            </svg>
-            <span>Back</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"></path></svg>
+            <span>{currentStep === 0 ? 'Exit Guide' : 'Back'}</span>
           </button>
-          <button className="group flex items-center gap-3 px-10 py-4 bg-[#4ade80] text-[#05160b] rounded-2xl font-bold transition-all hover:bg-[#22c55e] active:scale-95 shadow-xl shadow-[#4ade80]/10">
-            <span>Next Step</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="lucide lucide-chevron-right group-hover:translate-x-1 transition-transform"
-              aria-hidden="true"
-            >
-              <path d="m9 18 6-6-6-6"></path>
-            </svg>
+          <button
+            onClick={handleNext}
+            className="group flex items-center gap-3 px-10 py-4 bg-[#4ade80] text-[#05160b] rounded-2xl font-bold transition-all hover:bg-[#22c55e] active:scale-95 shadow-xl shadow-[#4ade80]/10"
+          >
+            <span>{currentStep === totalSteps - 1 ? 'Finish' : 'Next Step'}</span>
+            {currentStep < totalSteps - 1 && (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right group-hover:translate-x-1 transition-transform"><path d="m9 18 6-6-6-6"></path></svg>
+            )}
+            {currentStep === totalSteps - 1 && (
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check group-hover:scale-110 transition-transform"><path d="M20 6 9 17l-5-5"></path></svg>
+            )}
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default CookingGuide
+export default CookingGuide;

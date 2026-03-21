@@ -19,8 +19,11 @@ import HealthProfile from '../pages/Dashboard/HealthProfile';
 import CookingGuide from '../pages/Recipe/CookingGuide';
 import SearchRecipe from '../pages/Recipe/SearchRecipe';
 
+
 import ProtectedRoute from './ProtectedRoute';
+import RequireHealthProfile from './RequireHealthProfile';
 import MainLayout from '../components/layout/MainLayout';
+import NotFound from '../pages/public/NotFound';
 
 const AppRoute = () => {
     return (
@@ -33,23 +36,29 @@ const AppRoute = () => {
                 <Route path="/forgot-password" element={<ForgetPassword />} />
                 <Route path="/otp" element={<OtpPage />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
-                <Route path="/health-profile" element={<HealthProfile />} />
 
+                {/* Health Profile Setup Route - Protected but doesn't require health profile */}
+                <Route path="/health-profile" element={<ProtectedRoute><HealthProfile /></ProtectedRoute>} />
 
                 {/* Protected Routes */}
                 <Route element={
                     <ProtectedRoute>
-                        <MainLayout />
+                        <RequireHealthProfile>
+                            <MainLayout />
+                        </RequireHealthProfile>
                     </ProtectedRoute>
                 }>
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/generate-recipe" element={<GenerateRecipe />} />
                     <Route path="/discovery" element={<SearchRecipe />} />
-                    <Route path="/recipe/:id" element={<RecipeDetails />} />
+                    <Route path="/recipe" element={<RecipeDetails />} />
                     <Route path="/saved-recipes" element={<SavedRecipe />} />
                     <Route path="/cooking-guide" element={<CookingGuide />} />
                 </Route>
+
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     );

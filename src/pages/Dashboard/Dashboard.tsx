@@ -1,12 +1,31 @@
 
-const MOCK_RECIPES = [
+export const MOCK_RECIPES = [
     {
         id: 1,
         title: "Zesty Lemon Chicken Salad",
         rating: 4.8,
         time: "15 min",
         calories: "350 kcal",
-        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+        protein: "32g",
+        healthMatch: "94%",
+        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        difficulty: "Beginner",
+        dietary: "Low Carb, High Protein",
+        description: "A fresh and zesty salad packed with lean protein and vibrant flavors, perfect for a quick lunch.",
+        ingredients: [
+            { id: "i1", name: "Chicken Breast", amount: "200g" },
+            { id: "i2", name: "Mixed Greens", amount: "2 cups" },
+            { id: "i3", name: "Lemon", amount: "1 unit" },
+            { id: "i4", name: "Cherry Tomatoes", amount: "1 cup" },
+            { id: "i5", name: "Olive Oil", amount: "2 tbsp" }
+        ],
+        instructions: [
+            { time: "5 MIN", text: "Grill or pan-fry the seasoned chicken breast until fully cooked." },
+            { time: "5 MIN", text: "Wash and prepare the mixed greens and cherry tomatoes." },
+            { time: "2 MIN", text: "Whisk olive oil and fresh lemon juice to make the dressing." },
+            { time: "3 MIN", text: "Slice the cooked chicken, toss with greens and dressing, and serve." }
+        ],
+        chefTip: "Marinate the chicken in lemon juice for 10 minutes before cooking for extra flavor."
     },
     {
         id: 2,
@@ -14,7 +33,26 @@ const MOCK_RECIPES = [
         rating: 4.9,
         time: "10 min",
         calories: "420 kcal",
-        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+        protein: "18g",
+        healthMatch: "88%",
+        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        difficulty: "Beginner",
+        dietary: "Vegetarian",
+        description: "A classic, nutritious breakfast rich in healthy fats and protein to start your day right.",
+        ingredients: [
+            { id: "i1", name: "Sourdough Bread", amount: "2 slices" },
+            { id: "i2", name: "Ripe Avocado", amount: "1 unit" },
+            { id: "i3", name: "Eggs", amount: "2 units" },
+            { id: "i4", name: "Red Pepper Flakes", amount: "1 tsp" },
+            { id: "i5", name: "Salt and Pepper", amount: "to taste" }
+        ],
+        instructions: [
+            { time: "3 MIN", text: "Toast the sourdough bread slices until golden brown." },
+            { time: "3 MIN", text: "Mash the avocado with salt and pepper." },
+            { time: "4 MIN", text: "Cook eggs to your preference (poached, fried, or scrambled)." },
+            { time: "1 MIN", text: "Spread avocado on toast, top with eggs, and sprinkle red pepper flakes." }
+        ],
+        chefTip: "A squeeze of fresh lime juice in the mashed avocado prevents browning and adds a bright zesty kick."
     },
     {
         id: 3,
@@ -22,7 +60,27 @@ const MOCK_RECIPES = [
         rating: 4.7,
         time: "20 min",
         calories: "450 kcal",
-        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+        protein: "14g",
+        healthMatch: "92%",
+        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        difficulty: "Intermediate",
+        dietary: "Vegan, Gluten-Free",
+        description: "A hearty and spicy bowl loaded with plant-based protein, fiber, and delicious veggies.",
+        ingredients: [
+            { id: "i1", name: "Quinoa", amount: "1 cup (cooked)" },
+            { id: "i2", name: "Black Beans", amount: "1/2 cup" },
+            { id: "i3", name: "Corn", amount: "1/4 cup" },
+            { id: "i4", name: "Jalapeño", amount: "1 unit" },
+            { id: "i5", name: "Avocado", amount: "1/2 unit" },
+            { id: "i6", name: "Salsa", amount: "2 tbsp" }
+        ],
+        instructions: [
+            { time: "15 MIN", text: "Cook the quinoa according to package instructions if not pre-cooked." },
+            { time: "2 MIN", text: "Rinse the black beans and corn." },
+            { time: "2 MIN", text: "Slice the jalapeño and avocado." },
+            { time: "1 MIN", text: "Assemble the bowl starting with quinoa, then add toppings and salsa." }
+        ],
+        chefTip: "Rinse quinoa thoroughly before cooking to remove its natural bitter coating."
     },
     {
         id: 4,
@@ -30,13 +88,34 @@ const MOCK_RECIPES = [
         rating: 4.9,
         time: "5 min",
         calories: "280 kcal",
-        image: "https://images.unsplash.com/photo-1556881286-fc6915169721?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
+        protein: "5g",
+        healthMatch: "96%",
+        image: "https://images.unsplash.com/photo-1556881286-fc6915169721?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+        difficulty: "Beginner",
+        dietary: "Vegan",
+        description: "A refreshing and antioxidant-rich smoothie perfect for a quick snack or light breakfast.",
+        ingredients: [
+            { id: "i1", name: "Acai Puree", amount: "1 packet" },
+            { id: "i2", name: "Mixed Berries (Frozen)", amount: "1 cup" },
+            { id: "i3", name: "Banana", amount: "1/2 unit" },
+            { id: "i4", name: "Almond Milk", amount: "1/2 cup" },
+            { id: "i5", name: "Chia Seeds", amount: "1 tbsp" }
+        ],
+        instructions: [
+            { time: "1 MIN", text: "Gather all ingredients and add them to the blender." },
+            { time: "2 MIN", text: "Blend on high until smooth and creamy." },
+            { time: "1 MIN", text: "Check consistency. Add more almond milk if it's too thick." },
+            { time: "1 MIN", text: "Pour into a glass, top with extra chia seeds, and enjoy." }
+        ],
+        chefTip: "Use frozen bananas instead of ice cubes to keep the smoothie creamy and thick."
     }
 ];
 
 
-const Dashboard = () => {
+import { useNavigate } from 'react-router-dom';
 
+const Dashboard = () => {
+    const navigate = useNavigate();
 
     return (
         <div>
@@ -68,19 +147,14 @@ const Dashboard = () => {
                         </header>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
+                            <div onClick={() => navigate('/generate-recipe')} className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
                                 <div className="relative z-10">
                                     <h2 className="text-3xl font-extrabold text-[#051109] mb-2 leading-tight">
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
-                                        <div className="p-2 bg-[#00ff84] text-[#051109] rounded-xl">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-camera" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"></path><circle cx="12" cy="13" r="3"></circle></svg>
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-lg">Snap Ingredients</p>
-                                            <p className="text-xs opacity-70">Use camera to scan food</p>
-                                        </div>
+
+                                        <p className="font-bold text-lg">Enter Ingredients to get recipes</p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
@@ -89,7 +163,7 @@ const Dashboard = () => {
                             </div>
 
                             <div className="flex flex-col gap-4">
-                                <div className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'none' }}>
+                                <div onClick={() => navigate('/generate-recipe')} className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'none' }}>
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
@@ -130,7 +204,12 @@ const Dashboard = () => {
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {MOCK_RECIPES.map((recipe, idx) => (
-                                    <div key={recipe.id} className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group" style={{ transform: idx === 2 ? 'translateY(-0.0078834px)' : 'none' }}>
+                                    <div
+                                        key={recipe.id}
+                                        onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                        className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
+                                        style={{ transform: idx === 2 ? 'translateY(-0.0078834px)' : 'none' }}
+                                    >
                                         <div className="relative aspect-[4/3]">
                                             <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={recipe.title} src={recipe.image} />
                                             <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold flex items-center gap-1">⭐ {recipe.rating}</div>
