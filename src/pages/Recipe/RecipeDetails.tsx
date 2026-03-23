@@ -5,14 +5,14 @@ import {
   Flame, Beef, InfoIcon, CheckCircle2 
 } from 'lucide-react';
 
-import { MOCK_RECIPES } from '../Dashboard/Dashboard';
+import { mockRecipes } from '../../data/mockRecipes';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     
     // Find the recipe or default to the first one
-    const recipeData = MOCK_RECIPES.find(r => r.id.toString() === id) || MOCK_RECIPES[0];
+    const recipeData = mockRecipes.find(r => r.id === id) || mockRecipes[0];
 
     // State for interactive features
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
@@ -234,7 +234,7 @@ const RecipeDetails = () => {
                                             <button 
                                                 key={lvl}
                                                 onClick={() => {
-                                                    setCurrentComplexity(lvl);
+                                                    setCurrentComplexity(lvl as any);
                                                     setActivePicker(null);
                                                 }}
                                                 className={`w-full px-6 py-4 text-left text-sm font-bold transition-colors border-b border-white/5 last:border-0
@@ -301,7 +301,9 @@ const RecipeDetails = () => {
             
             {/* Fixed Bottom Button */}
             <div className="fixed bottom-8 left-0 right-0 flex justify-center z-50 px-6">
-                <button className="bg-[#00ff84] hover:bg-[#00ff84]/90 text-[#051109] font-black uppercase tracking-[0.1em] py-5 px-16 rounded-full w-full max-w-lg flex items-center justify-center gap-4 shadow-[0_0_50px_rgba(0,255,132,0.3)] transition-all hover:scale-[1.03] active:scale-[0.98] group">
+                <button 
+                onClick={() => navigate(`/cooking-guide/${recipeData.id}`)}
+                className="bg-[#00ff84] hover:bg-[#00ff84]/90 text-[#051109] font-black uppercase tracking-[0.1em] py-5 px-16 rounded-full w-full max-w-lg flex items-center justify-center gap-4 shadow-[0_0_50px_rgba(0,255,132,0.3)] transition-all hover:scale-[1.03] active:scale-[0.98] group">
                     <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[12px] border-l-[#051109] border-b-[8px] border-b-transparent group-hover:translate-x-1 transition-transform"></div>
                     Start Cooking
                 </button>

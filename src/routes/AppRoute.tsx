@@ -52,9 +52,9 @@ const AppRoute = () => {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/generate-recipe" element={<GenerateRecipe />} />
                     <Route path="/discovery" element={<SearchRecipe />} />
-                    <Route path="/recipe" element={<RecipeDetails />} />
+                    <Route path="/recipe/:id" element={<RecipeDetails />} />
                     <Route path="/saved-recipes" element={<SavedRecipe />} />
-                    <Route path="/cooking-guide" element={<CookingGuide />} />
+                    <Route path="/cooking-guide/:id" element={<CookingGuide />} />
                 </Route>
 
                 {/* 404 Route */}

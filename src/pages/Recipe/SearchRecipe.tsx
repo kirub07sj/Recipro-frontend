@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { mockRecipes as recipes } from '../../data/mockRecipes';
 
 // Icons using custom SVGs to match the project's style
 const SearchIcon = () => (
@@ -38,27 +40,6 @@ const ChefHatIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6.5 17H17.5" />
     </svg>
 );
-
-const recipes = [
-    {
-        id: 1,
-        title: "Zesty Lemon Chicken Salad",
-        match: 98,
-        time: "15 min",
-        calories: "350 kcal",
-        tags: ["KETO", "HIGH PROTEIN"],
-        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400&h=300"
-    },
-    {
-        id: 2,
-        title: "Avocado Toast with Egg",
-        match: 95,
-        time: "10 min",
-        calories: "420 kcal",
-        tags: ["KETO", "HIGH PROTEIN"],
-        image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=400&h=300"
-    }
-];
 
 const categories = ["All", "Breakfast", "High Protein", "Keto", "Gluten-Free", "Under 30min", "Dinner"];
 
@@ -118,8 +99,8 @@ const SearchRecipe = () => {
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold mb-6">Recommended for you</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {recipes.map((recipe) => (
-                            <div key={recipe.id} className="bg-[#061B12] rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all">
+                        {recipes.slice(0, 2).map((recipe) => (
+                            <Link to={`/recipe/${recipe.id}`} key={recipe.id} className="bg-[#061B12] rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all block text-left">
                                 <div className="relative aspect-[4/3]">
                                     <img
                                         src={recipe.image}
@@ -165,7 +146,7 @@ const SearchRecipe = () => {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
