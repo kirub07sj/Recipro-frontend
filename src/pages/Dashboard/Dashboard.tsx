@@ -1,11 +1,37 @@
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 import { mockRecipes } from '../../data/mockRecipes';
+import { useRecipeStore } from '../../store/recipeStore';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const { setPendingFile } = useRecipeStore();
+
+    const handleSnapClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setPendingFile(file);
+            navigate('/generate-recipe');
+        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     return (
         <div>
+            {/* Hidden File Input */}
+            <input 
+                type="file" 
+                accept="image/*" 
+                capture="environment"
+                ref={fileInputRef} 
+                style={{ display: 'none' }} 
+                onChange={handleFileChange} 
+            />
             {/* Main Content */}
             <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
                 <div className="max-w-7xl mx-auto">
@@ -34,14 +60,14 @@ const Dashboard = () => {
                         </header>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div onClick={() => navigate('/generate-recipe')} className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
+                            <div onClick={handleSnapClick} className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
                                 <div className="relative z-10">
                                     <h2 className="text-3xl font-extrabold text-[#051109] mb-2 leading-tight">
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
 
-                                        <p className="font-bold text-lg">Enter Ingredients to get recipes</p>
+                                        <p className="font-bold text-lg">Snap Ingredient to get recipes</p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">

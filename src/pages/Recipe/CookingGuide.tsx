@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockRecipes } from '../../data/mockRecipes';
+import { useRecipeStore } from '../../store/recipeStore';
 
 const CookingGuide = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const { generatedRecipes } = useRecipeStore();
   
-  const recipeData = mockRecipes.find(r => r.id === id) || mockRecipes[0];
-  const steps = recipeData.instructions;
+  const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || mockRecipes[0];
+  const steps = recipeData?.instructions || [];
 
   const [currentStep, setCurrentStep] = useState(0);
   const [timeLeft, setTimeLeft] = useState(steps[0].timeSeconds);

@@ -6,13 +6,15 @@ import {
 } from 'lucide-react';
 
 import { mockRecipes } from '../../data/mockRecipes';
+import { useRecipeStore } from '../../store/recipeStore';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
+    const { generatedRecipes } = useRecipeStore();
     
     // Find the recipe or default to the first one
-    const recipeData = mockRecipes.find(r => r.id === id) || mockRecipes[0];
+    const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || mockRecipes[0];
 
     // State for interactive features
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());

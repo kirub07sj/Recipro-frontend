@@ -18,7 +18,7 @@ import SavedRecipe from '../pages/Recipe/SavedRecipe';
 import HealthProfile from '../pages/Dashboard/HealthProfile';
 import CookingGuide from '../pages/Recipe/CookingGuide';
 import SearchRecipe from '../pages/Recipe/SearchRecipe';
-
+import RecipeVariants from '../pages/Recipe/RecipeVariants';
 
 import ProtectedRoute from './ProtectedRoute';
 import RequireHealthProfile from './RequireHealthProfile';
@@ -52,6 +52,7 @@ const AppRoute = () => {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/generate-recipe" element={<GenerateRecipe />} />
                     <Route path="/discovery" element={<SearchRecipe />} />
+                    <Route path="/recipe-variants" element={<RecipeVariants />} />
                     <Route path="/recipe/:id" element={<RecipeDetails />} />
                     <Route path="/saved-recipes" element={<SavedRecipe />} />
                     <Route path="/cooking-guide/:id" element={<CookingGuide />} />
