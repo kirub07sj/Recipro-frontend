@@ -1,48 +1,23 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-const MOCK_STEPS = [
-  {
-    title: "Prepare the Base",
-    instruction: "Finely chop the shallots and mince the garlic. Heat 2 tablespoons of extra virgin olive oil in a large skillet over medium-low heat. Sauté until translucent but not browned.",
-    tip: "Don't rush this! Slow cooking shallots brings out their natural sweetness.",
-    timeSeconds: 180, // 3:00
-  },
-  {
-    title: "Toast the Aromatics",
-    instruction: "Add the spices and toast them in the hot oil for about 30 seconds until fragrant.",
-    tip: "Keep stirring constantly to prevent the spices from burning and turning bitter.",
-    timeSeconds: 30, // 0:30
-  },
-  {
-    title: "Simmer the Sauce",
-    instruction: "Pour in the crushed tomatoes and bring to a gentle simmer. Lower the heat and let it bubble away.",
-    tip: "A longer simmer leads to a deeper, more developed flavor.",
-    timeSeconds: 600, // 10:00
-  },
-  {
-    title: "Prepare the Pasta",
-    instruction: "While the sauce simmers, boil water in a large pot and salt generously. Cook pasta until al dente.",
-    tip: "Reserve half a cup of pasta water before draining to help thicken the sauce later.",
-    timeSeconds: 480, // 8:00
-  },
-  {
-    title: "Combine and Serve",
-    instruction: "Toss the pasta with the sauce, adding a splash of pasta water. Garnish with fresh basil and parmesan.",
-    tip: "Serve immediately while hot for the best texture and flavor.",
-    timeSeconds: 0, // No timer
-  }
-];
+import { useNavigate, useParams } from 'react-router-dom';
+import { mockRecipes } from '../../data/mockRecipes';
+import { useRecipeStore } from '../../store/recipeStore';
 
 const CookingGuide = () => {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const { generatedRecipes } = useRecipeStore();
+  
+  const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || mockRecipes[0];
+  const steps = recipeData?.instructions || [];
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(MOCK_STEPS[0].timeSeconds);
+  const [timeLeft, setTimeLeft] = useState(steps[0].timeSeconds);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  const stepData = MOCK_STEPS[currentStep];
-  const totalSteps = MOCK_STEPS.length;
+  const stepData = steps[currentStep];
+  const totalSteps = steps.length;
   const progressPercent = ((currentStep + 1) / totalSteps) * 100;
 
   useEffect(() => {
@@ -121,18 +96,18 @@ const CookingGuide = () => {
           <div className="flex gap-4 w-full mb-10">
             <div className="flex-1 bg-[#0a1c11] border border-white/5 rounded-2xl py-6 px-4 flex flex-col items-center justify-center shadow-lg">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg>
-              <div className="text-xl font-bold text-white leading-tight">420 kcal</div>
+              <div className="text-xl font-bold text-white leading-tight">{recipeData.calories}</div>
               <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Per Serving</div>
             </div>
             <div className="flex-1 bg-[#0a1c11] border border-white/5 rounded-2xl py-6 px-4 flex flex-col items-center justify-center shadow-lg">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mb-3"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-              <div className="text-xl font-bold text-white leading-tight">22 min</div>
+              <div className="text-xl font-bold text-white leading-tight">{recipeData.time}</div>
               <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest mt-1">Cooking Time</div>
             </div>
           </div>
 
           <button
-            onClick={() => { setIsFinished(false); setCurrentStep(0); setTimeLeft(MOCK_STEPS[0].timeSeconds); }}
+            onClick={() => { setIsFinished(false); setCurrentStep(0); setTimeLeft(steps[0].timeSeconds); }}
             className="w-full bg-white text-black font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-zinc-200 transition-colors shadow-lg active:scale-95"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
@@ -181,7 +156,7 @@ const CookingGuide = () => {
           <div className="space-y-6" style={{ opacity: 1, transform: 'none' }}>
             <h1 className="text-5xl font-extrabold tracking-tight leading-tight">{stepData.title}</h1>
             <p className="text-xl text-white/70 leading-relaxed font-light">
-              {stepData.instruction}
+              {stepData.text}
             </p>
             {stepData.tip && (
               <div className="p-4 bg-[#15803d]/10 border-l-4 border-[#15803d] rounded-r-xl">

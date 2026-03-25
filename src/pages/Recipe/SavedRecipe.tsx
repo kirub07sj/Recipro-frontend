@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { mockRecipes as savedRecipes } from '../../data/mockRecipes';
 
 // Icons
 const SearchIcon = () => (
@@ -18,57 +20,6 @@ const ClockIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
 );
-
-const savedRecipes = [
-    {
-        id: 1,
-        title: "Zesty Lemon Chicken Salad",
-        time: "15 MIN",
-        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 2,
-        title: "Avocado Toast with Egg",
-        time: "10 MIN",
-        image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 3,
-        title: "Quinoa Power Bowl",
-        time: "25 MIN",
-        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 4,
-        title: "Berry Smoothie Bowl",
-        time: "5 MIN",
-        image: "https://images.unsplash.com/photo-1494597564530-859f0b15705c?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 5,
-        title: "Zesty Lemon Chicken Salad",
-        time: "15 MIN",
-        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 6,
-        title: "Avocado Toast with Egg",
-        time: "10 MIN",
-        image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 7,
-        title: "Quinoa Power Bowl",
-        time: "25 MIN",
-        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&q=80&w=400&h=500"
-    },
-    {
-        id: 8,
-        title: "Berry Smoothie Bowl",
-        time: "5 MIN",
-        image: "https://images.unsplash.com/photo-1494597564530-859f0b15705c?auto=format&fit=crop&q=80&w=400&h=500"
-    }
-];
 
 const tabs = ["All Recipes", "Favorites", "Created by Me", "Folders"];
 
@@ -116,9 +67,10 @@ const SavedRecipe = () => {
             {/* Recipe Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {savedRecipes.map((recipe, index) => (
-                    <div
+                    <Link
+                        to={`/recipe/${recipe.id}`}
                         key={`${recipe.id}-${index}`}
-                        className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer"
+                        className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
                     >
                         {/* Background Image */}
                         <img
@@ -143,7 +95,7 @@ const SavedRecipe = () => {
 
                         {/* Subtle Border Glow on Hover */}
                         <div className="absolute inset-0 border-2 border-[#00E676]/0 group-hover:border-[#00E676]/10 rounded-[2rem] transition-all pointer-events-none"></div>
-                    </div>
+                    </Link>
                 ))}
             </div>
         </div>
