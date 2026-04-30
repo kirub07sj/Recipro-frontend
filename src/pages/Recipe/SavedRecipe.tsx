@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mockRecipes as savedRecipes } from '../../data/mockRecipes';
+import { useRecipeStore } from '../../store/recipeStore';
+import { useAuth } from '../../hooks/useAuth';
+import { getSavedRecipesService } from '../../services/recipeService';
 
 // Icons
 const SearchIcon = () => (
@@ -25,6 +27,20 @@ const tabs = ["All Recipes", "Favorites", "Created by Me", "Folders"];
 
 const SavedRecipe = () => {
     const [activeTab, setActiveTab] = useState("All Recipes");
+    const { userId } = useAuth();
+    const { savedRecipes, setSavedRecipes } = useRecipeStore();
+
+    useEffect(() => {
+        if (userId) {
+            getSavedRecipesService(userId)
+                .then(res => {
+                    if (res.success) {
+                        setSavedRecipes(res.data);
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [userId, setSavedRecipes]);
 
     return (
         <div className="flex flex-col gap-8 pb-12">
@@ -68,8 +84,8 @@ const SavedRecipe = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {savedRecipes.map((recipe, index) => (
                     <Link
-                        to={`/recipe/${recipe.id}`}
-                        key={`${recipe.id}-${index}`}
+                        to={`/recipe/${recipe.recipeId || recipe.id}`}
+                        key={`${recipe.recipeId || recipe.id}-${index}`}
                         className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
                     >
                         {/* Background Image */}
@@ -98,6 +114,13 @@ const SavedRecipe = () => {
                     </Link>
                 ))}
             </div>
+            
+            {savedRecipes.length === 0 && (
+                <div className="text-center text-gray-500 py-20">
+                    <p className="text-xl">You haven't saved any recipes yet!</p>
+                    <p className="mt-2 text-sm">Explore and bookmark your favorites.</p>
+                </div>
+            )}
         </div>
     );
 };
