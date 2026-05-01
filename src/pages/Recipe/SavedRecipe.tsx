@@ -26,7 +26,6 @@ const ClockIcon = () => (
 const tabs = ["All Recipes", "Favorites", "Created by Me", "Folders"];
 
 const SavedRecipe = () => {
-    const [activeTab, setActiveTab] = useState("All Recipes");
     const { userId } = useAuth();
     const { savedRecipes, setSavedRecipes } = useRecipeStore();
 
@@ -50,35 +49,10 @@ const SavedRecipe = () => {
                     <h1 className="text-4xl font-bold mb-2">Saved Recipes</h1>
                     <p className="text-gray-400">Your personal collection of favorite recipes.</p>
                 </div>
-                <div className="flex items-center gap-3">
-                    <button className="p-3 bg-[#061B12] border border-[#0A2A1E] rounded-xl hover:bg-[#0A2A1E] transition-all text-gray-400 hover:text-white">
-                        <SearchIcon />
-                    </button>
-                    <button className="flex items-center gap-2 bg-[#00E676] px-6 py-3 rounded-xl text-[#03100B] font-bold hover:bg-[#00C853] transition-all shadow-[0_0_20px_rgba(0,230,118,0.2)]">
-                        <PlusIcon />
-                        <span>Create New</span>
-                    </button>
-                </div>
+
             </div>
 
-            {/* Navigation Tabs */}
-            <div className="flex items-center gap-8 border-b border-[#0A2A1E]">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`pb-4 text-sm font-medium transition-all relative ${activeTab === tab
-                            ? 'text-white'
-                            : 'text-gray-500 hover:text-gray-300'
-                            }`}
-                    >
-                        {tab}
-                        {activeTab === tab && (
-                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#00E676] shadow-[0_0_10px_rgba(0,230,118,0.5)]"></div>
-                        )}
-                    </button>
-                ))}
-            </div>
+
 
             {/* Recipe Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -114,7 +88,7 @@ const SavedRecipe = () => {
                     </Link>
                 ))}
             </div>
-            
+
             {savedRecipes.length === 0 && (
                 <div className="text-center text-gray-500 py-20">
                     <p className="text-xl">You haven't saved any recipes yet!</p>

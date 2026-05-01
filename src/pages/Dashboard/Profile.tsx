@@ -25,8 +25,9 @@ const Profile = () => {
     const dailyGoal = profile?.dailyGoal || 2200;
     const dietMode = profile?.dietMode || 'Paleo';
     const weight = profile?.weight || 72;
-    const allergies = profile?.allergies?.length ? profile.allergies : ['Peanuts', 'Shellfish'];
-    const dislikes = profile?.dislikes?.length ? profile.dislikes : ['Cilantro', 'Olives'];
+    const conditions = profile?.conditions || [];
+    const allergies = profile?.allergies?.length ? profile.allergies : [];
+    const dislikes = profile?.dislikes?.length ? profile.dislikes : [];
 
     const handleRemoveAllergy = async (item: string) => {
         if (!userId || !profile) return;
@@ -58,24 +59,15 @@ const Profile = () => {
     };
 
     return (
-        <div className="min-h-screen font-sans p-6" style={{ background: 'rgb(5, 22, 11)' }}>
+        <div className="min-h-screen font-sans p-6">
             {/* Header / Avatar */}
             <div className="flex flex-col items-center mt-8">
                 <div className="relative group">
-                    <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#00ff88] to-green-300 shadow-[0_0_20px_rgba(0,255,136,0.3)]">
-                        <img
-                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}&backgroundColor=b6e3f4,c0aede,d1d4f9`}
-                            alt="Profile Avatar"
-                            className="w-full h-full object-cover rounded-full border-4 border-[#05160b] bg-white transition-all duration-300"
-                        />
+                    <div className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#00ff88] to-green-300 shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center justify-center overflow-hidden">
+                        <div className="w-full h-full rounded-full border-4 border-[#05160b] bg-[#0c2415] flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                        </div>
                     </div>
-                    {/* The small edit badge on the avatar */}
-                    <button
-                        onClick={handleAvatarChange}
-                        title="Randomize Avatar"
-                        className="absolute bottom-0 right-0 bg-[#00ff88] text-[#05160b] rounded-full p-1.5 shadow-lg hover:bg-green-400 hover:scale-110 active:scale-95 transition-all cursor-pointer border-2 border-[#05160b]">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /><path d="m15 5 4 4" /></svg>
-                    </button>
                 </div>
 
                 <div className="mt-4 flex items-center justify-center gap-2 h-8">
@@ -148,6 +140,17 @@ const Profile = () => {
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></svg>
                         </div>
+
+                        {/* Health Conditions card */}
+                        <div className="col-span-2 bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex items-center justify-between">
+                            <div>
+                                <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-2">Health Conditions</h3>
+                                <div className="flex items-end gap-1">
+                                    <span className="text-2xl font-extrabold text-[#00ff88]">{conditions.length > 0 ? conditions.join(', ') : 'None'}</span>
+                                </div>
+                            </div>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m4.93 19.07 14.14-14.14"/></svg>
+                        </div>
                     </div>
                 </div>
 
@@ -204,24 +207,7 @@ const Profile = () => {
                 </div>
             </div>
 
-            {/* Weekly Meal Planner */}
-            <div className="max-w-3xl mx-auto mt-12 bg-gradient-to-r from-[#0c2415] to-[#081a0f] border border-white/5 rounded-[2rem] p-6 shadow-[0_8px_30px_rgba(0,0,0,0.5)] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
-                {/* Subtle spotlight effect */}
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#00ff88]/5 rounded-full blur-[80px] group-hover:bg-[#00ff88]/10 transition-colors duration-500"></div>
 
-                <div className="flex items-center gap-5 relative z-10 w-full md:w-auto">
-                    <div className="w-16 h-16 rounded-2xl bg-[#00ff88]/10 flex items-center justify-center border border-[#00ff88]/20 shadow-inner">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8" /><path d="M15 15 3.3 3.3a4.24 4.24 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7" /><path d="m2.1 21.8 6.4-6.3" /><path d="m19 5-7 7" /></svg>
-                    </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-white">Weekly Meal Planner</h3>
-                        <p className="text-sm text-zinc-400 mt-1 font-medium">Organize your nutrition for the week ahead.</p>
-                    </div>
-                </div>
-                <button className="relative z-10 bg-[#00ff88] text-black font-extrabold py-4 px-8 rounded-2xl shadow-[0_10px_20px_rgba(0,255,136,0.15)] hover:bg-[#00ff88]/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 w-full md:w-auto">
-                    Open Planner
-                </button>
-            </div>
         </div>
     );
 };

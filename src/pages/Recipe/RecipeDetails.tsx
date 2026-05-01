@@ -10,12 +10,16 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { getSavedRecipesService, saveRecipeService, deleteSavedRecipeService } from '../../services/recipeService';
 import { lookupMealByIdService } from '../../services/discoveryService';
+import { recordRecipeViewService } from '../../services/recentlyViewedService';
 import { useEffect } from 'react';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { generatedRecipes, savedRecipes, setSavedRecipes, addSavedRecipe, removeSavedRecipe } = useRecipeStore();
+    const { 
+        generatedRecipes, savedRecipes, setSavedRecipes, 
+        addSavedRecipe, removeSavedRecipe, addRecentlyViewed 
+    } = useRecipeStore();
     const { userId } = useAuth();
 
     // State for interactive features
@@ -34,6 +38,12 @@ const RecipeDetails = () => {
             setCurrentComplexity(localRecipe.difficulty || "Intermediate");
             setCurrentDietary(localRecipe.dietary || "Omnivore");
             setLoading(false);
+            
+            // Record view
+            if (userId && localRecipe) {
+                addRecentlyViewed(localRecipe);
+                recordRecipeViewService(userId, localRecipe).catch(console.error);
+            }
         } else if (id) {
             setLoading(true);
             lookupMealByIdService(id).then(res => {
@@ -42,9 +52,15 @@ const RecipeDetails = () => {
                 setCurrentComplexity(fetched.difficulty || "Intermediate");
                 setCurrentDietary(fetched.dietary || "Omnivore");
                 setLoading(false);
+
+                // Record view
+                if (userId && fetched) {
+                    addRecentlyViewed(fetched);
+                    recordRecipeViewService(userId, fetched).catch(console.error);
+                }
             });
         }
-    }, [id, generatedRecipes, savedRecipes]);
+    }, [id, userId, generatedRecipes, savedRecipes]);
 
     const toggleIngredient = (ingredientId: string) => {
         setSelectedIngredients(prev => {

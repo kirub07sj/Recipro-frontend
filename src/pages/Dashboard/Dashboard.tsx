@@ -2,11 +2,27 @@ import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { mockRecipes } from '../../data/mockRecipes';
 import { useRecipeStore } from '../../store/recipeStore';
+import { useAuth } from '../../hooks/useAuth';
+import { useEffect } from 'react';
+import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const { setPendingFile } = useRecipeStore();
+    const { setPendingFile, recentlyViewed, setRecentlyViewed } = useRecipeStore();
+    const { userId } = useAuth();
+
+    useEffect(() => {
+        if (userId) {
+            getRecentlyViewedService(userId, 4)
+                .then(res => {
+                    if (res.success) {
+                        setRecentlyViewed(res.data);
+                    }
+                })
+                .catch(console.error);
+        }
+    }, [userId, setRecentlyViewed]);
 
     const handleSnapClick = () => {
         fileInputRef.current?.click();
@@ -109,39 +125,45 @@ const Dashboard = () => {
 
                         <section>
                             <div className="flex items-center justify-between mb-6">
-                                <h2 className="text-2xl font-bold text-white">Cook it again</h2>
+                                <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
                                 <button className="text-[#00ff84] text-sm font-bold flex items-center gap-1 hover:underline">
                                     View all
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                                 </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                                {mockRecipes.map((recipe, idx) => (
+                                {recentlyViewed.length > 0 ? recentlyViewed.map((item, idx) => (
                                     <div
-                                        key={recipe.id}
-                                        onClick={() => navigate(`/recipe/${recipe.id}`)}
+                                        key={item._id}
+                                        onClick={() => navigate(`/recipe/${item.recipeId}`)}
                                         className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
-                                        style={{ transform: idx === 2 ? 'translateY(-0.0078834px)' : 'none' }}
                                     >
                                         <div className="relative aspect-[4/3]">
-                                            <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={recipe.title} src={recipe.image} />
-                                            <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-white text-xs font-bold flex items-center gap-1">⭐ {recipe.rating}</div>
+                                            <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" alt={item.title} src={item.image} />
+                                            {item.dietary && (
+                                                <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full text-white text-[10px] font-bold flex items-center gap-1">{item.dietary}</div>
+                                            )}
                                         </div>
                                         <div className="p-5">
-                                            <h3 className="text-lg font-bold text-white mb-3 group-hover:text-[#00ff84] transition-colors line-clamp-1">{recipe.title}</h3>
+                                            <h3 className="text-lg font-bold text-white mb-3 group-hover:text-[#00ff84] transition-colors line-clamp-1">{item.title}</h3>
                                             <div className="flex items-center gap-4 text-xs text-gray-400">
                                                 <span className="flex items-center gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg>
-                                                    {recipe.time}
+                                                    {item.time}
                                                 </span>
                                                 <span className="flex items-center gap-1">
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-flame" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-                                                    {recipe.calories}
+                                                    {item.calories}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="col-span-full py-12 bg-[#0d2114] rounded-[2rem] border border-dashed border-white/10 flex flex-col items-center justify-center text-gray-500">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-20"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                        <p>No recently viewed recipes</p>
+                                    </div>
+                                )}
                             </div>
                         </section>
                     </div>
