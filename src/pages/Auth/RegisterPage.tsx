@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-
-import { registerService } from '../../services/authService';
+import { registerService, googleLoginService } from '../../services/authService';
+import { useGoogleLogin } from '@react-oauth/google';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -36,6 +36,29 @@ const RegisterPage = () => {
         }
     };
 
+    const handleGoogleSuccess = async (tokenResponse: any) => {
+        setLoading(true);
+        setError('');
+        try {
+            if (!tokenResponse.access_token) throw new Error('No access token received');
+            const response = await googleLoginService({ accessToken: tokenResponse.access_token });
+            localStorage.setItem('token', response.token);
+            if (response.user && response.user.username) {
+                localStorage.setItem('userName', response.user.username);
+            }
+            navigate('/dashboard');
+        } catch (err: any) {
+            setError(err.message || 'Google sign up failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const registerWithGoogle = useGoogleLogin({
+        onSuccess: handleGoogleSuccess,
+        onError: () => setError('Google Sign Up failed'),
+    });
+
     return (
         <div id="root">
             <div className="min-h-screen w-full flex items-center justify-center p-4 bg-[#05160b] text-white font-sans selection:bg-green-500/30">
@@ -58,8 +81,8 @@ const RegisterPage = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                        <button type="button" className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#0d2d18] border border-[#143d22] hover:bg-[#143d22] transition-colors duration-200">
+                    <div className="flex justify-center mb-6 w-full">
+                        <button type="button" onClick={() => registerWithGoogle()} className="w-full py-4 bg-[#0d2d18] border border-[#143d22] hover:bg-[#143d22] rounded-2xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] text-white">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chromium text-green-500" aria-hidden="true">
                                 <path d="M10.88 21.94 15.46 14"></path>
                                 <path d="M21.17 8H12"></path>
@@ -67,13 +90,7 @@ const RegisterPage = () => {
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <circle cx="12" cy="12" r="4"></circle>
                             </svg>
-                            <span className="text-sm font-medium">Google</span>
-                        </button>
-                        <button type="button" className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#0d2d18] border border-[#143d22] hover:bg-[#143d22] transition-colors duration-200">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none" className="text-white">
-                                <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.93 1.932-1.31 2.926-1.31.12 0 .23.01.28.02.01.03.09.04.09.04zm-11.81 9.06c.01 3.01 2.8 4.6 2.8 4.6l-.18 1.44c-1.31.09-2.27.43-2.73.66-.46-.35-1.28-1.02-1.92-2.43-.89-1.97-.87-4.1-.11-5.7.54-1.13 1.4-2.05 2.53-2.61.02-.01.03-.02.04-.02zM8.32 1.6c.71-.48 1.57-.75 2.52-.75 1.35 0 2.56.55 3.44 1.43.91.9 1.47 2.14 1.47 3.52 0 1.26-.53 2.4-1.38 3.23-.84.82-1.97 1.34-3.23 1.34-1.15 0-2.2-.42-3.01-1.13-.81-.72-1.33-1.74-1.33-2.88 0-1.15.42-2.2 1.13-3.01.62-.64 1.42-1.15 2.39-1.75zm12.67 7.07c.01 3.01-2.8 4.6-2.8 4.6l.18 1.44c1.31.09 2.27.43 2.73.66.46-.35 1.28-1.02 1.92-2.43.89-1.97.87-4.1.11-5.7-.54-1.13-1.4-2.05-2.53-2.61-.02-.01-.03-.02-.04-.02zm-5.76 3.65c.57.8 1.47 1.53 2.38 2.34.86.76 1.7 1.6 2.13 2.65.65 1.58.55 3.44-.27 5.09-.76 1.54-2.06 2.72-3.66 3.32-1.45.54-3.13.56-4.66.02-1.41-.5-2.6-1.54-3.32-2.92-.76-1.47-.9-3.21-.36-4.76.49-1.41 1.51-2.56 2.84-3.24.9-.46 1.9-.71 2.92-.71 1.05 0 2.08.3 2.97.86.8.51 1.49 1.18 2.05 1.96.42.59 1.01 1.46 1.12 1.83.13.43-.09.91-.53 1.04-.43.13-.91-.09-1.04-.53-.08-.26-.55-.99-.87-1.45-.45-.63-1.01-1.17-1.65-1.58-.71-.45-1.53-.69-2.38-.69-.82 0-1.62.2-2.34.57-1.06.54-1.87 1.46-2.27 2.59-.43 1.24-.32 2.63.29 3.8.57 1.1 1.52 1.93 2.65 2.33 1.22.43 2.56.41 3.73-.01 1.28-.48 2.32-1.42 2.93-2.65.65-1.32.73-2.81.21-4.08-.34-.84-1.02-1.51-1.71-2.12-.73-.65-1.45-1.24-1.91-1.88-1.17-1.65-.67-3.95.84-5.18.35-.29.74-.52 1.14-.68z" />
-                            </svg>
-                            <span className="text-sm font-medium">Apple</span>
+                            <span className="text-sm font-medium">Continue with Google</span>
                         </button>
                     </div>
 
