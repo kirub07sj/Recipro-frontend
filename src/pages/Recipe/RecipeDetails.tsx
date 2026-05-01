@@ -9,6 +9,7 @@ import { mockRecipes } from '../../data/mockRecipes';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { getSavedRecipesService, saveRecipeService, deleteSavedRecipeService } from '../../services/recipeService';
+import { lookupMealByIdService } from '../../services/discoveryService';
 import { useEffect } from 'react';
 
 const RecipeDetails = () => {
@@ -17,15 +18,33 @@ const RecipeDetails = () => {
     const { generatedRecipes, savedRecipes, setSavedRecipes, addSavedRecipe, removeSavedRecipe } = useRecipeStore();
     const { userId } = useAuth();
 
-    // Find the recipe or default to the first one
-    const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id) || mockRecipes[0];
-
-
     // State for interactive features
+    const [recipeData, setRecipeData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
-    const [currentComplexity, setCurrentComplexity] = useState(recipeData.difficulty);
-    const [currentDietary, setCurrentDietary] = useState(recipeData.dietary);
+    const [currentComplexity, setCurrentComplexity] = useState("Intermediate");
+    const [currentDietary, setCurrentDietary] = useState("Omnivore");
     const [activePicker, setActivePicker] = useState<'complexity' | 'dietary' | null>(null);
+
+    useEffect(() => {
+        const localRecipe = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id);
+        if (localRecipe) {
+            setRecipeData(localRecipe);
+            setCurrentComplexity(localRecipe.difficulty || "Intermediate");
+            setCurrentDietary(localRecipe.dietary || "Omnivore");
+            setLoading(false);
+        } else if (id) {
+            setLoading(true);
+            lookupMealByIdService(id).then(res => {
+                const fetched = res || mockRecipes[0];
+                setRecipeData(fetched);
+                setCurrentComplexity(fetched.difficulty || "Intermediate");
+                setCurrentDietary(fetched.dietary || "Omnivore");
+                setLoading(false);
+            });
+        }
+    }, [id, generatedRecipes, savedRecipes]);
 
     const toggleIngredient = (ingredientId: string) => {
         setSelectedIngredients(prev => {
@@ -49,10 +68,10 @@ const RecipeDetails = () => {
         }
     };
 
-    const isAllSelected = selectedIngredients.size === recipeData.ingredients.length && recipeData.ingredients.length > 0;
+    const isAllSelected = recipeData && selectedIngredients.size === recipeData.ingredients.length && recipeData.ingredients.length > 0;
 
     // Save Logic
-    const isSaved = savedRecipes.some(r => r.recipeId === recipeData.id);
+    const isSaved = recipeData && savedRecipes.some(r => r.recipeId === recipeData.id);
 
     useEffect(() => {
         if (userId) {
@@ -84,6 +103,14 @@ const RecipeDetails = () => {
             // In a real app we'd revert the optimistic state change here on error
         }
     };
+
+    if (loading || !recipeData) {
+        return (
+            <div className="min-h-screen bg-[#051109] text-white flex items-center justify-center">
+                <div className="text-[#00ff84] font-bold animate-pulse text-xl">Loading Recipe...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden">
