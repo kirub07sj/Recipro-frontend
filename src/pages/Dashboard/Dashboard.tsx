@@ -14,7 +14,7 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (userId) {
-            getRecentlyViewedService(userId, 4)
+            getRecentlyViewedService(userId, 20)
                 .then(res => {
                     if (res.success) {
                         setRecentlyViewed(res.data);
