@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { mockRecipes as recipes } from '../../data/mockRecipes';
+import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
 
 // Icons using custom SVGs to match the project's style
 const SearchIcon = () => (
@@ -41,12 +41,60 @@ const ChefHatIcon = () => (
     </svg>
 );
 
-const categories = ["All", "Breakfast", "High Protein", "Keto", "Gluten-Free", "Under 30min", "Dinner"];
-
-const recentSearches = ["Avocado Toast", "Chicken Breast", "Smoothie Bowl"];
+const categories = ["All", "Low Carb", "Diabetic", "High Protein", "Keto", "Vegetarian", "Vegan"];
+const recentSearches = ["Arrabiata", "Chicken Breast", "Sushi"];
 
 const SearchRecipe = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
+    const [recipes, setRecipes] = useState<any[]>([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        // Initial load: fetch some default meals
+        fetchMealsByLetter('c');
+    }, []);
+
+    const fetchMealsByLetter = async (letter: string) => {
+        setLoading(true);
+        const data = await listMealsByLetterService(letter);
+        setRecipes(data || []);
+        setLoading(false);
+    };
+
+    const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            if (!searchQuery.trim()) {
+                fetchMealsByLetter('c');
+                return;
+            }
+            setLoading(true);
+            const data = await searchMealsByNameService(searchQuery);
+            setRecipes(data || []);
+            setLoading(false);
+        }
+    };
+
+    const handleCategoryClick = async (cat: string) => {
+        setSelectedCategory(cat);
+        setLoading(true);
+        if (cat === "All") {
+            await fetchMealsByLetter('c');
+        } else {
+            const data = await filterMealsByDietService(cat);
+            setRecipes(data || []);
+            setLoading(false);
+        }
+    };
+
+    const handleRandomMealClick = async () => {
+        setLoading(true);
+        const meal = await getRandomMealService();
+        if (meal) {
+            setRecipes([meal]);
+        }
+        setLoading(false);
+    };
 
     return (
         <div className="flex flex-col gap-8 pb-12">
@@ -64,7 +112,10 @@ const SearchRecipe = () => {
                     </div>
                     <input
                         type="text"
-                        placeholder="Search recipes, ingredients..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleSearch}
+                        placeholder="Search recipes (e.g., Arrabiata), press Enter..."
                         className="w-full bg-[#061B12] border border-[#0A2A1E] rounded-2xl py-5 pl-14 pr-6 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00E676]/50 transition-all"
                     />
                 </div>
@@ -78,7 +129,7 @@ const SearchRecipe = () => {
                 {categories.map((cat) => (
                     <button
                         key={cat}
-                        onClick={() => setSelectedCategory(cat)}
+                        onClick={() => handleCategoryClick(cat)}
                         className={`px-6 py-3 rounded-xl whitespace-nowrap transition-all border ${selectedCategory === cat
                             ? 'bg-[#00E676] border-[#00E676] text-[#03100B] font-bold shadow-[0_0_15px_rgba(0,230,118,0.2)]'
                             : 'bg-[#061B12] border-[#0A2A1E] text-gray-400 hover:text-white hover:border-gray-700'
@@ -98,57 +149,63 @@ const SearchRecipe = () => {
                 {/* Recommended Section */}
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold mb-6">Recommended for you</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {recipes.slice(0, 2).map((recipe) => (
-                            <Link to={`/recipe/${recipe.id}`} key={recipe.id} className="bg-[#061B12] rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all block text-left">
-                                <div className="relative aspect-[4/3]">
-                                    <img
-                                        src={recipe.image}
-                                        alt={recipe.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    {/* Match Badge */}
-                                    <div className="absolute top-4 left-4 flex items-center gap-1 bg-[#00E676] px-3 py-1.5 rounded-full text-[#03100B] text-xs font-bold shadow-lg">
-                                        <div className="w-4 h-4 flex items-center justify-center">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                            </svg>
+                    {loading ? (
+                        <div className="text-[#00E676] font-bold animate-pulse">Loading recipes...</div>
+                    ) : recipes.length === 0 ? (
+                        <div className="text-gray-400">No recipes found. Try another search.</div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {recipes.map((recipe) => (
+                                <Link to={`/recipe/${recipe.id}?source=discovery`} key={recipe.id} className="bg-[#061B12] rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all block text-left flex flex-col h-full">
+                                    <div className="relative aspect-[4/3] shrink-0">
+                                        <img
+                                            src={recipe.image}
+                                            alt={recipe.title}
+                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                        {/* Match Badge */}
+                                        <div className="absolute top-4 left-4 flex items-center gap-1 bg-[#00E676] px-3 py-1.5 rounded-full text-[#03100B] text-xs font-bold shadow-lg">
+                                            <div className="w-4 h-4 flex items-center justify-center">
+                                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                                </svg>
+                                            </div>
+                                            {recipe.match || 85}% Match
                                         </div>
-                                        {recipe.match}% Match
+                                        {/* Favorite Button */}
+                                        <button className="absolute top-4 right-4 p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white hover:bg-[#00E676] hover:text-[#03100B] transition-all">
+                                            <HeartIcon />
+                                        </button>
                                     </div>
-                                    {/* Favorite Button */}
-                                    <button className="absolute top-4 right-4 p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white hover:bg-[#00E676] hover:text-[#03100B] transition-all">
-                                        <HeartIcon />
-                                    </button>
-                                </div>
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold mb-4">{recipe.title}</h3>
-                                    <div className="flex items-center gap-6 text-gray-400 text-sm mb-6">
-                                        <div className="flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            {recipe.time}
+                                    <div className="p-6 flex flex-col flex-1">
+                                        <h3 className="text-xl font-bold mb-4 line-clamp-2">{recipe.title}</h3>
+                                        <div className="flex items-center gap-6 text-gray-400 text-sm mb-6 mt-auto">
+                                            <div className="flex items-center gap-2">
+                                                <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                                {recipe.time || '45 mins'}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.98 7.98 0 01-2.343 5.657z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14l2.828 2.828z" />
+                                                </svg>
+                                                {recipe.calories || '450 kcal'}
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2">
-                                            <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.98 7.98 0 01-2.343 5.657z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14l2.828 2.828z" />
-                                            </svg>
-                                            {recipe.calories}
+                                        <div className="flex gap-2 flex-wrap">
+                                            {(recipe.tags || []).slice(0, 3).map((tag: string) => (
+                                                <span key={tag} className="px-3 py-1.5 bg-[#03100B] border border-[#0A2A1E] rounded-lg text-[10px] font-bold tracking-wider text-gray-300">
+                                                    {tag}
+                                                </span>
+                                            ))}
                                         </div>
                                     </div>
-                                    <div className="flex gap-2">
-                                        {recipe.tags.map((tag) => (
-                                            <span key={tag} className="px-3 py-1.5 bg-[#03100B] border border-[#0A2A1E] rounded-lg text-[10px] font-bold tracking-wider text-gray-300">
-                                                {tag}
-                                            </span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
-                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Sidebar Section */}
@@ -161,7 +218,15 @@ const SearchRecipe = () => {
                         </div>
                         <div className="space-y-3">
                             {recentSearches.map((search) => (
-                                <button key={search} className="w-full flex items-center justify-between p-5 bg-[#061B12] border border-[#0A2A1E] rounded-2xl hover:border-[#00E676]/30 transition-all group">
+                                <button
+                                    key={search}
+                                    onClick={() => {
+                                        setSearchQuery(search);
+                                        // simulate enter press
+                                        handleSearch({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
+                                    }}
+                                    className="w-full flex items-center justify-between p-5 bg-[#061B12] border border-[#0A2A1E] rounded-2xl hover:border-[#00E676]/30 transition-all group"
+                                >
                                     <div className="flex items-center gap-4 text-gray-300 group-hover:text-white transition-colors">
                                         <HistoryIcon />
                                         <span className="font-medium">{search}</span>
@@ -174,7 +239,7 @@ const SearchRecipe = () => {
                         </div>
                     </div>
 
-                    {/* AI Assistant Card */}
+                    {/* AI Assistant Card (Repurposed for Random Meal) */}
                     <div className="p-8 bg-[#061B12] border border-[#0A2A1E] rounded-3xl relative overflow-hidden group">
                         {/* Decorative Gradient */}
                         <div className="absolute top-0 right-0 w-32 h-32 bg-[#00E676]/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-[#00E676]/20 transition-all"></div>
@@ -182,12 +247,15 @@ const SearchRecipe = () => {
                         <div className="bg-[#00E676] w-12 h-12 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(0,230,118,0.2)]">
                             <ChefHatIcon />
                         </div>
-                        <h3 className="text-xl font-bold mb-3">Try AI Assistant</h3>
+                        <h3 className="text-xl font-bold mb-3">Feeling Adventurous?</h3>
                         <p className="text-gray-400 text-sm leading-relaxed mb-8">
-                            Chat with our Chef AI to get personalized recipe modifications and cooking tips.
+                            Let us pick a random recipe for you to cook today!
                         </p>
-                        <button className="w-full bg-[#00E676] text-[#03100B] font-bold py-4 rounded-2xl hover:bg-[#00C853] transition-all active:scale-[0.98] shadow-lg shadow-[#00E676]/10">
-                            Start Chatting
+                        <button
+                            onClick={handleRandomMealClick}
+                            className="w-full bg-[#00E676] text-[#03100B] font-bold py-4 rounded-2xl hover:bg-[#00C853] transition-all active:scale-[0.98] shadow-lg shadow-[#00E676]/10"
+                        >
+                            Get Random Meal
                         </button>
                     </div>
                 </div>
