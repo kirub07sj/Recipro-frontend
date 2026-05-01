@@ -9,17 +9,12 @@ const Profile = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState(localStorage.getItem('userName') || 'Alex Doe');
     const [isEditingName, setIsEditingName] = useState(false);
-    const [avatarSeed, setAvatarSeed] = useState(userName);
 
     const handleNameSave = () => {
         localStorage.setItem('userName', userName);
         setIsEditingName(false);
     };
 
-    const handleAvatarChange = () => {
-        const newSeed = Math.random().toString(36).substring(7);
-        setAvatarSeed(newSeed);
-    };
 
     const healthScore = profile?.healthScore || 85;
     const dailyGoal = profile?.dailyGoal || 2200;
@@ -149,7 +144,7 @@ const Profile = () => {
                                     <span className="text-2xl font-extrabold text-[#00ff88]">{conditions.length > 0 ? conditions.join(', ') : 'None'}</span>
                                 </div>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m4.93 4.93 14.14 14.14"/><path d="m4.93 19.07 14.14-14.14"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="M12 2v20" /><path d="M2 12h20" /><path d="m4.93 4.93 14.14 14.14" /><path d="m4.93 19.07 14.14-14.14" /></svg>
                         </div>
                     </div>
                 </div>
