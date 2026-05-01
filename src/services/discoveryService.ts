@@ -59,3 +59,17 @@ export const getRandomMealService = async () => {
         return null;
     }
 };
+
+export const filterMealsByDietService = async (diet: string) => {
+    try {
+        const response = await fetch(`${API_URL}/discovery/filter?diet=${encodeURIComponent(diet)}`, {
+            headers: getAuthHeaders()
+        });
+        const data = await response.json();
+        return data.success ? data.data : [];
+    } catch (error) {
+        console.error('Error filtering meals:', error);
+        return [];
+    }
+};
+

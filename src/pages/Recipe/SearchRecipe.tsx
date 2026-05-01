@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { searchMealsByNameService, listMealsByLetterService, getRandomMealService } from '../../services/discoveryService';
+import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
 
 // Icons using custom SVGs to match the project's style
 const SearchIcon = () => (
@@ -41,7 +41,7 @@ const ChefHatIcon = () => (
     </svg>
 );
 
-const categories = ["All", "A", "B", "C", "S", "P", "M"]; // Reusing letters for MealDB list by letter
+const categories = ["All", "Low Carb", "Diabetic", "High Protein", "Keto", "Vegetarian", "Vegan"];
 const recentSearches = ["Arrabiata", "Chicken Breast", "Sushi"];
 
 const SearchRecipe = () => {
@@ -75,12 +75,15 @@ const SearchRecipe = () => {
         }
     };
 
-    const handleCategoryClick = (cat: string) => {
+    const handleCategoryClick = async (cat: string) => {
         setSelectedCategory(cat);
+        setLoading(true);
         if (cat === "All") {
-            fetchMealsByLetter('c');
+            await fetchMealsByLetter('c');
         } else {
-            fetchMealsByLetter(cat.toLowerCase());
+            const data = await filterMealsByDietService(cat);
+            setRecipes(data || []);
+            setLoading(false);
         }
     };
 

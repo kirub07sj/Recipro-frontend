@@ -127,23 +127,23 @@ const RecipeDetails = () => {
                 <div className="absolute top-6 left-6 right-6 flex justify-between items-center z-10">
                     <button
                         onClick={() => navigate(-1)}
-                        className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors"
+                        className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors"
                     >
-                        <ChevronLeft className="w-5 h-5 text-white" />
+                        <ChevronLeft className="w-7 h-7 text-white" />
                     </button>
-                    <div className="flex gap-3">
-                        <button className="w-11 h-11 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors">
-                            <Share2 className="w-5 h-5 text-white" />
+                    <div className="flex gap-4">
+                        <button className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors">
+                            <Share2 className="w-7 h-7 text-white" />
                         </button>
                         <button
-                            className={`w-11 h-11 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
+                            className={`w-14 h-14 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
                                     ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
                                     : 'bg-black/40 border-white/10 hover:bg-[#00ff84]/20'
                                 }`}
                             onClick={handleSaveToggle}
                         >
                             <Heart
-                                className={`w-5 h-5 transition-colors ${isSaved
+                                className={`w-7 h-7 transition-colors ${isSaved
                                         ? 'fill-[#00ff84] text-[#00ff84]'
                                         : 'text-white group-hover:text-[#00ff84]'
                                     }`}
@@ -186,6 +186,41 @@ const RecipeDetails = () => {
                     ))}
                 </div>
             </div>
+
+            {/* AI Health Insight & Detailed Nutrition */}
+            {recipeData.nutrition && (
+                <div className="max-w-5xl mx-auto px-8 mt-12">
+                    <div className="bg-gradient-to-r from-[#0d2114] to-[#051a10] border border-[#00ff84]/20 rounded-3xl p-8 shadow-2xl">
+                        <div className="flex items-start gap-5 mb-8">
+                            <div className="w-12 h-12 rounded-full bg-[#00ff84]/20 flex items-center justify-center shrink-0 border border-[#00ff84]/30">
+                                <Activity className="w-6 h-6 text-[#00ff84]" />
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-white mb-2">AI Health Insight</h3>
+                                <p className="text-gray-300 leading-relaxed">
+                                    {recipeData.healthInsight || "This recipe provides a balanced nutritional profile based on its ingredients."}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                            {[
+                                { label: "Calories", value: `${recipeData.nutrition.calories} kcal` },
+                                { label: "Protein", value: `${recipeData.nutrition.protein}g` },
+                                { label: "Carbs", value: `${recipeData.nutrition.carbs}g` },
+                                { label: "Fat", value: `${recipeData.nutrition.fat}g` },
+                                { label: "Fiber", value: `${recipeData.nutrition.fiber}g` },
+                                { label: "Sugar", value: `${recipeData.nutrition.sugar}g` },
+                            ].map((n, i) => (
+                                <div key={i} className="bg-black/20 rounded-2xl p-4 text-center border border-white/5 backdrop-blur-md hover:border-[#00ff84]/30 transition-colors">
+                                    <div className="text-xl font-bold text-white">{n.value}</div>
+                                    <div className="text-[10px] text-gray-500 font-bold uppercase tracking-wider mt-1">{n.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Main Content Layout */}
             <div className="max-w-5xl mx-auto px-8 mt-16 mb-24">
