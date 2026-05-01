@@ -3,6 +3,12 @@ const API_URL = `${baseUrl}/health`;
 
 export const getHealthProfileService = async (userId: string) => {
     const res = await fetch(`${API_URL}/${userId}`);
+    
+    // Explicitly handle 404 to gracefully support users without a health profile yet
+    if (res.status === 404) {
+        return { data: null };
+    }
+    
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || 'Failed to fetch health profile');
     return result;
