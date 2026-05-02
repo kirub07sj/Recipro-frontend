@@ -70,7 +70,7 @@ const Sidebar = () => {
         <>
             {/* Mobile Toggle Button */}
             <button
-                className="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-300 hover:text-white bg-[#03100B] rounded-lg shadow-lg border border-[#0A2A1E]"
+                className="md:hidden fixed top-6 left-6 z-50 p-3 text-white bg-[#03100B]/60 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 transition-all active:scale-95"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle Sidebar"
             >
@@ -87,21 +87,21 @@ const Sidebar = () => {
 
             {/* Sidebar Container */}
             <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-[#03100B] border-r border-[#0A2A1E] 
+        fixed top-4 bottom-4 left-4 z-40 w-72  
+        bg-[#0d2114]/60 backdrop-blur-xl border border-white/10
+        rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
         transform transition-transform duration-300 ease-in-out flex flex-col
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0
+        ${isOpen ? 'translate-x-0' : '-translate-x-[120%]'}
+        md:translate-x-0
       `}>
                 {/* Logo Section */}
-                <div className="flex items-center gap-3 px-8 py-8">
-                    <div className="bg-[#00E676] p-2 rounded-full shadow-[0_0_15px_rgba(0,230,118,0.4)]">
-                        <ChefHatIcon className="w-6 h-6 text-[#03100B]" />
-                    </div>
-                    <span className="text-white text-xl font-bold tracking-wide">Recipro</span>
+                <div className="flex items-center gap-4 px-10 py-10">
+                    <img src="/icon.svg" alt="Logo" className="w-14 h-14" />
+                    <span className="text-white text-2xl font-bold tracking-tight">Recipro</span>
                 </div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 px-4 py-2 space-y-2 mt-2">
+                <nav className="flex-1 px-6 py-4 space-y-3">
                     {navItems.map((item) => {
                         const Icon = item.icon;
                         return (
@@ -110,29 +110,32 @@ const Sidebar = () => {
                                 to={item.path}
                                 onClick={() => setIsOpen(false)}
                                 className={({ isActive }) => `
-                  flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300
+                  flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-300
                   ${isActive
-                                        ? 'bg-[#002C1B] text-white font-semibold border border-[#005C3A] shadow-[0_0_20px_rgba(0,230,118,0.05)]'
-                                        : 'text-gray-400 hover:text-gray-200 hover:bg-[#061B12]'
+                                        ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
+                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }
                 `}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
-                                <span>{item.name}</span>
+                                {({ isActive }) => (
+                                    <>
+                                        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                                        <span className="text-[1.05rem]">{item.name}</span>
+                                    </>
+                                )}
                             </NavLink>
                         );
                     })}
                 </nav>
 
                 {/* Bottom Section */}
-                <div className="p-4 mb-2">
-                    {/* We could also add a user profile mini-card here if needed, but the prompt just specified "Logout" at the bottom */}
+                <div className="px-6 py-8">
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-400 hover:text-red-400 hover:bg-[#120808] rounded-2xl transition-all duration-300"
+                        className="w-full flex items-center gap-4 px-6 py-4 text-gray-400 hover:text-red-400 hover:bg-red-400/5 rounded-[1.5rem] transition-all duration-300 group"
                     >
-                        <LogoutIcon className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-medium">Logout</span>
+                        <LogoutIcon className="w-5 h-5 flex-shrink-0 transition-colors group-hover:text-red-400" />
+                        <span className="font-semibold text-[1.05rem]">Logout</span>
                     </button>
                 </div>
             </aside>
