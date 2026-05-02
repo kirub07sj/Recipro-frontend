@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
+import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
 import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 
@@ -9,10 +10,12 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { setPendingFile, recentlyViewed, setRecentlyViewed } = useRecipeStore();
+    const { profile, fetchProfile } = useHealthProfileStore();
     const { userId } = useAuth();
 
     useEffect(() => {
         if (userId) {
+            // Fetch recently viewed
             getRecentlyViewedService(userId, 20)
                 .then(res => {
                     if (res.success) {
@@ -20,8 +23,13 @@ const Dashboard = () => {
                     }
                 })
                 .catch(console.error);
+
+            // Fetch health profile if not already loaded
+            if (!profile) {
+                fetchProfile(userId).catch(console.error);
+            }
         }
-    }, [userId, setRecentlyViewed]);
+    }, [userId, setRecentlyViewed, profile, fetchProfile]);
 
     const handleSnapClick = () => {
         fileInputRef.current?.click();
@@ -62,7 +70,7 @@ const Dashboard = () => {
                                 <div className="flex items-center gap-2 mt-2">
                                     <span className="px-3 py-1 bg-[#00ff84]/10 text-[#00ff84] text-[10px] font-bold rounded-full border border-[#00ff84]/20 flex items-center gap-1.5">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-zap" aria-hidden="true"><path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path></svg>
-                                        Low Carb Profile Active
+                                        {profile?.dietMode || 'Standard'} Profile Active
                                     </span>
                                 </div>
                             </div>
@@ -128,7 +136,7 @@ const Dashboard = () => {
 
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                                {recentlyViewed.length > 0 ? recentlyViewed.map((item, idx) => (
+                                {recentlyViewed.length > 0 ? recentlyViewed.map((item) => (
                                     <div
                                         key={item._id}
                                         onClick={() => navigate(`/recipe/${item.recipeId}`)}

@@ -12,12 +12,7 @@ const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
     </svg>
 );
 
-const ChefHatIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 2 7.034 4 7.034 6A3.996 3.996 0 004 9.5C4 11.233 5.023 12.721 6.5 13.33V19C6.5 20.104 7.396 21 8.5 21H15.5C16.604 21 17.5 20.104 17.5 19V13.33C18.977 12.721 20 11.233 20 9.5A3.996 3.996 0 0016.966 6C16.966 4 15 2 12 2Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.5 17H17.5" />
-    </svg>
-);
+
 
 const HomeIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,9 +105,9 @@ const Sidebar = () => {
                                 to={item.path}
                                 onClick={() => setIsOpen(false)}
                                 className={({ isActive }) => `
-                  flex items-center gap-4 px-6 py-4 rounded-[1.5rem] transition-all duration-300
+                  flex items-center gap-4 px-6 pl-14 py-4 rounded-[1.5rem] transition-all duration-300
                   ${isActive
-                                        ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
+                                        ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)] hover:text-gray-900'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                                     }
                 `}
