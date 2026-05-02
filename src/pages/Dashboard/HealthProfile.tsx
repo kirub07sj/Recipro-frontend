@@ -112,7 +112,7 @@ const HealthProfile = () => {
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Dietary Preferences</h3>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein', 'Keto', 'Paleo'].map(diet => (
+                            {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein'].map(diet => (
                                 <button
                                     key={diet}
                                     onClick={() => setDietMode(diet)}

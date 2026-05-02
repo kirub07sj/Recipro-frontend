@@ -41,7 +41,7 @@ const ChefHatIcon = () => (
     </svg>
 );
 
-const categories = ["All", "Low Carb", "Diabetic", "High Protein", "Keto", "Vegetarian", "Vegan"];
+const categories = ["All", "Low Carb", "High Protein", "Vegetarian", "Vegan"];
 const recentSearches = ["Arrabiata", "Chicken Breast", "Sushi"];
 
 const SearchRecipe = () => {

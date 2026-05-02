@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useRef } from 'react';
-import { mockRecipes } from '../../data/mockRecipes';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useEffect } from 'react';
@@ -40,13 +39,13 @@ const Dashboard = () => {
     return (
         <div>
             {/* Hidden File Input */}
-            <input 
-                type="file" 
-                accept="image/*" 
+            <input
+                type="file"
+                accept="image/*"
                 capture="environment"
-                ref={fileInputRef} 
-                style={{ display: 'none' }} 
-                onChange={handleFileChange} 
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
             />
             {/* Main Content */}
             <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
@@ -126,10 +125,7 @@ const Dashboard = () => {
                         <section>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-                                <button className="text-[#00ff84] text-sm font-bold flex items-center gap-1 hover:underline">
-                                    View all
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
-                                </button>
+
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, idx) => (
