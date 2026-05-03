@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,67 +74,99 @@ const Sidebar = () => {
             </button>
 
             {/* Mobile Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                        onClick={() => setIsOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Sidebar Container */}
-            <aside className={`
-        fixed top-4 bottom-4 left-4 z-40 w-72  
-        bg-[#0d2114]/60 backdrop-blur-xl border border-white/10
-        rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
-        transform transition-transform duration-300 ease-in-out flex flex-col
-        ${isOpen ? 'translate-x-0' : '-translate-x-[120%]'}
-        md:translate-x-0
-      `}>
+            <motion.aside
+                initial={false}
+                animate={{
+                    x: isOpen ? 0 : (window.innerWidth < 768 ? '-120%' : 0),
+                    transition: { type: 'spring', damping: 25, stiffness: 200 }
+                }}
+                className={`
+                    fixed top-4 bottom-4 left-4 z-40 w-72  
+                    bg-[#0d2114]/60 backdrop-blur-xl border border-white/10
+                    rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
+                    flex flex-col md:translate-x-0
+                `}
+            >
                 {/* Logo Section */}
-                <div className="flex items-center gap-4 px-10 py-10">
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-4 px-10 py-10"
+                >
                     <img src="/icon.svg" alt="Logo" className="w-14 h-14" />
                     <span className="text-white text-2xl font-bold tracking-tight">Recipro</span>
-                </div>
+                </motion.div>
 
                 {/* Navigation Links */}
                 <nav className="flex-1 px-6 py-4 space-y-3">
-                    {navItems.map((item) => {
+                    {navItems.map((item, index) => {
                         const Icon = item.icon;
                         return (
-                            <NavLink
+                            <motion.div
                                 key={item.path}
-                                to={item.path}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) => `
-                  flex items-center gap-4 px-6 pl-14 py-4 rounded-[1.5rem] transition-all duration-300
-                  ${isActive
-                                        ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)] hover:text-gray-900'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                                    }
-                `}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 * (index + 1) }}
                             >
-                                {({ isActive }) => (
-                                    <>
-                                        <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5px]' : ''}`} />
-                                        <span className="text-[1.05rem]">{item.name}</span>
-                                    </>
-                                )}
-                            </NavLink>
+                                <NavLink
+                                    to={item.path}
+                                    onClick={() => setIsOpen(false)}
+                                    className={({ isActive }) => `
+                                        flex items-center gap-4 px-6 pl-14 py-4 rounded-[1.5rem] transition-all duration-300
+                                        ${isActive
+                                            ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                        }
+                                    `}
+                                >
+                                    {({ isActive }) => (
+                                        <motion.div
+                                            className="flex items-center gap-4 w-full"
+                                            whileHover={{ x: 5 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                                            <span className="text-[1.05rem]">{item.name}</span>
+                                        </motion.div>
+                                    )}
+                                </NavLink>
+                            </motion.div>
                         );
                     })}
                 </nav>
 
                 {/* Bottom Section */}
-                <div className="px-6 py-8">
-                    <button
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="px-6 py-8"
+                >
+                    <motion.button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-6 py-4 text-gray-400 hover:text-red-400 hover:bg-red-400/5 rounded-[1.5rem] transition-all duration-300 group"
+                        whileHover={{ x: 5, backgroundColor: 'rgba(248, 113, 113, 0.05)' }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex items-center gap-4 px-6 py-4 text-gray-400 hover:text-red-400 rounded-[1.5rem] transition-all duration-300 group"
                     >
                         <LogoutIcon className="w-5 h-5 flex-shrink-0 transition-colors group-hover:text-red-400" />
                         <span className="font-semibold text-[1.05rem]">Logout</span>
-                    </button>
-                </div>
-            </aside>
+                    </motion.button>
+                </motion.div>
+            </motion.aside>
         </>
     );
 };
