@@ -158,12 +158,7 @@ const LandingPage = () => {
                                     <path d="m12 5 7 7-7 7"></path>
                                 </svg>
                             </motion.button>
-                            <motion.button
-                                whileHover={{ backgroundColor: "rgba(255, 255, 255, 0.1)" }}
-                                className="px-8 py-4 border border-white/10 font-bold rounded-2xl transition-all"
-                            >
-                                Watch Demo
-                            </motion.button>
+
                         </motion.div>
                         <motion.div variants={fadeInUp} className="mt-12 flex items-center gap-4">
                             <div className="flex -space-x-3">

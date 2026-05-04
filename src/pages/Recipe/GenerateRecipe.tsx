@@ -1,6 +1,7 @@
 import { useState, useRef, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { extractIngredientsFromImage, generateRecipeVariants } from '../../services/aiService';
+import { searchIngredients, type IngredientSuggestion } from '../../services/ingredientService';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { AuthContext } from '../../context/AuthContext';
@@ -10,6 +11,9 @@ const GenerateRecipe = () => {
     // Use an empty array initially to let the user upload or start typing
     const [ingredients, setIngredients] = useState<string[]>([]);
     const [inputValue, setInputValue] = useState('');
+    const [apiSuggestions, setApiSuggestions] = useState<IngredientSuggestion[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [isSearching, setIsSearching] = useState(false);
     const [isExtracting, setIsExtracting] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
@@ -30,6 +34,26 @@ const GenerateRecipe = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [pendingFile]);
 
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (inputValue.trim().length >= 2) {
+                setIsSearching(true);
+                const result = await searchIngredients(inputValue);
+                if (result.success) {
+                    setApiSuggestions(result.suggestions);
+                    setShowSuggestions(true);
+                }
+                setIsSearching(false);
+            } else {
+                setApiSuggestions([]);
+                setShowSuggestions(false);
+            }
+        };
+
+        const debounce = setTimeout(fetchSuggestions, 300);
+        return () => clearTimeout(debounce);
+    }, [inputValue]);
+
     const removeIngredient = (ing: string) => {
         setIngredients(ingredients.filter(i => i !== ing));
     };
@@ -37,13 +61,14 @@ const GenerateRecipe = () => {
     const addIngredient = (ing: string) => {
         if (ing && !ingredients.includes(ing)) {
             setIngredients([...ingredients, ing]);
+            setInputValue('');
+            setShowSuggestions(false);
         }
     };
 
     const handleAddClick = () => {
         if (inputValue.trim()) {
             addIngredient(inputValue.trim());
-            setInputValue('');
         }
     };
 
@@ -102,13 +127,13 @@ const GenerateRecipe = () => {
     const handleFileProcess = async (file: File) => {
         setIsExtracting(true);
         setErrorMsg('');
-        
+
         try {
             const optimizedFile = await compressImage(file);
             const result = await extractIngredientsFromImage(optimizedFile);
             if (result.success && result.data) {
                 // Determine if backend returns an array of strings or array of objects with 'name'
-                const newIngredients = result.data.map((item: any) => 
+                const newIngredients = result.data.map((item: any) =>
                     typeof item === 'string' ? item : (item.name || item)
                 );
                 // Merge with existing avoiding duplicates
@@ -143,7 +168,7 @@ const GenerateRecipe = () => {
         try {
             const healthProfileData = profile || {}; // Send available profile data
             const result = await generateRecipeVariants(userId, ingredients, healthProfileData);
-            
+
             if (result.success && result.data) {
                 setGeneratedRecipes(result.data);
                 navigate('/recipe-variants');
@@ -157,7 +182,7 @@ const GenerateRecipe = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-[#051109] text-white p-6 md:p-10 font-sans relative pb-40">
+        <div className="min-h-screen w-full  text-white p-6 md:p-10 font-sans relative pb-40">
             <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
                 {/* Header */}
                 <header className="flex items-center gap-4 mb-8">
@@ -169,7 +194,7 @@ const GenerateRecipe = () => {
                     </button>
                     <div className="flex-1 flex justify-between items-center">
                         <div>
-                            <div 
+                            <div
                                 onClick={handleCameraClick}
                                 className="inline-flex items-center gap-1.5 text-[#00ff84] text-[10px] font-bold tracking-wider mb-1 uppercase cursor-pointer hover:underline"
                             >
@@ -188,17 +213,17 @@ const GenerateRecipe = () => {
                 )}
 
                 {/* Hidden File Input */}
-                <input 
-                    type="file" 
-                    accept="image/*" 
+                <input
+                    type="file"
+                    accept="image/*"
                     capture="environment"
-                    ref={fileInputRef} 
-                    style={{ display: 'none' }} 
-                    onChange={handleFileChange} 
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
                 />
 
                 {/* Banner */}
-                <div 
+                <div
                     onClick={handleCameraClick}
                     className="w-full h-56 rounded-[2rem] overflow-hidden relative border border-white/10 cursor-pointer group"
                 >
@@ -208,7 +233,7 @@ const GenerateRecipe = () => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/30 transition-colors" />
-                    
+
                     {isExtracting ? (
                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm">
                             <div className="w-10 h-10 border-4 border-[#00ff84] border-t-transparent rounded-full animate-spin mb-3"></div>
@@ -277,6 +302,39 @@ const GenerateRecipe = () => {
                                 placeholder="Add an ingredient manually..."
                                 className="w-full bg-[#0d2114] border border-white/5 rounded-2xl py-4 pl-14 pr-4 text-white font-medium placeholder:text-gray-500 placeholder:font-normal focus:outline-none focus:border-[#00ff84]/50 transition-colors shadow-inner"
                             />
+
+                            {isSearching && (
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2">
+                                    <div className="w-4 h-4 border-2 border-[#00ff84] border-t-transparent rounded-full animate-spin"></div>
+                                </div>
+                            )}
+
+                            {/* Autocomplete Suggestions */}
+                            {showSuggestions && apiSuggestions.length > 0 && (
+                                <div className="absolute left-0 right-0 top-full mt-2 bg-[#0d2114]/50 border border-white/10 rounded-2xl overflow-hidden z-[100] shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
+                                    {apiSuggestions.map((sug, index) => (
+                                        <button
+                                            key={`${sug.name}-${index}`}
+                                            onClick={() => addIngredient(sug.name)}
+                                            className="w-full text-left px-5 py-3.5 bg-transparent hover:bg-[#00ff84]/10 flex items-center justify-between border-b hover:outline-none rounded-t-2xl last:border-0 group transition-colors"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] group-hover:bg-[#00ff84]/20">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21 21-4.3-4.3" /><circle cx="10" cy="10" r="7" /></svg>
+                                                </div>
+                                                <div>
+                                                    <span className="text-white font-semibold block">{sug.name}</span>
+                                                    <span className="text-[10px] text-gray-500 uppercase tracking-wider">{sug.category}</span>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] text-[#00ff84]/60 font-bold">{(sug.confidence * 100).toFixed(0)}% Match</span>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-600 group-hover:text-[#00ff84] transition-colors"><path d="m5 12 7 7 7-7" /></svg>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                         <button
                             onClick={handleAddClick}
@@ -312,7 +370,7 @@ const GenerateRecipe = () => {
                     <button
                         onClick={handleGenerate}
                         disabled={ingredients.length === 0 || isGenerating}
-                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
+                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 lg:ml-40 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
                     >
                         {isGenerating ? (
                             <>

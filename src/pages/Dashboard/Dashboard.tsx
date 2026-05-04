@@ -5,6 +5,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
 import { getRecentlyViewedService } from '../../services/recentlyViewedService';
+import { motion } from 'framer-motion';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -44,8 +45,27 @@ const Dashboard = () => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div>
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             {/* Hidden File Input */}
             <input
                 type="file"
@@ -58,8 +78,8 @@ const Dashboard = () => {
             {/* Main Content */}
             <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
                 <div className="max-w-7xl mx-auto">
-                    <div className="space-y-8 animate-in fade-in duration-500">
-                        <header className="flex items-center justify-between">
+                    <div className="space-y-8">
+                        <motion.header variants={itemVariants} className="flex items-center justify-between">
                             <div>
                                 <p className="text-[#00ff84] text-xs font-bold uppercase tracking-widest mb-1">
                                     Good Evening
@@ -75,15 +95,24 @@ const Dashboard = () => {
                                 </div>
                             </div>
                             <div className="flex items-center gap-4">
-                                <button className="p-2.5 bg-[#0d2114] rounded-full text-gray-400 hover:text-[#00ff84] transition-colors relative">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="p-2.5 bg-[#0d2114] rounded-full text-gray-400 hover:text-[#00ff84] transition-colors relative"
+                                >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
                                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-[#00ff84] rounded-full border-2 border-[#051109]"></span>
-                                </button>
+                                </motion.button>
                             </div>
-                        </header>
+                        </motion.header>
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            <div onClick={handleSnapClick} className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer" style={{ transform: 'none' }}>
+                            <motion.div
+                                variants={itemVariants}
+                                whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                                onClick={handleSnapClick}
+                                className="bg-[#00ff84] rounded-[32px] p-8 border border-white/5 relative overflow-hidden group cursor-pointer"
+                            >
                                 <div className="relative z-10">
                                     <h2 className="text-3xl font-extrabold text-[#051109] mb-2 leading-tight">
                                         What's in your<br />fridge today?
@@ -96,10 +125,15 @@ const Dashboard = () => {
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-scan-line text-[#051109]" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><path d="M7 12h10"></path></svg>
                                 </div>
-                            </div>
+                            </motion.div>
 
                             <div className="flex flex-col gap-4">
-                                <div onClick={() => navigate('/generate-recipe')} className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'none' }}>
+                                <motion.div
+                                    variants={itemVariants}
+                                    whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                                    onClick={() => navigate('/generate-recipe')}
+                                    className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer"
+                                >
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
@@ -112,8 +146,12 @@ const Dashboard = () => {
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-[#00ff84] group-hover:text-[#051109] transition-all">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                                     </div>
-                                </div>
-                                <div className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer" style={{ transform: 'translateX(0.0059972px)' }}>
+                                </motion.div>
+                                <motion.div
+                                    variants={itemVariants}
+                                    whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                                    className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer"
+                                >
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-history" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l4 2"></path></svg>
@@ -126,19 +164,23 @@ const Dashboard = () => {
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-[#00ff84] group-hover:text-[#051109] transition-all">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg>
                                     </div>
-                                </div>
+                                </motion.div>
                             </div>
                         </div>
 
-                        <section>
+                        <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
 
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                                {recentlyViewed.length > 0 ? recentlyViewed.map((item) => (
-                                    <div
+                                {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
+                                    <motion.div
                                         key={item._id}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: 0.1 * index }}
+                                        whileHover={{ y: -10 }}
                                         onClick={() => navigate(`/recipe/${item.recipeId}`)}
                                         className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
                                     >
@@ -152,7 +194,7 @@ const Dashboard = () => {
                                             <h3 className="text-lg font-bold text-white mb-3 group-hover:text-[#00ff84] transition-colors line-clamp-1">{item.title}</h3>
                                             <div className="flex items-center gap-4 text-xs text-gray-400">
                                                 <span className="flex items-center gap-1">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock" aria-hidden="true"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock" aria-hidden="true"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                                     {item.time}
                                                 </span>
                                                 <span className="flex items-center gap-1">
@@ -161,7 +203,7 @@ const Dashboard = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )) : (
                                     <div className="col-span-full py-12 bg-[#0d2114] rounded-[2rem] border border-dashed border-white/10 flex flex-col items-center justify-center text-gray-500">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="mb-4 opacity-20"><path d="M12 6v6l4 2"></path><circle cx="12" cy="12" r="10"></circle></svg>
@@ -169,11 +211,11 @@ const Dashboard = () => {
                                     </div>
                                 )}
                             </div>
-                        </section>
+                        </motion.section>
                     </div>
                 </div>
             </main>
-        </div>
+        </motion.div>
     )
 }
 
