@@ -311,12 +311,12 @@ const GenerateRecipe = () => {
 
                             {/* Autocomplete Suggestions */}
                             {showSuggestions && apiSuggestions.length > 0 && (
-                                <div className="absolute left-0 right-0 top-full mt-2 bg-[#0d2114]/90 border border-white/10 rounded-2xl overflow-hidden z-[100] shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
+                                <div className="absolute left-0 right-0 top-full mt-2 bg-[#0d2114]/50 border border-white/10 rounded-2xl overflow-hidden z-[100] shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200">
                                     {apiSuggestions.map((sug, index) => (
                                         <button
                                             key={`${sug.name}-${index}`}
                                             onClick={() => addIngredient(sug.name)}
-                                            className="w-full text-left px-5 py-3.5 hover:bg-[#00ff84]/10 flex items-center justify-between border-b border-white/5 last:border-0 group transition-colors"
+                                            className="w-full text-left px-5 py-3.5 bg-transparent hover:bg-[#00ff84]/10 flex items-center justify-between border-b hover:outline-none rounded-t-2xl last:border-0 group transition-colors"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] group-hover:bg-[#00ff84]/20">
