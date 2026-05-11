@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,12 +13,7 @@ const MenuIcon = ({ isOpen }: { isOpen: boolean }) => (
     </svg>
 );
 
-const ChefHatIcon = ({ className }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 2C9 2 7.034 4 7.034 6A3.996 3.996 0 004 9.5C4 11.233 5.023 12.721 6.5 13.33V19C6.5 20.104 7.396 21 8.5 21H15.5C16.604 21 17.5 20.104 17.5 19V13.33C18.977 12.721 20 11.233 20 9.5A3.996 3.996 0 0016.966 6C16.966 4 15 2 12 2Z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6.5 17H17.5" />
-    </svg>
-);
+
 
 const HomeIcon = ({ className }: { className?: string }) => (
     <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +66,7 @@ const Sidebar = () => {
         <>
             {/* Mobile Toggle Button */}
             <button
-                className="md:hidden fixed top-4 left-4 z-50 p-2 text-gray-300 hover:text-white bg-[#03100B] rounded-lg shadow-lg border border-[#0A2A1E]"
+                className="md:hidden fixed top-6 left-6 z-50 p-3 text-white bg-[#03100B]/60 backdrop-blur-lg rounded-2xl shadow-xl border border-white/10 transition-all active:scale-95"
                 onClick={() => setIsOpen(!isOpen)}
                 aria-label="Toggle Sidebar"
             >
@@ -78,64 +74,99 @@ const Sidebar = () => {
             </button>
 
             {/* Mobile Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden transition-opacity"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+                        onClick={() => setIsOpen(false)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Sidebar Container */}
-            <aside className={`
-        fixed inset-y-0 left-0 z-40 w-64 bg-[#03100B] border-r border-[#0A2A1E] 
-        transform transition-transform duration-300 ease-in-out flex flex-col
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        md:relative md:translate-x-0
-      `}>
+            <motion.aside
+                initial={false}
+                animate={{
+                    x: isOpen ? 0 : (window.innerWidth < 768 ? '-120%' : 0),
+                    transition: { type: 'spring', damping: 25, stiffness: 200 }
+                }}
+                className={`
+                    fixed top-4 bottom-4 left-4 z-40 w-72  
+                    bg-[#0d2114]/60 backdrop-blur-xl border border-white/10
+                    rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
+                    flex flex-col md:translate-x-0
+                `}
+            >
                 {/* Logo Section */}
-                <div className="flex items-center gap-3 px-8 py-8">
-                    <div className="bg-[#00E676] p-2 rounded-full shadow-[0_0_15px_rgba(0,230,118,0.4)]">
-                        <ChefHatIcon className="w-6 h-6 text-[#03100B]" />
-                    </div>
-                    <span className="text-white text-xl font-bold tracking-wide">Recipro</span>
-                </div>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-center gap-4 px-10 py-10"
+                >
+                    <img src="/icon.svg" alt="Logo" className="w-14 h-14" />
+                    <span className="text-white text-2xl font-bold tracking-tight">Recipro</span>
+                </motion.div>
 
                 {/* Navigation Links */}
-                <nav className="flex-1 px-4 py-2 space-y-2 mt-2">
-                    {navItems.map((item) => {
+                <nav className="flex-1 px-6 py-4 space-y-3">
+                    {navItems.map((item, index) => {
                         const Icon = item.icon;
                         return (
-                            <NavLink
+                            <motion.div
                                 key={item.path}
-                                to={item.path}
-                                onClick={() => setIsOpen(false)}
-                                className={({ isActive }) => `
-                  flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300
-                  ${isActive
-                                        ? 'bg-[#002C1B] text-white font-semibold border border-[#005C3A] shadow-[0_0_20px_rgba(0,230,118,0.05)]'
-                                        : 'text-gray-400 hover:text-gray-200 hover:bg-[#061B12]'
-                                    }
-                `}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 * (index + 1) }}
                             >
-                                <Icon className="w-5 h-5 flex-shrink-0" />
-                                <span>{item.name}</span>
-                            </NavLink>
+                                <NavLink
+                                    to={item.path}
+                                    onClick={() => setIsOpen(false)}
+                                    className={({ isActive }) => `
+                                        flex items-center gap-4 px-6 pl-14 py-4 rounded-[1.5rem] transition-all duration-300
+                                        ${isActive
+                                            ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                        }
+                                    `}
+                                >
+                                    {({ isActive }) => (
+                                        <motion.div
+                                            className="flex items-center gap-4 w-full"
+                                            whileHover={{ x: 5 }}
+                                            whileTap={{ scale: 0.98 }}
+                                        >
+                                            <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'stroke-[2.5px]' : ''}`} />
+                                            <span className="text-[1.05rem]">{item.name}</span>
+                                        </motion.div>
+                                    )}
+                                </NavLink>
+                            </motion.div>
                         );
                     })}
                 </nav>
 
                 {/* Bottom Section */}
-                <div className="p-4 mb-2">
-                    {/* We could also add a user profile mini-card here if needed, but the prompt just specified "Logout" at the bottom */}
-                    <button
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="px-6 py-8"
+                >
+                    <motion.button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-4 py-3.5 text-gray-400 hover:text-red-400 hover:bg-[#120808] rounded-2xl transition-all duration-300"
+                        whileHover={{ x: 5, backgroundColor: 'rgba(248, 113, 113, 0.05)' }}
+                        whileTap={{ scale: 0.98 }}
+                        className="w-full flex items-center gap-4 px-6 py-4 text-gray-400 hover:text-red-400 rounded-[1.5rem] transition-all duration-300 group"
                     >
-                        <LogoutIcon className="w-5 h-5 flex-shrink-0" />
-                        <span className="font-medium">Logout</span>
-                    </button>
-                </div>
-            </aside>
+                        <LogoutIcon className="w-5 h-5 flex-shrink-0 transition-colors group-hover:text-red-400" />
+                        <span className="font-semibold text-[1.05rem]">Logout</span>
+                    </motion.button>
+                </motion.div>
+            </motion.aside>
         </>
     );
 };

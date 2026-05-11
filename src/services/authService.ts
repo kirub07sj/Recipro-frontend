@@ -22,6 +22,17 @@ export const loginService = async (data: { email: string; password: string }) =>
     return result;
 };
 
+export const googleLoginService = async (data: { tokenId?: string; accessToken?: string }) => {
+    const res = await fetch(`${API_URL}/google`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.message || 'Google Login failed');
+    return result;
+};
+
 export const forgotPasswordService = async (data: { email: string }) => {
     const res = await fetch(`${API_URL}/forgot-password`, {
         method: 'POST',

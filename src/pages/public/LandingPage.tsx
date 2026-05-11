@@ -1,15 +1,35 @@
-
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const LandingPage = () => {
     const navigate = useNavigate();
+
+    const fadeInUp = {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.6 }
+    };
+
+    const staggerContainer = {
+        initial: {},
+        animate: {
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
 
     return (
         <div
             className="min-h-screen font-sans selection:bg-[#00ff73] selection:text-[#011c14]"
             style={{ backgroundColor: "rgb(1, 28, 20)", color: "rgb(255, 255, 255)" }}
         >
-            <nav className="fixed h-[85px] top-0 left-0 right-0 z-50 transition-all duration-300 bg-black/20 backdrop-blur-md py-6 text-white border-b border-white/5">
+            <motion.nav
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.6, type: "spring", damping: 20 }}
+                className="fixed h-[85px] top-0 left-0 right-0 z-50 transition-all duration-300 bg-black/20 backdrop-blur-md py-6 text-white border-b border-white/5"
+            >
                 <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <div className="bg-[#00ff73] p-1.5 rounded-lg">
@@ -85,30 +105,38 @@ const LandingPage = () => {
                         </svg>
                     </button>
                 </div>
-            </nav>
+            </motion.nav>
             <section className="pt-32 pb-20 px-6 overflow-hidden">
                 <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
-                    <div style={{ opacity: "1", transform: "none" }}>
-                        <div className="inline-flex items-center gap-2 bg-[#00ff73]/10 border border-[#00ff73]/20 px-4 py-1.5 rounded-full text-[#00ff73] text-sm font-medium mb-6">
+                    <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
+                    >
+                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 bg-[#00ff73]/10 border border-[#00ff73]/20 px-4 py-1.5 rounded-full text-[#00ff73] text-sm font-medium mb-6">
                             <span className="relative flex h-2 w-2">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00ff73] opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00ff73]"></span>
                             </span>
                             Next-Gen AI Cooking Assistant
-                        </div>
-                        <h1 className="text-5xl lg:text-7xl font-bold leading-[1.1] mb-6">
+                        </motion.div>
+                        <motion.h1 variants={fadeInUp} className="text-5xl lg:text-7xl font-bold leading-[1.1] mb-6">
                             Turn Your Ingredients Into{" "}
                             <span className="text-[#00ff73]">Healthy Recipes</span> with AI
-                        </h1>
-                        <p
+                        </motion.h1>
+                        <motion.p
+                            variants={fadeInUp}
                             className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed"
                             style={{ color: "rgb(139, 161, 155)" }}
                         >
                             Upload ingredients or type what you have, and get personalized
                             recipes based on your health conditions and preferences.
-                        </p>
-                        <div className="flex flex-col sm:flex-row gap-4">
-                            <button
+                        </motion.p>
+                        <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => navigate("/register")}
                                 className="group px-8 py-4 bg-[#00ff73] text-[#011c14] font-bold rounded-2xl flex items-center justify-center gap-2 hover:shadow-[0_0_30px_rgba(0,255,115,0.3)] transition-all"
                             >
@@ -129,12 +157,10 @@ const LandingPage = () => {
                                     <path d="M5 12h14"></path>
                                     <path d="m12 5 7 7-7 7"></path>
                                 </svg>
-                            </button>
-                            <button className="px-8 py-4 border border-white/10 hover:bg-white/5 font-bold rounded-2xl transition-all">
-                                Watch Demo
-                            </button>
-                        </div>
-                        <div className="mt-12 flex items-center gap-4">
+                            </motion.button>
+
+                        </motion.div>
+                        <motion.div variants={fadeInUp} className="mt-12 flex items-center gap-4">
                             <div className="flex -space-x-3">
                                 <div className="w-10 h-10 rounded-full border-2 border-[#011c14] bg-neutral-800 flex items-center justify-center overflow-hidden">
                                     <img
@@ -165,10 +191,20 @@ const LandingPage = () => {
                                 Joined by <span className="text-white font-bold">10k+</span>{" "}
                                 home chefs
                             </p>
-                        </div>
-                    </div>
-                    <div className="relative" style={{ opacity: "1", transform: "none" }}>
-                        <div className="relative z-10 bg-[#052b21] p-8 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden">
+                        </motion.div>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.8, delay: 0.2 }}
+                        className="relative"
+                    >
+                        <motion.div
+                            animate={{ y: [0, -15, 0] }}
+                            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                            className="relative z-10 bg-[#052b21] p-8 rounded-[2.5rem] border border-white/10 shadow-2xl overflow-hidden"
+                        >
                             <div className="absolute top-0 right-0 w-32 h-32 bg-[#00ff73]/20 blur-3xl -z-10"></div>
                             <div className="flex justify-between items-center mb-8">
                                 <div>
@@ -292,15 +328,21 @@ const LandingPage = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#00ff73]/10 blur-[80px] -z-10 rounded-full"></div>
-                        <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-emerald-500/10 blur-[80px] -z-10 rounded-full"></div>
-                    </div>
+                            <div className="absolute -top-10 -right-10 w-64 h-64 bg-[#00ff73]/10 blur-[80px] -z-10 rounded-full"></div>
+                            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-emerald-500/10 blur-[80px] -z-10 rounded-full"></div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
             <section id="features" className="py-24 px-6 relative">
-                <div className="max-w-7xl mx-auto">
-                    <div className="text-center mb-20">
+                <motion.div
+                    variants={staggerContainer}
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true }}
+                    className="max-w-7xl mx-auto"
+                >
+                    <motion.div variants={fadeInUp} className="text-center mb-20">
                         <h2 className="text-3xl md:text-5xl font-bold mb-6">
                             Master Your Kitchen with AI
                         </h2>
@@ -311,11 +353,12 @@ const LandingPage = () => {
                             Our platform combines cutting-edge AI with nutrition science to
                             help you eat better, waste less, and enjoy every meal.
                         </p>
-                    </div>
+                    </motion.div>
                     <div className="grid md:grid-cols-3 gap-8">
-                        <div
-                            className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group hover:border-[#00ff73]/30 transition-all duration-300"
-                            style={{ transform: "none" }}
+                        <motion.div
+                            variants={fadeInUp}
+                            whileHover={{ y: -10, borderColor: "rgba(0, 255, 115, 0.3)" }}
+                            className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group transition-all duration-300"
                         >
                             <div className="w-16 h-16 bg-[#00ff73]/10 rounded-2xl flex items-center justify-center text-[#00ff73] mb-8 group-hover:scale-110 transition-transform">
                                 <svg
@@ -345,10 +388,11 @@ const LandingPage = () => {
                                 Snap a photo of your fridge or pantry. Our AI identifies every
                                 ingredient instantly with computer vision.
                             </p>
-                        </div>
-                        <div
-                            className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group hover:border-[#00ff73]/30 transition-all duration-300"
-                            style={{ transform: "none" }}
+                        </motion.div>
+                        <motion.div
+                            variants={fadeInUp}
+                            whileHover={{ y: -10, borderColor: "rgba(0, 255, 115, 0.3)" }}
+                            className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group transition-all duration-300"
                         >
                             <div className="w-16 h-16 bg-[#00ff73]/10 rounded-2xl flex items-center justify-center text-[#00ff73] mb-8 group-hover:scale-110 transition-transform">
                                 <svg
@@ -378,8 +422,12 @@ const LandingPage = () => {
                                 Get recipes tailored to your health goals—whether it's low-carb,
                                 diabetic-friendly, or strictly gluten-free.
                             </p>
-                        </div>
-                        <div className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group hover:border-[#00ff73]/30 transition-all duration-300">
+                        </motion.div>
+                        <motion.div
+                            variants={fadeInUp}
+                            whileHover={{ y: -10, borderColor: "rgba(0, 255, 115, 0.3)" }}
+                            className="bg-[#052b21] p-10 rounded-[2rem] border border-white/5 group transition-all duration-300"
+                        >
                             <div className="w-16 h-16 bg-[#00ff73]/10 rounded-2xl flex items-center justify-center text-[#00ff73] mb-8 group-hover:scale-110 transition-transform">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -406,13 +454,19 @@ const LandingPage = () => {
                                 The more you cook, the better we get. Our engine learns your
                                 taste preferences and dietary restrictions.
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             </section>
             <section id="how-it-works" className="py-24 px-6 bg-black/20">
-                <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+                <motion.div
+                    variants={staggerContainer}
+                    initial="initial"
+                    whileInView="animate"
+                    viewport={{ once: true }}
+                    className="max-w-7xl mx-auto"
+                >
+                    <motion.div variants={fadeInUp} className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
                         <div className="max-w-xl">
                             <h2 className="text-4xl md:text-5xl font-bold mb-6">
                                 Simple Steps to <br />
@@ -423,7 +477,11 @@ const LandingPage = () => {
                                 plating.
                             </p>
                         </div>
-                        <button className="px-6 py-3 bg-white/5 border border-white/10 rounded-full font-bold flex items-center gap-2 hover:bg-white/10 transition-all">
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="px-6 py-3 bg-white/5 border border-white/10 rounded-full font-bold flex items-center gap-2 hover:bg-white/10 transition-all"
+                        >
                             See the Full Guide{" "}
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -441,11 +499,11 @@ const LandingPage = () => {
                                 <path d="M5 12h14"></path>
                                 <path d="m12 5 7 7-7 7"></path>
                             </svg>
-                        </button>
-                    </div>
+                        </motion.button>
+                    </motion.div>
                     <div className="grid md:grid-cols-3 gap-12 relative">
                         <div className="hidden md:block absolute top-[60px] left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                        <div className="relative z-10 flex flex-col items-center text-center">
+                        <motion.div variants={fadeInUp} className="relative z-10 flex flex-col items-center text-center">
                             <div className="w-12 h-12 bg-[#00ff73] text-[#011c14] font-black rounded-full flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(0,255,115,0.4)]">
                                 01
                             </div>
@@ -456,8 +514,8 @@ const LandingPage = () => {
                             >
                                 List what you have or upload a photo of your ingredients.
                             </p>
-                        </div>
-                        <div className="relative z-10 flex flex-col items-center text-center">
+                        </motion.div>
+                        <motion.div variants={fadeInUp} className="relative z-10 flex flex-col items-center text-center">
                             <div className="w-12 h-12 bg-[#00ff73] text-[#011c14] font-black rounded-full flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(0,255,115,0.4)]">
                                 02
                             </div>
@@ -469,8 +527,8 @@ const LandingPage = () => {
                                 Our AI filters through thousands of recipes based on your
                                 profile.
                             </p>
-                        </div>
-                        <div className="relative z-10 flex flex-col items-center text-center">
+                        </motion.div>
+                        <motion.div variants={fadeInUp} className="relative z-10 flex flex-col items-center text-center">
                             <div className="w-12 h-12 bg-[#00ff73] text-[#011c14] font-black rounded-full flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(0,255,115,0.4)]">
                                 03
                             </div>
@@ -481,15 +539,18 @@ const LandingPage = () => {
                             >
                                 Get step-by-step instructions for a personalized healthy meal.
                             </p>
-                        </div>
+                        </motion.div>
                     </div>
-                </div>
+                </motion.div>
             </section>
             <section className="py-24 px-6">
                 <div className="max-w-5xl mx-auto">
-                    <div
+                    <motion.div
+                        variants={fadeInUp}
+                        initial="initial"
+                        whileInView="animate"
+                        viewport={{ once: true }}
                         className="bg-[#00ff73] rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden"
-                        style={{ opacity: "1", transform: "none" }}
                     >
                         <div
                             className="absolute inset-0 opacity-10 pointer-events-none"
@@ -507,20 +568,24 @@ const LandingPage = () => {
                             diet and live a healthier lifestyle through better cooking.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-                            <button
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => navigate("/register")}
-                                className="px-10 py-5 bg-[#011c14] text-[#00ff73] font-bold rounded-2xl hover:scale-105 transition-all text-lg shadow-xl"
+                                className="px-10 py-5 bg-[#011c14] text-[#00ff73] font-bold rounded-2xl transition-all text-lg shadow-xl"
                             >
                                 Start Cooking Now
-                            </button>
-                            <button
+                            </motion.button>
+                            <motion.button
+                                whileHover={{ scale: 1.05, backgroundColor: "#011c14", color: "#fff" }}
+                                whileTap={{ scale: 0.95 }}
                                 onClick={() => navigate("/register")}
-                                className="px-10 py-5 bg-white text-[#011c14] font-bold rounded-2xl hover:bg-[#011c14] hover:text-white transition-all text-lg border border-transparent shadow-xl"
+                                className="px-10 py-5 bg-white text-[#011c14] font-bold rounded-2xl transition-all text-lg border border-transparent shadow-xl"
                             >
                                 Create Free Account
-                            </button>
+                            </motion.button>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </section>
             <footer className="py-20 px-6 border-t border-white/5">
