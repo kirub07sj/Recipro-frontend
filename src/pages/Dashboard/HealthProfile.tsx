@@ -9,13 +9,29 @@ const HealthProfile = () => {
     const { profile, createProfile, updateProfile, isLoading } = useHealthProfileStore();
 
     const [weight, setWeight] = useState(profile?.weight || 72);
+    const [height, setHeight] = useState(profile?.height || 170);
+    const [cuisine, setCuisine] = useState(profile?.cuisine || 'Ethiopian');
+    const [dailyGoal, setDailyGoal] = useState(profile?.dailyGoal || 2200);
     const [dietMode, setDietMode] = useState(profile?.dietMode || '');
     const [allergies, setAllergies] = useState<string[]>(profile?.allergies || []);
     const [conditions, setConditions] = useState<string[]>(profile?.conditions || []);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (weight < 20 || weight > 500) newErrors.weight = "Weight must be between 20kg and 500kg";
+        if (height < 50 || height > 300) newErrors.height = "Height must be between 50cm and 300cm";
+        if (dailyGoal < 500 || dailyGoal > 8000) newErrors.dailyGoal = "Goal must be between 500 and 8000 kcal";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     useEffect(() => {
         if (profile) {
             setWeight(profile.weight || 72);
+            setHeight(profile.height || 170);
+            setCuisine(profile.cuisine || 'Ethiopian');
+            setDailyGoal(profile.dailyGoal || 2200);
             setDietMode(profile.dietMode || '');
             setAllergies(profile.allergies || []);
             setConditions(profile.conditions || []);
@@ -32,10 +48,14 @@ const HealthProfile = () => {
 
     const handleSave = async () => {
         if (!userId) return;
+        if (!validate()) return;
         try {
             if (profile) {
                 await updateProfile(userId, {
                     weight,
+                    height,
+                    cuisine,
+                    dailyGoal,
                     dietMode,
                     allergies,
                     conditions,
@@ -44,18 +64,21 @@ const HealthProfile = () => {
                 await createProfile({
                     user: userId,
                     weight,
+                    height,
+                    cuisine,
+                    dailyGoal,
                     dietMode,
                     allergies,
                     dislikes: [], // Dislikes can be managed later from the full profile page
                     conditions,
                     healthScore: 85, // Default base score
-                    dailyGoal: 2200 // Default base goal
                 });
             }
             // Profile setup complete, navigate to dashboard or profile
             navigate('/profile');
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to save profile:", err);
+            setErrors({ submit: err.message || "Failed to save profile. Please check your inputs." });
         }
     }; return (
         <div>
@@ -88,17 +111,80 @@ const HealthProfile = () => {
                             </svg>
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Body Metrics</h3>
                         </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Weight (kg)</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.weight ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="70"
+                                        type="number"
+                                        value={weight}
+                                        onChange={(e) => {
+                                            setWeight(Number(e.target.value));
+                                            if (errors.weight) setErrors(prev => ({ ...prev, weight: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
+                                </div>
+                                {errors.weight && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.weight}</p>}
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Height (cm)</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.height ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="170"
+                                        type="number"
+                                        value={height}
+                                        onChange={(e) => {
+                                            setHeight(Number(e.target.value));
+                                            if (errors.height) setErrors(prev => ({ ...prev, height: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">cm</span>
+                                </div>
+                                {errors.height && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.height}</p>}
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
+                                <label className="block text-sm text-zinc-400 mb-3">Daily Calorie Goal</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="2200"
+                                        type="number"
+                                        value={dailyGoal}
+                                        onChange={(e) => {
+                                            setDailyGoal(Number(e.target.value));
+                                            if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">kcal</span>
+                                </div>
+                                {errors.dailyGoal && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.dailyGoal}</p>}
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-[#00ff88]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-utensils w-5 h-5" aria-hidden="true">
+                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                                <path d="M7 2v20"></path>
+                                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                            </svg>
+                            <h3 className="font-semibold uppercase tracking-wider text-xs">Preferred Cuisine</h3>
+                        </div>
                         <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
-                            <label className="block text-sm text-zinc-400 mb-3">Current Weight (kg)</label>
+                            <label className="block text-sm text-zinc-400 mb-3">Cuisine Type</label>
                             <div className="relative flex items-center">
                                 <input
-                                    className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none"
-                                    placeholder="70"
-                                    type="number"
-                                    value={weight}
-                                    onChange={(e) => setWeight(Number(e.target.value))}
+                                    className="w-full bg-[#1a1a1a] border-none text-white text-2xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none"
+                                    placeholder="Ethiopian"
+                                    type="text"
+                                    value={cuisine}
+                                    onChange={(e) => setCuisine(e.target.value)}
                                 />
-                                <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
                             </div>
                         </div>
                     </section>
@@ -197,6 +283,7 @@ const HealthProfile = () => {
 
                 <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50" style={{ background: 'rgba(5, 22, 11, 0.2)' }}>
                     <div className="max-w-2xl mx-auto">
+                        {errors.submit && <p className="text-red-500 text-sm mb-4 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/20">{errors.submit}</p>}
                         <button
                             onClick={handleSave}
                             disabled={isLoading}

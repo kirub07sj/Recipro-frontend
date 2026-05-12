@@ -10,6 +10,10 @@ const Profile = () => {
     const navigate = useNavigate();
     const [userName, setUserName] = useState(localStorage.getItem('userName') || 'Alex Doe');
     const [isEditingName, setIsEditingName] = useState(false);
+    const [newAllergy, setNewAllergy] = useState('');
+    const [isAddingAllergy, setIsAddingAllergy] = useState(false);
+    const [newDislike, setNewDislike] = useState('');
+    const [isAddingDislike, setIsAddingDislike] = useState(false);
 
     const handleNameSave = () => {
         localStorage.setItem('userName', userName);
@@ -21,6 +25,9 @@ const Profile = () => {
     const dailyGoal = profile?.dailyGoal || 2200;
     const dietMode = profile?.dietMode || 'Paleo';
     const weight = profile?.weight || 72;
+    const height = profile?.height || 170;
+    const cuisine = profile?.cuisine || 'Ethiopian';
+    const bmi = (weight / Math.pow(height / 100, 2)).toFixed(1);
     const conditions = profile?.conditions || [];
     const allergies = profile?.allergies?.length ? profile.allergies : [];
     const dislikes = profile?.dislikes?.length ? profile.dislikes : [];
@@ -37,21 +44,18 @@ const Profile = () => {
         await updateProfile(userId, { dislikes: newDislikes });
     };
 
-    // Basic Add prompt for demo purposes
     const handleAddAllergy = async () => {
-        if (!userId || !profile) return;
-        const item = prompt("Add Allergy");
-        if (item) {
-            await updateProfile(userId, { allergies: [...profile.allergies, item] });
-        }
+        if (!userId || !profile || !newAllergy.trim()) return;
+        await updateProfile(userId, { allergies: [...profile.allergies, newAllergy.trim()] });
+        setNewAllergy('');
+        setIsAddingAllergy(false);
     };
 
     const handleAddDislike = async () => {
-        if (!userId || !profile) return;
-        const item = prompt("Add Dislike");
-        if (item) {
-            await updateProfile(userId, { dislikes: [...profile.dislikes, item] });
-        }
+        if (!userId || !profile || !newDislike.trim()) return;
+        await updateProfile(userId, { dislikes: [...profile.dislikes, newDislike.trim()] });
+        setNewDislike('');
+        setIsAddingDislike(false);
     };
 
     const containerVariants = {
@@ -81,10 +85,10 @@ const Profile = () => {
                 <div className="relative group">
                     <motion.div
                         whileHover={{ scale: 1.05 }}
-                        className="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-[#00ff88] to-green-300 shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center justify-center overflow-hidden"
+                        className="w-20 h-20 rounded-full p-1 bg-gradient-to-tr from-[#00ff88] to-green-300 shadow-[0_0_20px_rgba(0,255,136,0.3)] flex items-center justify-center overflow-hidden"
                     >
                         <div className="w-full h-full rounded-full border-4 border-[#05160b] bg-[#0c2415] flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
                         </div>
                     </motion.div>
                 </div>
@@ -162,16 +166,27 @@ const Profile = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="absolute -right-6 -bottom-6 text-white/[0.03] rotate-[-10deg]"><path d="M17 21a1 1 0 0 0 1-1v-5.35c0-.457.316-.844.727-1.041a4 4 0 0 0-2.134-7.589 5 5 0 0 0-9.186 0 4 4 0 0 0-2.134 7.588c.411.198.727.585.727 1.041V20a1 1 0 0 0 1 1Z" /><path d="M6 17h12" /></svg>
                         </motion.div>
 
-                        {/* Weight card */}
+                        {/* Body Metrics card */}
                         <motion.div
                             whileHover={{ y: -5 }}
                             className="col-span-2 bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex items-center justify-between"
                         >
-                            <div>
-                                <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-2">Current Weight</h3>
-                                <div className="flex items-end gap-1">
-                                    <span className="text-3xl font-extrabold">{weight}</span>
-                                    <span className="text-xs text-zinc-400 mb-1 font-medium">kg</span>
+                            <div className="flex gap-8">
+                                <div>
+                                    <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-2">Weight & Height</h3>
+                                    <div className="flex items-end gap-1">
+                                        <span className="text-3xl font-extrabold">{weight}</span>
+                                        <span className="text-xs text-zinc-400 mb-1 font-medium">kg</span>
+                                        <span className="text-zinc-600 mb-1 font-bold mx-1">/</span>
+                                        <span className="text-3xl font-extrabold">{height}</span>
+                                        <span className="text-xs text-zinc-400 mb-1 font-medium">cm</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-2">BMI</h3>
+                                    <div className="flex items-end gap-1">
+                                        <span className="text-3xl font-extrabold text-[#00ff88]">{bmi}</span>
+                                    </div>
                                 </div>
                             </div>
                             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00ff88" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z" /><path d="M7 21h10" /><path d="M12 3v18" /><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2" /></svg>
@@ -201,6 +216,19 @@ const Profile = () => {
                     </div>
 
                     <div className="space-y-6">
+                        {/* Cuisine */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_#3b82f6]"></div>
+                                <h3 className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Preferred Cuisine</h3>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-950/40 text-blue-500 border border-blue-500/20 text-sm font-bold shadow-sm">
+                                    {cuisine}
+                                </span>
+                            </div>
+                        </div>
+
                         {/* Allergies */}
                         <div>
                             <div className="flex items-center gap-2 mb-3">
@@ -224,14 +252,34 @@ const Profile = () => {
                                         </motion.span>
                                     ))}
                                 </AnimatePresence>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleAddAllergy}
-                                    className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#0a1c11] text-zinc-400 border border-white/5 hover:border-white/20 hover:bg-[#0c2415] text-sm font-medium transition-all shadow-sm"
-                                >
-                                    <span>+ Add</span>
-                                </motion.button>
+                                {isAddingAllergy ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newAllergy}
+                                            onChange={(e) => setNewAllergy(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleAddAllergy()}
+                                            className="bg-[#0c2415] text-white border border-red-500/50 rounded-full px-4 py-1.5 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 shadow-inner transition-all w-32"
+                                            autoFocus
+                                            placeholder="Type..."
+                                        />
+                                        <button onClick={handleAddAllergy} className="text-red-500 hover:text-red-400 p-1.5 hover:bg-red-500/10 rounded-full transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                        </button>
+                                        <button onClick={() => { setIsAddingAllergy(false); setNewAllergy(''); }} className="text-zinc-500 hover:text-zinc-400 p-1.5 hover:bg-white/5 rounded-full transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setIsAddingAllergy(true)}
+                                        className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#0a1c11] text-zinc-400 border border-white/5 hover:border-white/20 hover:bg-[#0c2415] text-sm font-medium transition-all shadow-sm"
+                                    >
+                                        <span>+ Add</span>
+                                    </motion.button>
+                                )}
                             </div>
                         </div>
 
@@ -258,14 +306,34 @@ const Profile = () => {
                                         </motion.span>
                                     ))}
                                 </AnimatePresence>
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleAddDislike}
-                                    className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#0a1c11] text-zinc-400 border border-white/5 hover:border-white/20 hover:bg-[#0c2415] text-sm font-medium transition-all shadow-sm"
-                                >
-                                    <span>+ Add</span>
-                                </motion.button>
+                                {isAddingDislike ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={newDislike}
+                                            onChange={(e) => setNewDislike(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleAddDislike()}
+                                            className="bg-[#0c2415] text-white border border-[#00ff88]/50 rounded-full px-4 py-1.5 text-sm outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] shadow-inner transition-all w-32"
+                                            autoFocus
+                                            placeholder="Type..."
+                                        />
+                                        <button onClick={handleAddDislike} className="text-[#00ff88] hover:text-green-400 p-1.5 hover:bg-[#00ff88]/10 rounded-full transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+                                        </button>
+                                        <button onClick={() => { setIsAddingDislike(false); setNewDislike(''); }} className="text-zinc-500 hover:text-zinc-400 p-1.5 hover:bg-white/5 rounded-full transition-colors flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() => setIsAddingDislike(true)}
+                                        className="inline-flex items-center gap-1 px-4 py-2 rounded-full bg-[#0a1c11] text-zinc-400 border border-white/5 hover:border-white/20 hover:bg-[#0c2415] text-sm font-medium transition-all shadow-sm"
+                                    >
+                                        <span>+ Add</span>
+                                    </motion.button>
+                                )}
                             </div>
                         </div>
                     </div>

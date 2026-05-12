@@ -5,6 +5,8 @@ export interface HealthProfile {
     _id: string;
     user: string;
     weight: number;
+    height: number;
+    cuisine: string;
     dietMode: string;
     allergies: string[];
     dislikes: string[];
