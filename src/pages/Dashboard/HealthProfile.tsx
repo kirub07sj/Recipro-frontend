@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
+import { calculateEstimatedCalories, type Gender, type ActivityLevel, type FitnessGoal } from '../../utils/calorieCalculator';
 
 const HealthProfile = () => {
     const navigate = useNavigate();
@@ -11,16 +12,29 @@ const HealthProfile = () => {
     const [weight, setWeight] = useState(profile?.weight || 72);
     const [height, setHeight] = useState(profile?.height || 170);
     const [cuisine, setCuisine] = useState(profile?.cuisine || 'Ethiopian');
+    const [age, setAge] = useState(profile?.age || 30);
+    const [gender, setGender] = useState<Gender>((profile?.gender as Gender) || 'male');
+    const [activityLevel, setActivityLevel] = useState<ActivityLevel>((profile?.activityLevel as ActivityLevel) || 'sedentary');
+    const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal>((profile?.fitnessGoal as FitnessGoal) || 'maintain');
+    const [useCustomGoal, setUseCustomGoal] = useState(false);
     const [dailyGoal, setDailyGoal] = useState(profile?.dailyGoal || 2200);
     const [dietMode, setDietMode] = useState(profile?.dietMode || '');
     const [allergies, setAllergies] = useState<string[]>(profile?.allergies || []);
     const [conditions, setConditions] = useState<string[]>(profile?.conditions || []);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
+    useEffect(() => {
+        if (!useCustomGoal) {
+            const calculated = calculateEstimatedCalories(weight, height, age, gender, activityLevel, fitnessGoal);
+            setDailyGoal(calculated);
+        }
+    }, [weight, height, age, gender, activityLevel, fitnessGoal, useCustomGoal]);
+
     const validate = () => {
         const newErrors: Record<string, string> = {};
         if (weight < 20 || weight > 500) newErrors.weight = "Weight must be between 20kg and 500kg";
         if (height < 50 || height > 300) newErrors.height = "Height must be between 50cm and 300cm";
+        if (age < 1 || age > 120) newErrors.age = "Age must be between 1 and 120";
         if (dailyGoal < 500 || dailyGoal > 8000) newErrors.dailyGoal = "Goal must be between 500 and 8000 kcal";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -30,6 +44,10 @@ const HealthProfile = () => {
         if (profile) {
             setWeight(profile.weight || 72);
             setHeight(profile.height || 170);
+            setAge(profile.age || 30);
+            setGender((profile.gender as Gender) || 'male');
+            setActivityLevel((profile.activityLevel as ActivityLevel) || 'sedentary');
+            setFitnessGoal((profile.fitnessGoal as FitnessGoal) || 'maintain');
             setCuisine(profile.cuisine || 'Ethiopian');
             setDailyGoal(profile.dailyGoal || 2200);
             setDietMode(profile.dietMode || '');
@@ -54,6 +72,10 @@ const HealthProfile = () => {
                 await updateProfile(userId, {
                     weight,
                     height,
+                    age,
+                    gender,
+                    activityLevel,
+                    fitnessGoal,
                     cuisine,
                     dailyGoal,
                     dietMode,
@@ -65,6 +87,10 @@ const HealthProfile = () => {
                     user: userId,
                     weight,
                     height,
+                    age,
+                    gender,
+                    activityLevel,
+                    fitnessGoal,
                     cuisine,
                     dailyGoal,
                     dietMode,
@@ -146,11 +172,91 @@ const HealthProfile = () => {
                                 </div>
                                 {errors.height && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.height}</p>}
                             </div>
-                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
-                                <label className="block text-sm text-zinc-400 mb-3">Daily Calorie Goal</label>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Age</label>
                                 <div className="relative flex items-center">
                                     <input
-                                        className={`w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        className={`w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.age ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="30"
+                                        type="number"
+                                        value={age}
+                                        onChange={(e) => {
+                                            setAge(Number(e.target.value));
+                                            if (errors.age) setErrors(prev => ({ ...prev, age: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">yrs</span>
+                                </div>
+                                {errors.age && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.age}</p>}
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Gender</label>
+                                <div className="flex gap-2">
+                                    {['male', 'female'].map((g) => (
+                                        <button
+                                            key={g}
+                                            onClick={() => setGender(g as Gender)}
+                                            className={`flex-1 p-4 rounded-2xl text-sm font-bold capitalize transition-all border ${gender === g ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#1a1a1a] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {g}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
+                                <label className="block text-sm text-zinc-400 mb-3">Activity Level</label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    {[
+                                        { id: 'sedentary', label: 'Sedentary' },
+                                        { id: 'light', label: 'Lightly Active' },
+                                        { id: 'moderate', label: 'Moderately Active' },
+                                        { id: 'active', label: 'Very Active' }
+                                    ].map((act) => (
+                                        <button
+                                            key={act.id}
+                                            onClick={() => setActivityLevel(act.id as ActivityLevel)}
+                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${activityLevel === act.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#1a1a1a] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {act.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
+                                <label className="block text-sm text-zinc-400 mb-3">Fitness Goal</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { id: 'lose_weight', label: 'Lose Weight' },
+                                        { id: 'maintain', label: 'Maintain' },
+                                        { id: 'gain_weight', label: 'Gain Weight' }
+                                    ].map((fg) => (
+                                        <button
+                                            key={fg.id}
+                                            onClick={() => setFitnessGoal(fg.id as FitnessGoal)}
+                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${fitnessGoal === fg.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#1a1a1a] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {fg.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm text-zinc-400 mb-1">Estimated Daily Calories</label>
+                                    <p className="text-xs text-zinc-500 mb-3">This is an estimated calorie target based on your profile and activity level.</p>
+                                    <label className="flex items-center gap-2 cursor-pointer w-fit">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 rounded border-zinc-700 text-[#00ff88] focus:ring-[#00ff88] bg-[#1a1a1a] cursor-pointer"
+                                            checked={useCustomGoal}
+                                            onChange={(e) => setUseCustomGoal(e.target.checked)}
+                                        />
+                                        <span className="text-sm font-medium text-zinc-300">Use Custom Goal</span>
+                                    </label>
+                                </div>
+                                <div className="relative flex items-center sm:w-1/3">
+                                    <input
+                                        className={`w-full bg-[#1a1a1a] border-none text-[#00ff88] text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none ${!useCustomGoal && 'opacity-70'}`}
                                         placeholder="2200"
                                         type="number"
                                         value={dailyGoal}
@@ -158,10 +264,11 @@ const HealthProfile = () => {
                                             setDailyGoal(Number(e.target.value));
                                             if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
                                         }}
+                                        disabled={!useCustomGoal}
                                     />
                                     <span className="absolute right-6 text-zinc-500 font-medium">kcal</span>
                                 </div>
-                                {errors.dailyGoal && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.dailyGoal}</p>}
+                                {errors.dailyGoal && <p className="text-red-500 text-xs mt-2 ml-2 font-medium absolute -bottom-5">{errors.dailyGoal}</p>}
                             </div>
                         </div>
                     </section>

@@ -1,4 +1,5 @@
 const cuisines = [
+    "Global",
     "Ethiopian",
     "Italian",
     "Indian",

@@ -78,7 +78,7 @@ const Profile = () => {
             initial="hidden"
             animate="visible"
             variants={containerVariants}
-            className="min-h-screen font-sans p-6"
+            className="min-h-screen font-sans p-4 md:p-6"
         >
             {/* Header / Avatar */}
             <motion.div variants={itemVariants} className="flex flex-col items-center mt-8">
@@ -125,7 +125,7 @@ const Profile = () => {
                 </motion.div>
             </motion.div>
 
-            <div className="max-w-3xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
+            <div className="max-w-3xl md:mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
                 {/* Health DNA */}
                 <motion.div variants={itemVariants}>
                     <div className="flex items-center gap-2 mb-4">

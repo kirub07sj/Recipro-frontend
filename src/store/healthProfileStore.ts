@@ -6,6 +6,10 @@ export interface HealthProfile {
     user: string;
     weight: number;
     height: number;
+    age: number;
+    gender: string;
+    activityLevel: string;
+    fitnessGoal: string;
     cuisine: string;
     dietMode: string;
     allergies: string[];
