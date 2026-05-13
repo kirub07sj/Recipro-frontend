@@ -1,11 +1,16 @@
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const Profile = () => {
-    const { profile, updateProfile } = useHealthProfileStore();
+    const {
+        profile,
+        updateProfile,
+        todayIntake,
+        fetchTodayIntake
+    } = useHealthProfileStore();
     const { userId } = useAuth();
     const navigate = useNavigate();
     const [userName, setUserName] = useState(localStorage.getItem('userName') || 'Alex Doe');
@@ -14,6 +19,13 @@ const Profile = () => {
     const [isAddingAllergy, setIsAddingAllergy] = useState(false);
     const [newDislike, setNewDislike] = useState('');
     const [isAddingDislike, setIsAddingDislike] = useState(false);
+    const [showIntakeDetails, setShowIntakeDetails] = useState(false);
+
+    useEffect(() => {
+        if (userId) {
+            fetchTodayIntake();
+        }
+    }, [userId, fetchTodayIntake]);
 
     const handleNameSave = () => {
         localStorage.setItem('userName', userName);
@@ -137,21 +149,43 @@ const Profile = () => {
                         {/* Daily Goal card */}
                         <motion.div
                             whileHover={{ y: -5 }}
-                            className="bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden"
+                            onHoverStart={() => setShowIntakeDetails(true)}
+                            onHoverEnd={() => setShowIntakeDetails(false)}
+                            className="bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px]"
                         >
-                            <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-2">Daily Goal</h3>
-                            <div className="flex items-end gap-1">
-                                <span className="text-3xl font-extrabold">{dailyGoal.toLocaleString()}</span>
-                                <span className="text-xs text-zinc-400 mb-1 font-medium">kcal</span>
+                            <div className="flex justify-between flex-col ">
+                                <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest">Daily Goal</h3>
+                                <div className="flex items-end gap-2">
+                                    <span className="text-4xl text-white font-extrabold">{dailyGoal.toLocaleString()}</span>
+                                    <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest mb-1">kcal</h3>
+                                </div>
+
                             </div>
-                            <div className="mt-4 w-full h-1.5 bg-black/40 rounded-full overflow-hidden">
+
+                            <div className="w-full h-2.5 bg-black/40 rounded-full overflow-hidden mt-4">
                                 <motion.div
                                     initial={{ width: 0 }}
-                                    animate={{ width: '45%' }}
-                                    transition={{ delay: 0.5, duration: 1 }}
+                                    animate={{ width: `${Math.min(100, ((todayIntake?.totalCalories || 0) / (dailyGoal || 1)) * 100)}%` }}
+                                    transition={{ duration: 1, ease: 'easeOut' }}
                                     className="h-full bg-[#00ff88] rounded-full shadow-[0_0_10px_#00ff88]"
                                 ></motion.div>
                             </div>
+
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: showIntakeDetails ? 1 : 0, height: showIntakeDetails ? 'auto' : 0 }}
+                                className="absolute  bottom-4  left-0 right-0 px-4 backdrop-blur-sm bg-[#091a0f]/20 rounded-full p-5 flex justify-between items-center mt-6 overflow-hidden"
+                            >
+                                <div className="text-center">
+                                    <div className="text-xl font-extrabold text-white">{todayIntake?.totalCalories || 0}</div>
+                                    <div className="text-[9px] text-[#8ba494] uppercase tracking-widest mt-1 font-bold">Consumed</div>
+                                </div>
+                                <div className="h-8 w-px bg-white/10 mx-2"></div>
+                                <div className="text-center">
+                                    <div className="text-xl font-extrabold text-[#00ff88]">{Math.max(0, dailyGoal - (todayIntake?.totalCalories || 0))}</div>
+                                    <div className="text-[9px] text-[#8ba494] uppercase tracking-widest mt-1 font-bold">Remaining</div>
+                                </div>
+                            </motion.div>
                         </motion.div>
 
                         {/* Diet Mode card */}

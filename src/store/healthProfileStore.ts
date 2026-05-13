@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { getHealthProfileService, createHealthProfileService, updateHealthProfileService } from '../services/healthProfileService';
+import { getTodayIntakeService, consumeRecipeService } from '../services/intakeService';
 
 export interface HealthProfile {
     _id: string;
@@ -29,6 +30,9 @@ interface HealthProfileState {
     createProfile: (data: any) => Promise<void>;
     updateProfile: (userId: string, data: any) => Promise<void>;
     clearProfile: () => void;
+    todayIntake: any | null;
+    fetchTodayIntake: () => Promise<void>;
+    consumeRecipe: (recipe: { id: string, title: string, calories: number }) => Promise<void>;
 }
 
 export const useHealthProfileStore = create<HealthProfileState>((set) => ({
@@ -65,5 +69,22 @@ export const useHealthProfileStore = create<HealthProfileState>((set) => ({
             throw error;
         }
     },
-    clearProfile: () => set({ profile: null, error: null })
+    clearProfile: () => set({ profile: null, error: null, todayIntake: null }),
+    todayIntake: null,
+    fetchTodayIntake: async () => {
+        try {
+            const result = await getTodayIntakeService();
+            set({ todayIntake: result.data });
+        } catch (error) {
+            console.error('Error fetching today intake:', error);
+        }
+    },
+    consumeRecipe: async (recipe) => {
+        try {
+            const result = await consumeRecipeService(recipe);
+            set({ todayIntake: result.data });
+        } catch (error: any) {
+            throw error;
+        }
+    }
 }));

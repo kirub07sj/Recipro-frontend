@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockRecipes } from '../../data/mockRecipes';
 import { useRecipeStore } from '../../store/recipeStore';
+import { useHealthProfileStore } from '../../store/healthProfileStore';
+import { CheckCircle2, Flame, Loader2 } from 'lucide-react';
 
 const CookingGuide = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { generatedRecipes } = useRecipeStore();
-  
+
   const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || mockRecipes[0];
   const steps = recipeData?.instructions || [];
 
@@ -15,6 +17,10 @@ const CookingGuide = () => {
   const [timeLeft, setTimeLeft] = useState(steps[0].timeSeconds);
   const [isRunning, setIsRunning] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
+  const [isConsuming, setIsConsuming] = useState(false);
+  const [hasConsumed, setHasConsumed] = useState(false);
+
+  const { consumeRecipe } = useHealthProfileStore();
 
   const stepData = steps[currentStep];
   const totalSteps = steps.length;
@@ -108,10 +114,43 @@ const CookingGuide = () => {
 
           <button
             onClick={() => { setIsFinished(false); setCurrentStep(0); setTimeLeft(steps[0].timeSeconds); }}
-            className="w-full bg-white text-black font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-6 hover:bg-zinc-200 transition-colors shadow-lg active:scale-95"
+            className="w-full bg-white text-black font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-3 hover:bg-zinc-200 transition-colors shadow-lg active:scale-95"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
             Cook Again
+          </button>
+
+          <button
+            disabled={hasConsumed || isConsuming}
+            onClick={async () => {
+              try {
+                setIsConsuming(true);
+                await consumeRecipe({
+                  id: recipeData.id,
+                  title: recipeData.title,
+                  calories: Number(recipeData.calories) || 0
+                });
+                setHasConsumed(true);
+              } catch (error) {
+                console.error('Failed to consume:', error);
+                alert('Could not record intake. Please try again.');
+              } finally {
+                setIsConsuming(false);
+              }
+            }}
+            className={`w-full font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-6 transition-all shadow-lg active:scale-95 ${hasConsumed
+                ? 'bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/30'
+                : 'bg-[#00ff88] text-[#05160b] hover:bg-[#00cc6a]'
+              }`}
+          >
+            {isConsuming ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : hasConsumed ? (
+              <CheckCircle2 className="w-5 h-5" />
+            ) : (
+              <Flame className="w-5 h-5" />
+            )}
+            {isConsuming ? 'Recording...' : hasConsumed ? 'Calories Recorded!' : 'Mark as Consumed'}
           </button>
 
           <button
