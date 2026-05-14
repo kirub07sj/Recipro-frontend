@@ -2,20 +2,63 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
+import { calculateEstimatedCalories, type Gender, type ActivityLevel, type FitnessGoal } from '../../utils/calorieCalculator';
+import { cuisines } from '../../data/cuisine';
 
 const HealthProfile = () => {
     const navigate = useNavigate();
     const { userId } = useAuth();
     const { profile, createProfile, updateProfile, isLoading } = useHealthProfileStore();
 
-    const [weight, setWeight] = useState(profile?.weight || 72);
+    const [weight, setWeight] = useState<number | ''>(profile?.weight || '');
+    const [height, setHeight] = useState<number | ''>(profile?.height || '');
+    const [cuisine, setCuisine] = useState(profile?.cuisine || 'Ethiopian');
+    const [age, setAge] = useState<number | ''>(profile?.age || '');
+    const [gender, setGender] = useState<Gender>((profile?.gender as Gender) || 'male');
+    const [activityLevel, setActivityLevel] = useState<ActivityLevel>((profile?.activityLevel as ActivityLevel) || 'sedentary');
+    const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal>((profile?.fitnessGoal as FitnessGoal) || 'maintain');
+    const [useCustomGoal, setUseCustomGoal] = useState(false);
+    const [dailyGoal, setDailyGoal] = useState<number | ''>(profile?.dailyGoal || '');
     const [dietMode, setDietMode] = useState(profile?.dietMode || '');
     const [allergies, setAllergies] = useState<string[]>(profile?.allergies || []);
     const [conditions, setConditions] = useState<string[]>(profile?.conditions || []);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        if (!useCustomGoal) {
+            const w = Number(weight) || 72;
+            const h = Number(height) || 170;
+            const a = Number(age) || 30;
+            const calculated = calculateEstimatedCalories(w, h, a, gender, activityLevel, fitnessGoal);
+            setDailyGoal(calculated);
+        }
+    }, [weight, height, age, gender, activityLevel, fitnessGoal, useCustomGoal]);
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        const w = Number(weight);
+        const h = Number(height);
+        const a = Number(age);
+        const d = Number(dailyGoal);
+
+        if (!w || w < 20 || w > 500) newErrors.weight = "Weight must be between 20kg and 500kg";
+        if (!h || h < 50 || h > 300) newErrors.height = "Height must be between 50cm and 300cm";
+        if (!a || a < 1 || a > 120) newErrors.age = "Age must be between 1 and 120";
+        if (!d || d < 500 || d > 8000) newErrors.dailyGoal = "Goal must be between 500 and 8000 kcal";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     useEffect(() => {
         if (profile) {
             setWeight(profile.weight || 72);
+            setHeight(profile.height || 170);
+            setAge(profile.age || 30);
+            setGender((profile.gender as Gender) || 'male');
+            setActivityLevel((profile.activityLevel as ActivityLevel) || 'sedentary');
+            setFitnessGoal((profile.fitnessGoal as FitnessGoal) || 'maintain');
+            setCuisine(profile.cuisine || 'Ethiopian');
+            setDailyGoal(profile.dailyGoal || 2200);
             setDietMode(profile.dietMode || '');
             setAllergies(profile.allergies || []);
             setConditions(profile.conditions || []);
@@ -32,10 +75,18 @@ const HealthProfile = () => {
 
     const handleSave = async () => {
         if (!userId) return;
+        if (!validate()) return;
         try {
             if (profile) {
                 await updateProfile(userId, {
-                    weight,
+                    weight: Number(weight),
+                    height: Number(height),
+                    age: Number(age),
+                    gender,
+                    activityLevel,
+                    fitnessGoal,
+                    cuisine,
+                    dailyGoal: Number(dailyGoal),
                     dietMode,
                     allergies,
                     conditions,
@@ -43,19 +94,26 @@ const HealthProfile = () => {
             } else {
                 await createProfile({
                     user: userId,
-                    weight,
+                    weight: Number(weight),
+                    height: Number(height),
+                    age: Number(age),
+                    gender,
+                    activityLevel,
+                    fitnessGoal,
+                    cuisine,
+                    dailyGoal: Number(dailyGoal),
                     dietMode,
                     allergies,
                     dislikes: [], // Dislikes can be managed later from the full profile page
                     conditions,
                     healthScore: 85, // Default base score
-                    dailyGoal: 2200 // Default base goal
                 });
             }
             // Profile setup complete, navigate to dashboard or profile
             navigate('/profile');
-        } catch (err) {
+        } catch (err: any) {
             console.error("Failed to save profile:", err);
+            setErrors({ submit: err.message || "Failed to save profile. Please check your inputs." });
         }
     }; return (
         <div>
@@ -88,17 +146,171 @@ const HealthProfile = () => {
                             </svg>
                             <h3 className="font-semibold uppercase tracking-wider text-xs">Body Metrics</h3>
                         </div>
-                        <div className="bg-[#111111] p-6 rounded-3xl border border-white/5 shadow-xl">
-                            <label className="block text-sm text-zinc-400 mb-3">Current Weight (kg)</label>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Weight (kg)</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.weight ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="70"
+                                        type="number"
+                                        value={weight}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setWeight(val ? Number(val) : '');
+                                            if (errors.weight) setErrors(prev => ({ ...prev, weight: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
+                                </div>
+                                {errors.weight && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.weight}</p>}
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Height (cm)</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.height ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="170"
+                                        type="number"
+                                        value={height}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setHeight(val ? Number(val) : '');
+                                            if (errors.height) setErrors(prev => ({ ...prev, height: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">cm</span>
+                                </div>
+                                {errors.height && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.height}</p>}
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Age</label>
+                                <div className="relative flex items-center">
+                                    <input
+                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.age ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                        placeholder="30"
+                                        type="number"
+                                        value={age}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setAge(val ? Number(val) : '');
+                                            if (errors.age) setErrors(prev => ({ ...prev, age: '' }));
+                                        }}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">yrs</span>
+                                </div>
+                                {errors.age && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.age}</p>}
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                <label className="block text-sm text-zinc-400 mb-3">Gender</label>
+                                <div className="flex gap-2">
+                                    {['male', 'female'].map((g) => (
+                                        <button
+                                            key={g}
+                                            onClick={() => setGender(g as Gender)}
+                                            className={`flex-1 p-4 rounded-2xl text-sm font-bold capitalize transition-all border ${gender === g ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {g}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
+                                <label className="block text-sm text-zinc-400 mb-3">Activity Level</label>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                    {[
+                                        { id: 'sedentary', label: 'Sedentary' },
+                                        { id: 'light', label: 'Lightly Active' },
+                                        { id: 'moderate', label: 'Moderately Active' },
+                                        { id: 'active', label: 'Very Active' }
+                                    ].map((act) => (
+                                        <button
+                                            key={act.id}
+                                            onClick={() => setActivityLevel(act.id as ActivityLevel)}
+                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${activityLevel === act.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {act.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
+                                <label className="block text-sm text-zinc-400 mb-3">Fitness Goal</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {[
+                                        { id: 'lose_weight', label: 'Lose Weight' },
+                                        { id: 'maintain', label: 'Maintain' },
+                                        { id: 'gain_weight', label: 'Gain Weight' }
+                                    ].map((fg) => (
+                                        <button
+                                            key={fg.id}
+                                            onClick={() => setFitnessGoal(fg.id as FitnessGoal)}
+                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${fitnessGoal === fg.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                        >
+                                            {fg.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm text-zinc-400 mb-1">Estimated Daily Calories</label>
+                                    <p className="text-xs text-zinc-500 mb-3">This is an estimated calorie target based on your profile and activity level.</p>
+                                    <label className="flex items-center gap-2 cursor-pointer w-fit">
+                                        <input
+                                            type="checkbox"
+                                            className="w-4 h-4 rounded border-zinc-700 text-[#00ff88] focus:ring-[#00ff88] bg-[#0d2214] cursor-pointer"
+                                            checked={useCustomGoal}
+                                            onChange={(e) => setUseCustomGoal(e.target.checked)}
+                                        />
+                                        <span className="text-sm font-medium text-zinc-300">Use Custom Goal</span>
+                                    </label>
+                                </div>
+                                <div className="relative flex items-center sm:w-1/3">
+                                    <input
+                                        className={`w-full bg-[#0d2214] border-none text-[#00ff88] text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none ${!useCustomGoal && 'opacity-70'}`}
+                                        placeholder="2200"
+                                        type="number"
+                                        value={dailyGoal}
+                                        onChange={(e) => {
+                                            const val = e.target.value;
+                                            setDailyGoal(val ? Number(val) : '');
+                                            if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
+                                        }}
+                                        disabled={!useCustomGoal}
+                                    />
+                                    <span className="absolute right-6 text-zinc-500 font-medium">kcal</span>
+                                </div>
+                                {errors.dailyGoal && <p className="text-red-500 text-xs mt-2 ml-2 font-medium absolute -bottom-5">{errors.dailyGoal}</p>}
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="space-y-4">
+                        <div className="flex items-center gap-2 text-[#00ff88]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-utensils w-5 h-5" aria-hidden="true">
+                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
+                                <path d="M7 2v20"></path>
+                                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
+                            </svg>
+                            <h3 className="font-semibold uppercase tracking-wider text-xs">Preferred Cuisine</h3>
+                        </div>
+                        <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                            <label className="block text-sm text-zinc-400 mb-3">Cuisine Type</label>
                             <div className="relative flex items-center">
-                                <input
-                                    className="w-full bg-[#1a1a1a] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none"
-                                    placeholder="70"
-                                    type="number"
-                                    value={weight}
-                                    onChange={(e) => setWeight(Number(e.target.value))}
-                                />
-                                <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
+                                <select
+                                    className="w-full bg-[#0d2214] border-none text-white text-2xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none appearance-none cursor-pointer"
+                                    value={cuisine}
+                                    onChange={(e) => setCuisine(e.target.value)}
+                                >
+                                    <option value="" disabled>Select a cuisine</option>
+                                    {cuisines.map(c => (
+                                        <option key={c} value={c} className="bg-[#0d2214] text-lg">{c}</option>
+                                    ))}
+                                </select>
+                                <div className="absolute right-6 pointer-events-none text-zinc-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -116,7 +328,7 @@ const HealthProfile = () => {
                                 <button
                                     key={diet}
                                     onClick={() => setDietMode(diet)}
-                                    className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                    className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:border-white/20'}`}
                                 >
                                     {diet}
                                 </button>
@@ -138,7 +350,7 @@ const HealthProfile = () => {
                                 <button
                                     key={allergy}
                                     onClick={() => toggleArray(allergies, setAllergies, allergy)}
-                                    className={`p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#111111] text-zinc-400 border-white/5 hover:bg-[#1a1a1a]'}`}
+                                    className={`p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:bg-[#0d2214]'}`}
                                 >
                                     <div className={`w-2 h-2 rounded-full ${allergies.includes(allergy) ? 'bg-[#00ff88]' : 'bg-zinc-700'}`}></div>
                                     {allergy}
@@ -169,7 +381,7 @@ const HealthProfile = () => {
                                             toggleArray(newConds, setConditions, condition);
                                         }
                                     }}
-                                    className={`w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${conditions.includes(condition) ? 'bg-green-500/10 border-[#00ff88] text-white' : 'bg-[#111111] border-white/5 text-zinc-400 hover:border-white/20'}`}
+                                    className={`w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${conditions.includes(condition) ? 'bg-green-500/10 border-[#00ff88] text-white' : 'bg-[#08150c] border-white/5 text-zinc-400 hover:border-white/20'}`}
                                 >
                                     <span className="font-medium">{condition}</span>
                                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${conditions.includes(condition) ? 'border-[#00ff88] bg-[#00ff88]/20' : 'border-zinc-700 group-hover:border-zinc-500'}`}>
@@ -197,6 +409,7 @@ const HealthProfile = () => {
 
                 <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50" style={{ background: 'rgba(5, 22, 11, 0.2)' }}>
                     <div className="max-w-2xl mx-auto">
+                        {errors.submit && <p className="text-red-500 text-sm mb-4 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/20">{errors.submit}</p>}
                         <button
                             onClick={handleSave}
                             disabled={isLoading}
