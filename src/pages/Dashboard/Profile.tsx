@@ -174,7 +174,7 @@ const Profile = () => {
                             <motion.div
                                 initial={{ opacity: 0, height: 0 }}
                                 animate={{ opacity: showIntakeDetails ? 1 : 0, height: showIntakeDetails ? 'auto' : 0 }}
-                                className="absolute  bottom-4  left-0 right-0 px-4 backdrop-blur-sm bg-[#091a0f]/20 rounded-full p-5 flex justify-between items-center mt-6 overflow-hidden"
+                                className="absolute  bottom-4  left-0 right-0 px-4 backdrop-blur-lg bg-[#091a0f]/50 rounded-full p-5 flex justify-between items-center mt-6 overflow-hidden"
                             >
                                 <div className="text-center">
                                     <div className="text-xl font-extrabold text-white">{todayIntake?.totalCalories || 0}</div>
