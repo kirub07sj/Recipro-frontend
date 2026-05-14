@@ -176,7 +176,7 @@ const Dashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
                                     <motion.div
-                                        key={item._id}
+                                        key={item._id || item.recipeId || index}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.1 * index }}

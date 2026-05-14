@@ -3,14 +3,25 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { mockRecipes } from '../../data/mockRecipes';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
+import { useAuth } from '../../hooks/useAuth';
 import { CheckCircle2, Flame, Loader2 } from 'lucide-react';
 
 const CookingGuide = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { generatedRecipes } = useRecipeStore();
+  const { userId } = useAuth();
+  const { generatedRecipes, savedRecipes } = useRecipeStore();
 
-  const recipeData = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || mockRecipes[0];
+  let recipeData = mockRecipes.find(r => r.id === id) ||
+    generatedRecipes.find(r => r.id === id) ||
+    savedRecipes.find(r => r.recipeId === id) ||
+    mockRecipes[0];
+
+  // Normalize ID (saved recipes use recipeId)
+  if (recipeData && !recipeData.id && (recipeData as any).recipeId) {
+    recipeData = { ...recipeData, id: (recipeData as any).recipeId };
+  }
+
   const steps = recipeData?.instructions || [];
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -36,7 +47,7 @@ const CookingGuide = () => {
     let timer: ReturnType<typeof setInterval>;
     if (isRunning && timeLeft > 0) {
       timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
+        setTimeLeft((prev: number) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0) {
       setIsRunning(false);
@@ -125,10 +136,11 @@ const CookingGuide = () => {
             onClick={async () => {
               try {
                 setIsConsuming(true);
-                await consumeRecipe({
+                if (!userId) throw new Error("Must be logged in to record intake");
+                await consumeRecipe(userId, {
                   id: recipeData.id,
                   title: recipeData.title,
-                  calories: Number(recipeData.calories) || 0
+                  calories: Number(recipeData.calories.replace(' kcal', '')) || 0
                 });
                 setHasConsumed(true);
               } catch (error) {
@@ -139,8 +151,8 @@ const CookingGuide = () => {
               }
             }}
             className={`w-full font-extrabold text-sm py-4 rounded-xl flex items-center justify-center gap-2 mb-6 transition-all shadow-lg active:scale-95 ${hasConsumed
-                ? 'bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/30'
-                : 'bg-[#00ff88] text-[#05160b] hover:bg-[#00cc6a]'
+              ? 'bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/30'
+              : 'bg-[#00ff88] text-[#05160b] hover:bg-[#00cc6a]'
               }`}
           >
             {isConsuming ? (

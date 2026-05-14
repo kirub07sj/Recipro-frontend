@@ -23,7 +23,7 @@ const Profile = () => {
 
     useEffect(() => {
         if (userId) {
-            fetchTodayIntake();
+            fetchTodayIntake(userId);
         }
     }, [userId, fetchTodayIntake]);
 
