@@ -9,19 +9,19 @@ const getAuthHeaders = () => {
     };
 };
 
-export const consumeRecipeService = async (recipe: { id: string, title: string, calories: number }) => {
+export const consumeRecipeService = async (userId: string, recipe: { id: string, title: string, calories: number }) => {
     const res = await fetch(`${API_URL}/consume`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({ recipe })
+        body: JSON.stringify({ userId, recipe })
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || 'Failed to consume recipe');
     return result;
 };
 
-export const getTodayIntakeService = async () => {
-    const res = await fetch(`${API_URL}/today`, {
+export const getTodayIntakeService = async (userId: string) => {
+    const res = await fetch(`${API_URL}/today/${userId}`, {
         headers: getAuthHeaders()
     });
     const result = await res.json();

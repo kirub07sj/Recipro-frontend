@@ -32,15 +32,20 @@ const RecipeDetails = () => {
     const [activePicker, setActivePicker] = useState<'complexity' | 'dietary' | null>(null);
 
     useEffect(() => {
-        const localRecipe = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id);
+        let localRecipe = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id);
         if (localRecipe) {
+            // Ensure we have a standard id property (saved recipes use recipeId)
+            if (!localRecipe.id && localRecipe.recipeId) {
+                localRecipe = { ...localRecipe, id: localRecipe.recipeId };
+            }
+            
             setRecipeData(localRecipe);
             setCurrentComplexity(localRecipe.difficulty || "Intermediate");
             setCurrentDietary(localRecipe.dietary || "Omnivore");
             setLoading(false);
             
             // Record view
-            if (userId && localRecipe) {
+            if (userId) {
                 addRecentlyViewed(localRecipe);
                 recordRecipeViewService(userId, localRecipe).catch(console.error);
             }
