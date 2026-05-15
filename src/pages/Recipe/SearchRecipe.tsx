@@ -43,13 +43,16 @@ const ChefHatIcon = () => (
 );
 
 const categories = ["All", "Low Carb", "High Protein", "Vegetarian", "Vegan"];
-const recentSearches = ["Arrabiata", "Chicken Breast", "Sushi"];
 
 const SearchRecipe = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [recipes, setRecipes] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
+    const [history, setHistory] = useState<string[]>(() => {
+        const saved = localStorage.getItem('recentSearches');
+        return saved ? JSON.parse(saved) : [];
+    });
 
     useEffect(() => {
         // Initial load: fetch some default meals
@@ -65,15 +68,30 @@ const SearchRecipe = () => {
 
     const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            if (!searchQuery.trim()) {
-                fetchMealsByLetter('c');
-                return;
-            }
-            setLoading(true);
-            const data = await searchMealsByNameService(searchQuery);
-            setRecipes(data || []);
-            setLoading(false);
+            executeSearch(searchQuery);
         }
+    };
+
+    const executeSearch = async (query: string) => {
+        if (!query.trim()) {
+            fetchMealsByLetter('c');
+            return;
+        }
+
+        // Add to history
+        const newHistory = [query, ...history.filter(h => h !== query)].slice(0, 5);
+        setHistory(newHistory);
+        localStorage.setItem('recentSearches', JSON.stringify(newHistory));
+
+        setLoading(true);
+        const data = await searchMealsByNameService(query);
+        setRecipes(data || []);
+        setLoading(false);
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+        localStorage.removeItem('recentSearches');
     };
 
     const handleCategoryClick = async (cat: string) => {
@@ -140,13 +158,7 @@ const SearchRecipe = () => {
                         className="w-full bg-[#061B12] border border-[#0A2A1E] rounded-2xl py-5 pl-14 pr-6 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00E676]/50 transition-all"
                     />
                 </div>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-[#00E676] p-5 rounded-2xl hover:bg-[#00C853] transition-colors shadow-[0_0_20px_rgba(0,230,118,0.2)]"
-                >
-                    <CameraIcon />
-                </motion.button>
+
             </motion.div>
 
             {/* Filter Section */}
@@ -165,14 +177,7 @@ const SearchRecipe = () => {
                         {cat}
                     </motion.button>
                 ))}
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#061B12] border border-[#0A2A1E] rounded-xl text-gray-400 hover:text-white transition-all ml-auto"
-                >
-                    <FilterIcon />
-                    <span>Filters</span>
-                </motion.button>
+
             </motion.div>
 
             {/* Main Content Area */}
@@ -187,7 +192,7 @@ const SearchRecipe = () => {
                     ) : (
                         <motion.div
                             layout
-                            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                         >
                             <AnimatePresence mode="popLayout">
                                 {recipes.map((recipe, index) => (
@@ -216,7 +221,7 @@ const SearchRecipe = () => {
                                                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                                         </svg>
                                                     </div>
-                                                    {recipe.match || 85}% Match
+                                                    {recipe.match || ''}% Match
                                                 </div>
                                                 {/* Favorite Button */}
                                                 <motion.button
@@ -228,7 +233,7 @@ const SearchRecipe = () => {
                                                 </motion.button>
                                             </div>
                                             <div className="p-6 flex flex-col flex-1">
-                                                <h3 className="text-xl font-bold mb-4 line-clamp-2">{recipe.title}</h3>
+                                                <h3 className="text-xl text-[#fff] font-bold mb-4 line-clamp-2">{recipe.title}</h3>
                                                 <div className="flex items-center gap-6 text-gray-400 text-sm mb-6 mt-auto">
                                                     <div className="flex items-center gap-2">
                                                         <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -266,18 +271,24 @@ const SearchRecipe = () => {
                     <div>
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold">Recent Searches</h2>
-                            <button className="text-[#00E676] text-xs font-bold hover:underline">Clear</button>
+                            {history.length > 0 && (
+                                <button
+                                    onClick={clearHistory}
+                                    className="text-[#041A0B] bg-[#00E676] text-xs font-bold hover:underline"
+                                >
+                                    Clear
+                                </button>
+                            )}
                         </div>
                         <div className="space-y-3">
-                            {recentSearches.map((search) => (
+                            {history.map((search) => (
                                 <motion.button
                                     key={search}
                                     whileHover={{ x: 5 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
                                         setSearchQuery(search);
-                                        // simulate enter press
-                                        handleSearch({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
+                                        executeSearch(search);
                                     }}
                                     className="w-full flex items-center justify-between p-5 bg-[#061B12] border border-[#0A2A1E] rounded-2xl hover:border-[#00E676]/30 transition-all group"
                                 >

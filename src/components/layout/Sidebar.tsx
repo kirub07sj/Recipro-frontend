@@ -128,7 +128,7 @@ const Sidebar = () => {
                                     className={({ isActive }) => `
                                         flex items-center gap-4 px-6 pl-14 py-4 rounded-[1.5rem] transition-all duration-300
                                         ${isActive
-                                            ? 'bg-white text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
+                                            ? 'bg-white text-[#03100B] hover:text-[#03100B] font-bold shadow-[0_4px_15px_rgba(255,255,255,0.1)]'
                                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                                         }
                                     `}
@@ -160,7 +160,7 @@ const Sidebar = () => {
                         onClick={handleLogout}
                         whileHover={{ x: 5, backgroundColor: 'rgba(248, 113, 113, 0.05)' }}
                         whileTap={{ scale: 0.98 }}
-                        className="w-full flex items-center gap-4 px-6 py-4 text-gray-400 hover:text-red-400 rounded-[1.5rem] transition-all duration-300 group"
+                        className="w-full flex items-center gap-4 px-6 py-4 text-[#041A0B] bg-[#00E676] hover:text-red-400 rounded-[1.5rem] transition-all duration-300 group"
                     >
                         <LogoutIcon className="w-5 h-5 flex-shrink-0 transition-colors group-hover:text-red-400" />
                         <span className="font-semibold text-[1.05rem]">Logout</span>

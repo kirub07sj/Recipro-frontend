@@ -23,6 +23,7 @@ const HealthProfile = () => {
     const [allergies, setAllergies] = useState<string[]>(profile?.allergies || []);
     const [conditions, setConditions] = useState<string[]>(profile?.conditions || []);
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [currentStep, setCurrentStep] = useState(1);
 
     useEffect(() => {
         if (!useCustomGoal) {
@@ -104,318 +105,329 @@ const HealthProfile = () => {
                     dailyGoal: Number(dailyGoal),
                     dietMode,
                     allergies,
-                    dislikes: [], // Dislikes can be managed later from the full profile page
+                    dislikes: [],
                     conditions,
-                    healthScore: 85, // Default base score
+                    healthScore: 85,
                 });
             }
-            // Profile setup complete, navigate to dashboard or profile
             navigate('/profile');
         } catch (err: any) {
             console.error("Failed to save profile:", err);
             setErrors({ submit: err.message || "Failed to save profile. Please check your inputs." });
         }
+    };
+
+    const nextStep = () => {
+        if (currentStep === 1) {
+            if (validate()) setCurrentStep(2);
+        } else if (currentStep === 2) {
+            setCurrentStep(3);
+        }
+    };
+
+    const prevStep = () => {
+        if (currentStep > 1) setCurrentStep(currentStep - 1);
     }; return (
         <div>
             <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-[#00ff88]/30" style={{ background: 'rgb(5, 22, 11)' }}>
-                <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-md px-6 py-4 flex items-center gap-4">
-                    <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-6 h-6 text-[#00ff88]" aria-hidden="true">
-                            <path d="m15 18-6-6 6-6"></path>
-                        </svg>
-                    </button>
-                    <div>
-                        <h1 className="text-xl font-bold tracking-tight">Health Profile</h1>
-                        <p className="text-xs text-zinc-400">Personalize your AI recipe experience</p>
+                <header className="sticky top-0 z-30 bg-[#050505]/30 backdrop-blur-md px-6 py-2 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left w-6 h-6 text-[#00ff88]" aria-hidden="true">
+                                <path d="m15 18-6-6 6-6"></path>
+                            </svg>
+                        </button>
+                        <div>
+                            <h1 className="text-xl font-bold tracking-tight">Health Profile</h1>
+                            <p className="text-xs text-zinc-400">Step {currentStep} of 3</p>
+                        </div>
+                    </div>
+
+                    {/* Step Indicator Dots */}
+                    <div className="flex gap-3">
+                        {[1, 2, 3].map((s) => (
+                            <button
+                                key={s}
+                                onClick={() => {
+                                    if (s < currentStep || validate()) setCurrentStep(s);
+                                }}
+                                className={`w-5 h-10 rounded-full scale-[.4] transition-all duration-500 ${currentStep === s ? 'bg-[#00ff88] shadow-[0_0_15px_#00ff88]' : 'bg-zinc-700 hover:bg-zinc-500'}`}
+                            />
+                        ))}
                     </div>
                 </header>
-                <main className="px-6 pt-4 pb-32 max-w-2xl mx-auto space-y-10">
-                    <section className="space-y-2">
-                        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Set Up Your Health Profile</h2>
-                        <p className="text-sm text-zinc-400 leading-relaxed">We use this data to calculate your macros and filter recipes that match your lifestyle perfectly.</p>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#00ff88]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-scale w-5 h-5" aria-hidden="true">
-                                <path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
-                                <path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"></path>
-                                <path d="M7 21h10"></path>
-                                <path d="M12 3v18"></path>
-                                <path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"></path>
-                            </svg>
-                            <h3 className="font-semibold uppercase tracking-wider text-xs">Body Metrics</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
-                                <label className="block text-sm text-zinc-400 mb-3">Weight (kg)</label>
-                                <div className="relative flex items-center">
-                                    <input
-                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.weight ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
-                                        placeholder="70"
-                                        type="number"
-                                        value={weight}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setWeight(val ? Number(val) : '');
-                                            if (errors.weight) setErrors(prev => ({ ...prev, weight: '' }));
-                                        }}
-                                    />
-                                    <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
-                                </div>
-                                {errors.weight && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.weight}</p>}
+                <main className="px-6 pt-4 pb-10 max-w-4xl mx-auto space-y-10 scale-90 -mt-5">
+                    {currentStep === 1 && (
+                        <section className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="space-y-2">
+                                <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Body Metrics</h2>
+                                <p className="text-sm text-zinc-400">We use these to calculate your metabolic rate and calorie needs.</p>
                             </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
-                                <label className="block text-sm text-zinc-400 mb-3">Height (cm)</label>
-                                <div className="relative flex items-center">
-                                    <input
-                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.height ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
-                                        placeholder="170"
-                                        type="number"
-                                        value={height}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setHeight(val ? Number(val) : '');
-                                            if (errors.height) setErrors(prev => ({ ...prev, height: '' }));
-                                        }}
-                                    />
-                                    <span className="absolute right-6 text-zinc-500 font-medium">cm</span>
-                                </div>
-                                {errors.height && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.height}</p>}
-                            </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
-                                <label className="block text-sm text-zinc-400 mb-3">Age</label>
-                                <div className="relative flex items-center">
-                                    <input
-                                        className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.age ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
-                                        placeholder="30"
-                                        type="number"
-                                        value={age}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setAge(val ? Number(val) : '');
-                                            if (errors.age) setErrors(prev => ({ ...prev, age: '' }));
-                                        }}
-                                    />
-                                    <span className="absolute right-6 text-zinc-500 font-medium">yrs</span>
-                                </div>
-                                {errors.age && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.age}</p>}
-                            </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
-                                <label className="block text-sm text-zinc-400 mb-3">Gender</label>
-                                <div className="flex gap-2">
-                                    {['male', 'female'].map((g) => (
-                                        <button
-                                            key={g}
-                                            onClick={() => setGender(g as Gender)}
-                                            className={`flex-1 p-4 rounded-2xl text-sm font-bold capitalize transition-all border ${gender === g ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
-                                        >
-                                            {g}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
-                                <label className="block text-sm text-zinc-400 mb-3">Activity Level</label>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    {[
-                                        { id: 'sedentary', label: 'Sedentary' },
-                                        { id: 'light', label: 'Lightly Active' },
-                                        { id: 'moderate', label: 'Moderately Active' },
-                                        { id: 'active', label: 'Very Active' }
-                                    ].map((act) => (
-                                        <button
-                                            key={act.id}
-                                            onClick={() => setActivityLevel(act.id as ActivityLevel)}
-                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${activityLevel === act.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
-                                        >
-                                            {act.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2">
-                                <label className="block text-sm text-zinc-400 mb-3">Fitness Goal</label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {[
-                                        { id: 'lose_weight', label: 'Lose Weight' },
-                                        { id: 'maintain', label: 'Maintain' },
-                                        { id: 'gain_weight', label: 'Gain Weight' }
-                                    ].map((fg) => (
-                                        <button
-                                            key={fg.id}
-                                            onClick={() => setFitnessGoal(fg.id as FitnessGoal)}
-                                            className={`p-3 rounded-xl text-xs font-semibold transition-all border ${fitnessGoal === fg.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
-                                        >
-                                            {fg.label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl md:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <div className="flex-1">
-                                    <label className="block text-sm text-zinc-400 mb-1">Estimated Daily Calories</label>
-                                    <p className="text-xs text-zinc-500 mb-3">This is an estimated calorie target based on your profile and activity level.</p>
-                                    <label className="flex items-center gap-2 cursor-pointer w-fit">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                    <label className="block text-sm text-zinc-400 mb-3">Weight (kg)</label>
+                                    <div className="relative flex items-center">
                                         <input
-                                            type="checkbox"
-                                            className="w-4 h-4 rounded border-zinc-700 text-[#00ff88] focus:ring-[#00ff88] bg-[#0d2214] cursor-pointer"
-                                            checked={useCustomGoal}
-                                            onChange={(e) => setUseCustomGoal(e.target.checked)}
+                                            className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.weight ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                            placeholder="70"
+                                            type="number"
+                                            value={weight}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setWeight(val ? Number(val) : '');
+                                                if (errors.weight) setErrors(prev => ({ ...prev, weight: '' }));
+                                            }}
                                         />
-                                        <span className="text-sm font-medium text-zinc-300">Use Custom Goal</span>
-                                    </label>
-                                </div>
-                                <div className="relative flex items-center sm:w-1/3">
-                                    <input
-                                        className={`w-full bg-[#0d2214] border-none text-[#00ff88] text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none ${!useCustomGoal && 'opacity-70'}`}
-                                        placeholder="2200"
-                                        type="number"
-                                        value={dailyGoal}
-                                        onChange={(e) => {
-                                            const val = e.target.value;
-                                            setDailyGoal(val ? Number(val) : '');
-                                            if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
-                                        }}
-                                        disabled={!useCustomGoal}
-                                    />
-                                    <span className="absolute right-6 text-zinc-500 font-medium">kcal</span>
-                                </div>
-                                {errors.dailyGoal && <p className="text-red-500 text-xs mt-2 ml-2 font-medium absolute -bottom-5">{errors.dailyGoal}</p>}
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#00ff88]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-utensils w-5 h-5" aria-hidden="true">
-                                <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path>
-                                <path d="M7 2v20"></path>
-                                <path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path>
-                            </svg>
-                            <h3 className="font-semibold uppercase tracking-wider text-xs">Preferred Cuisine</h3>
-                        </div>
-                        <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
-                            <label className="block text-sm text-zinc-400 mb-3">Cuisine Type</label>
-                            <div className="relative flex items-center">
-                                <select
-                                    className="w-full bg-[#0d2214] border-none text-white text-2xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none appearance-none cursor-pointer"
-                                    value={cuisine}
-                                    onChange={(e) => setCuisine(e.target.value)}
-                                >
-                                    <option value="" disabled>Select a cuisine</option>
-                                    {cuisines.map(c => (
-                                        <option key={c} value={c} className="bg-[#0d2214] text-lg">{c}</option>
-                                    ))}
-                                </select>
-                                <div className="absolute right-6 pointer-events-none text-zinc-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#00ff88]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-leaf w-5 h-5" aria-hidden="true">
-                                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"></path>
-                                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"></path>
-                            </svg>
-                            <h3 className="font-semibold uppercase tracking-wider text-xs">Dietary Preferences</h3>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                            {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein'].map(diet => (
-                                <button
-                                    key={diet}
-                                    onClick={() => setDietMode(diet)}
-                                    className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border flex items-center gap-2 ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:border-white/20'}`}
-                                >
-                                    {diet}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#00ff88]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-circle-alert w-5 h-5" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="12" x2="12" y1="8" y2="12"></line>
-                                <line x1="12" x2="12.01" y1="16" y2="16"></line>
-                            </svg>
-                            <h3 className="font-semibold uppercase tracking-wider text-xs">Allergies &amp; Intolerances</h3>
-                        </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Seafood', 'Soy'].map(allergy => (
-                                <button
-                                    key={allergy}
-                                    onClick={() => toggleArray(allergies, setAllergies, allergy)}
-                                    className={`p-4 rounded-2xl text-sm font-medium transition-all duration-200 border flex flex-col items-center justify-center gap-2 text-center ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:bg-[#0d2214]'}`}
-                                >
-                                    <div className={`w-2 h-2 rounded-full ${allergies.includes(allergy) ? 'bg-[#00ff88]' : 'bg-zinc-700'}`}></div>
-                                    {allergy}
-                                </button>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section className="space-y-4">
-                        <div className="flex items-center gap-2 text-[#00ff88]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-stethoscope w-5 h-5" aria-hidden="true">
-                                <path d="M11 2v2"></path>
-                                <path d="M5 2v2"></path>
-                                <path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"></path>
-                                <path d="M8 15a6 6 0 0 0 12 0v-3"></path>
-                                <circle cx="20" cy="10" r="2"></circle>
-                            </svg>
-                            <h3 className="font-semibold uppercase tracking-wider text-xs">Medical Conditions</h3>
-                        </div>
-                        <div className="space-y-3">
-                            {['Diabetes', 'Hypertension', 'Heart Condition', 'None'].map(condition => (
-                                <button
-                                    key={condition}
-                                    onClick={() => {
-                                        if (condition === 'None') setConditions(['None']);
-                                        else {
-                                            const newConds = conditions.filter(c => c !== 'None');
-                                            toggleArray(newConds, setConditions, condition);
-                                        }
-                                    }}
-                                    className={`w-full p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between group ${conditions.includes(condition) ? 'bg-green-500/10 border-[#00ff88] text-white' : 'bg-[#08150c] border-white/5 text-zinc-400 hover:border-white/20'}`}
-                                >
-                                    <span className="font-medium">{condition}</span>
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${conditions.includes(condition) ? 'border-[#00ff88] bg-[#00ff88]/20' : 'border-zinc-700 group-hover:border-zinc-500'}`}>
-                                        {conditions.includes(condition) && <div className="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></div>}
+                                        <span className="absolute right-6 text-zinc-500 font-medium">kg</span>
                                     </div>
-                                </button>
-                            ))}
-                        </div>
-                    </section>
+                                    {errors.weight && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.weight}</p>}
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                    <label className="block text-sm text-zinc-400 mb-3">Height (cm)</label>
+                                    <div className="relative flex items-center">
+                                        <input
+                                            className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.height ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                            placeholder="170"
+                                            type="number"
+                                            value={height}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setHeight(val ? Number(val) : '');
+                                                if (errors.height) setErrors(prev => ({ ...prev, height: '' }));
+                                            }}
+                                        />
+                                        <span className="absolute right-6 text-zinc-500 font-medium">cm</span>
+                                    </div>
+                                    {errors.height && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.height}</p>}
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                    <label className="block text-sm text-zinc-400 mb-3">Age</label>
+                                    <div className="relative flex items-center">
+                                        <input
+                                            className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.age ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
+                                            placeholder="30"
+                                            type="number"
+                                            value={age}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setAge(val ? Number(val) : '');
+                                                if (errors.age) setErrors(prev => ({ ...prev, age: '' }));
+                                            }}
+                                        />
+                                        <span className="absolute right-6 text-zinc-500 font-medium">yrs</span>
+                                    </div>
+                                    {errors.age && <p className="text-red-500 text-xs mt-2 ml-2 font-medium">{errors.age}</p>}
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                    <label className="block text-sm text-zinc-400 mb-3">Gender</label>
+                                    <div className="flex gap-2">
+                                        {['male', 'female'].map((g) => (
+                                            <button
+                                                key={g}
+                                                onClick={() => setGender(g as Gender)}
+                                                className={`flex-1 p-4 rounded-2xl text-sm font-bold capitalize transition-all border ${gender === g ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                            >
+                                                {g}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl lg:col-span-2">
+                                    <label className="block text-sm text-zinc-400 mb-3">Activity Level</label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                                        {[
+                                            { id: 'sedentary', label: 'Sedentary' },
+                                            { id: 'light', label: 'Lightly Active' },
+                                            { id: 'moderate', label: 'Moderately Active' },
+                                            { id: 'active', label: 'Very Active' }
+                                        ].map((act) => (
+                                            <button
+                                                key={act.id}
+                                                onClick={() => setActivityLevel(act.id as ActivityLevel)}
+                                                className={`p-3 rounded-xl text-xs font-semibold transition-all border ${activityLevel === act.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                            >
+                                                {act.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl lg:col-span-1">
+                                    <label className="block text-sm text-zinc-400 mb-3">Fitness Goal</label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {[
+                                            { id: 'lose_weight', label: 'Lose Weight' },
+                                            { id: 'maintain', label: 'Maintain' },
+                                            { id: 'gain_weight', label: 'Gain Weight' }
+                                        ].map((fg) => (
+                                            <button
+                                                key={fg.id}
+                                                onClick={() => setFitnessGoal(fg.id as FitnessGoal)}
+                                                className={`p-3 rounded-xl text-xs font-semibold transition-all border ${fitnessGoal === fg.id ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#0d2214] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                            >
+                                                {fg.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl lg:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                    <div className="flex-1">
+                                        <label className="block text-sm text-zinc-400 mb-1">Estimated Daily Calories</label>
+                                        <p className="text-xs text-zinc-500 mb-3">Target calculated based on your metrics.</p>
+                                        <label className="flex items-center gap-2 cursor-pointer w-fit">
+                                            <input
+                                                type="checkbox"
+                                                className="w-4 h-4 rounded border-zinc-700 text-[#00ff88] focus:ring-[#00ff88] bg-[#0d2214] cursor-pointer"
+                                                checked={useCustomGoal}
+                                                onChange={(e) => setUseCustomGoal(e.target.checked)}
+                                            />
+                                            <span className="text-sm font-medium text-zinc-300">Custom Goal</span>
+                                        </label>
+                                    </div>
+                                    <div className="relative flex items-center sm:w-1/3">
+                                        <input
+                                            className={`w-full bg-[#0d2214] border-none text-[#00ff88] text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none ${!useCustomGoal && 'opacity-70'}`}
+                                            placeholder="2200"
+                                            type="number"
+                                            value={dailyGoal}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setDailyGoal(val ? Number(val) : '');
+                                                if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
+                                            }}
+                                            disabled={!useCustomGoal}
+                                        />
+                                        <span className="absolute right-6 text-zinc-500 font-medium">kcal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
 
-                    <div className="bg-[#00ff88] p-5 rounded-3xl text-black flex items-start gap-4 shadow-[0_10px_30px_rgba(0,255,136,0.15)]">
-                        <div className="bg-black/10 p-2 rounded-xl mt-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-info w-5 h-5" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M12 16v-4"></path>
-                                <path d="M12 8h.01"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-sm uppercase tracking-tight">AI Nutrition Insight</h4>
-                            <p className="text-sm font-medium leading-snug mt-1 opacity-80">Profiles with accurate weight and dietary markers get 42% more accurate macro-tracking recommendations.</p>
-                        </div>
-                    </div>
+                    {currentStep === 2 && (
+                        <section className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                            <div className="space-y-2">
+                                <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Preferences</h2>
+                                <p className="text-sm text-zinc-400">Tell us what you like and what you need to avoid.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-[#00ff88]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" /><path d="M7 2v20" /><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" /></svg>
+                                        <h3 className="font-semibold uppercase tracking-wider text-xs">Cuisine</h3>
+                                    </div>
+                                    <div className="bg-[#08150c] p-6 rounded-3xl border border-white/5 shadow-xl">
+                                        <select
+                                            className="w-full bg-[#0d2214] border-none text-white text-2xl font-bold p-5 rounded-2xl focus:ring-2 focus:ring-[#00ff88]/50 transition-all outline-none appearance-none cursor-pointer"
+                                            value={cuisine}
+                                            onChange={(e) => setCuisine(e.target.value)}
+                                        >
+                                            <option value="" disabled>Select a cuisine</option>
+                                            {cuisines.map(c => (
+                                                <option key={c} value={c} className="bg-[#0d2214] text-lg">{c}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2 text-[#00ff88]">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" /></svg>
+                                        <h3 className="font-semibold uppercase tracking-wider text-xs">Diet Type</h3>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Vegetarian', 'Vegan', 'Low Carb', 'High Protein'].map(diet => (
+                                            <button
+                                                key={diet}
+                                                onClick={() => setDietMode(diet)}
+                                                className={`px-5 py-3 rounded-full text-sm font-medium transition-all duration-300 border ${dietMode === diet ? 'bg-green-500/20 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:border-white/20'}`}
+                                            >
+                                                {diet}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2 text-[#00ff88]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                                    <h3 className="font-semibold uppercase tracking-wider text-xs">Allergies</h3>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                    {['Nuts', 'Dairy', 'Gluten', 'Eggs', 'Seafood', 'Soy'].map(allergy => (
+                                        <button
+                                            key={allergy}
+                                            onClick={() => toggleArray(allergies, setAllergies, allergy)}
+                                            className={`p-4 rounded-2xl text-sm font-medium transition-all border flex flex-col items-center gap-2 ${allergies.includes(allergy) ? 'bg-green-500/10 text-[#00ff88] border-[#00ff88]' : 'bg-[#08150c] text-zinc-400 border-white/5 hover:bg-[#0d2214]'}`}
+                                        >
+                                            <div className={`w-2 h-2 rounded-full ${allergies.includes(allergy) ? 'bg-[#00ff88]' : 'bg-zinc-700'}`}></div>
+                                            {allergy}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {currentStep === 3 && (
+                        <section className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+                            <div className="space-y-2">
+                                <h2 className="text-3xl font-bold bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Health Status</h2>
+                                <p className="text-sm text-zinc-400">Final check for any medical conditions we should consider.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {['Diabetes', 'Hypertension', 'Heart Condition', 'None'].map(condition => (
+                                    <button
+                                        key={condition}
+                                        onClick={() => {
+                                            if (condition === 'None') setConditions(['None']);
+                                            else {
+                                                const newConds = conditions.filter(c => c !== 'None');
+                                                toggleArray(newConds, setConditions, condition);
+                                            }
+                                        }}
+                                        className={`w-full p-6 rounded-3xl border transition-all duration-300 flex items-center justify-between group ${conditions.includes(condition) ? 'bg-green-500/10 border-[#00ff88] text-white' : 'bg-[#08150c] border-white/5 text-zinc-400 hover:border-white/20'}`}
+                                    >
+                                        <span className="text-lg font-medium">{condition}</span>
+                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${conditions.includes(condition) ? 'border-[#00ff88] bg-[#00ff88]/20' : 'border-zinc-700 group-hover:border-zinc-500'}`}>
+                                            {conditions.includes(condition) && <div className="w-2.5 h-2.5 rounded-full bg-[#00ff88]"></div>}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="bg-[#00ff88] p-6 rounded-[2rem] text-black flex items-start gap-4 shadow-2xl">
+                                <div className="bg-black/10 p-3 rounded-2xl mt-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4" /><path d="M12 8h.01" /></svg>
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-lg uppercase tracking-tight">Ready to launch!</h4>
+                                    <p className="text-sm font-medium leading-snug mt-1 opacity-90">Your profile is tuned. We'll prioritize recipes that keep you on track with your {fitnessGoal.replace('_', ' ')} goal.</p>
+                                </div>
+                            </div>
+                        </section>
+                    )}
                 </main>
 
-                <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50" style={{ background: 'rgba(5, 22, 11, 0.2)' }}>
-                    <div className="max-w-2xl mx-auto">
-                        {errors.submit && <p className="text-red-500 text-sm mb-4 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/20">{errors.submit}</p>}
+                <footer className="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#050505] via-[#050505] to-transparent z-50">
+                    <div className="max-w-4xl h-16 mx-auto flex gap-4">
+                        {currentStep > 1 && (
+                            <button
+                                onClick={prevStep}
+                                className="flex-1 bg-zinc-800 text-white font-bold py-5 rounded-2xl flex items-center justify-center gap-2 text-lg hover:bg-zinc-700 transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                                Back
+                            </button>
+                        )}
                         <button
-                            onClick={handleSave}
+                            onClick={currentStep === 3 ? handleSave : nextStep}
                             disabled={isLoading}
-                            className={`w-full bg-[#00ff88] text-black font-bold py-5 rounded-2xl shadow-[0_15px_30px_rgba(0,255,136,0.2)] flex items-center justify-center gap-2 text-lg active:brightness-90 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
+                            className={`flex-[2] bg-[#00ff88] text-black font-bold py-5 rounded-2xl shadow-[0_15px_30px_rgba(0,255,136,0.2)] flex items-center justify-center gap-2 text-lg active:brightness-90 transition-all ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
                         >
-                            {isLoading ? 'Saving...' : 'Save & Continue'}
+                            {isLoading ? 'Saving...' : (currentStep === 3 ? 'Save & Finish' : 'Next Step')}
                             {!isLoading && (
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right w-5 h-5" aria-hidden="true">
                                     <path d="m9 18 6-6-6-6"></path>
@@ -423,6 +435,7 @@ const HealthProfile = () => {
                             )}
                         </button>
                     </div>
+                    {errors.submit && <p className="max-w-4xl mx-auto text-red-500 text-sm mt-4 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/20">{errors.submit}</p>}
                 </footer>
             </div>
         </div>
