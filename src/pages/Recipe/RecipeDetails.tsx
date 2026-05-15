@@ -12,6 +12,8 @@ import { getSavedRecipesService, saveRecipeService, deleteSavedRecipeService } f
 import { lookupMealByIdService } from '../../services/discoveryService';
 import { recordRecipeViewService } from '../../services/recentlyViewedService';
 import { useEffect } from 'react';
+import RecipeDetailsSkeleton from '../../components/skeletons/RecipeDetailsSkeleton';
+import { motion } from 'framer-motion';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
@@ -126,15 +128,16 @@ const RecipeDetails = () => {
     };
 
     if (loading || !recipeData) {
-        return (
-            <div className="min-h-screen bg-[#051109] text-white flex items-center justify-center">
-                <div className="text-[#00ff84] font-bold animate-pulse text-xl">Loading Recipe...</div>
-            </div>
-        );
+        return <RecipeDetailsSkeleton />;
     }
 
     return (
-        <div className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden"
+        >
             {/* Hero Section */}
             <div className="relative h-[55vh] min-h-[450px] w-full">
                 {/* Background Image with Gradient Overlay */}
@@ -443,7 +446,7 @@ const RecipeDetails = () => {
                     Start Cooking
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

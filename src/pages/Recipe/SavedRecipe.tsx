@@ -4,6 +4,8 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { getSavedRecipesService } from '../../services/recipeService';
 import { motion } from 'framer-motion';
+import RecipeCardSkeleton from '../../components/skeletons/RecipeCardSkeleton';
+import { useState } from 'react';
 
 // Icons
 
@@ -17,16 +19,21 @@ const ClockIcon = () => (
 const SavedRecipe = () => {
     const { userId } = useAuth();
     const { savedRecipes, setSavedRecipes } = useRecipeStore();
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (userId) {
+            setLoading(true);
             getSavedRecipesService(userId)
                 .then(res => {
                     if (res.success) {
                         setSavedRecipes(res.data);
                     }
                 })
-                .catch(console.error);
+                .catch(console.error)
+                .finally(() => setLoading(false));
+        } else {
+            setLoading(false);
         }
     }, [userId, setSavedRecipes]);
 
@@ -62,12 +69,15 @@ const SavedRecipe = () => {
 
             {/* Recipe Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {savedRecipes.map((recipe, index) => (
-                    <motion.div
-                        key={`${recipe.recipeId || recipe.id}-${index}`}
-                        variants={itemVariants}
-                        whileHover={{ y: -10 }}
-                    >
+                {loading ? (
+                    <RecipeCardSkeleton cards={6} />
+                ) : (
+                    savedRecipes.map((recipe, index) => (
+                        <motion.div
+                            key={`${recipe.recipeId || recipe.id}-${index}`}
+                            variants={itemVariants}
+                            whileHover={{ y: -10 }}
+                        >
                         <Link
                             to={`/recipe/${recipe.recipeId || recipe.id}`}
                             className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
@@ -97,10 +107,11 @@ const SavedRecipe = () => {
                             <div className="absolute inset-0 border-2 border-[#00E676]/0 group-hover:border-[#00E676]/10 rounded-[2rem] transition-all pointer-events-none"></div>
                         </Link>
                     </motion.div>
-                ))}
+                    ))
+                )}
             </div>
 
-            {savedRecipes.length === 0 && (
+            {!loading && savedRecipes.length === 0 && (
                 <motion.div variants={itemVariants} className="text-center text-gray-500 py-20">
                     <p className="text-xl">You haven't saved any recipes yet!</p>
                     <p className="mt-2 text-sm">Explore and bookmark your favorites.</p>

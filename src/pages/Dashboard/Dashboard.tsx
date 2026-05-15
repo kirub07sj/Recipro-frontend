@@ -6,6 +6,7 @@ import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
 import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -14,25 +15,21 @@ const Dashboard = () => {
     const { profile, fetchProfile, todayIntake, fetchTodayIntake } = useHealthProfileStore();
     const { userId } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (userId) {
-            // Fetch recently viewed
-            getRecentlyViewedService(userId, 20)
-                .then(res => {
-                    if (res.success) {
-                        setRecentlyViewed(res.data);
-                    }
-                })
-                .catch(console.error);
+            setLoading(true);
+            const promises = [
+                getRecentlyViewedService(userId, 20).then(res => {
+                    if (res.success) setRecentlyViewed(res.data);
+                }),
+                profile ? Promise.resolve() : fetchProfile(userId),
+                fetchTodayIntake(userId)
+            ];
 
-            // Fetch health profile if not already loaded
-            if (!profile) {
-                fetchProfile(userId).catch(console.error);
-            }
-
-            // Fetch today's intake
-            fetchTodayIntake(userId).catch(console.error);
+            Promise.all(promises)
+                .finally(() => setLoading(false));
         }
     }, [userId, setRecentlyViewed, profile, fetchProfile, fetchTodayIntake]);
 
@@ -64,11 +61,21 @@ const Dashboard = () => {
         visible: { opacity: 1, y: 0 }
     };
 
+    if (loading) {
+        return (
+            <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
+                <div className="max-w-7xl mx-auto">
+                    <DashboardSkeleton />
+                </div>
+            </main>
+        );
+    }
+
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
         >
             {/* Hidden File Input */}
             <input

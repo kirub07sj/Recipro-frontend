@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
 import { motion, AnimatePresence } from 'framer-motion';
+import RecipeCardSkeleton from '../../components/skeletons/RecipeCardSkeleton';
 
 // Icons using custom SVGs to match the project's style
 const SearchIcon = () => (
@@ -186,7 +187,9 @@ const SearchRecipe = () => {
                 <div className="flex-1">
                     <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">Recommended for you</motion.h2>
                     {loading ? (
-                        <div className="text-[#00E676] font-bold animate-pulse">Loading recipes...</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <RecipeCardSkeleton cards={6} />
+                        </div>
                     ) : recipes.length === 0 ? (
                         <motion.div variants={itemVariants} className="text-gray-400">No recipes found. Try another search.</motion.div>
                     ) : (
