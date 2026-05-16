@@ -97,7 +97,7 @@ const Dashboard = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className=" flex items-center gap-4">
                                 {/* Calorie Notification */}
                                 <AnimatePresence>
                                     {showNotifications && profile && (
@@ -105,7 +105,7 @@ const Dashboard = () => {
                                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                                             animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
                                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                            className=" z-10 bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl py-2 px-4 flex items-center gap-3 overflow-hidden"
+                                            className="max-md:absolute max-md:top-24 max-md:right-8 z-[999] bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl py-2 backdrop-blur-md px-4 flex items-center gap-3 overflow-hidden"
                                         >
                                             <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] mb-3">
                                                 {todayIntake?.totalCalories >= profile.dailyGoal ? (

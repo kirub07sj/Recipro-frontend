@@ -27,9 +27,14 @@ const GenerateRecipe = () => {
 
     const suggestions = ['Onion', 'Spinach', 'Feta Cheese', 'Bell Pepper', 'Cucumber', 'Greek Yogurt'];
 
+    const processingRef = useRef(false);
+
     useEffect(() => {
-        if (pendingFile) {
-            handleFileProcess(pendingFile);
+        if (pendingFile && !processingRef.current) {
+            processingRef.current = true;
+            handleFileProcess(pendingFile).finally(() => {
+                processingRef.current = false;
+            });
             setPendingFile(null); // Clear after picking up
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
