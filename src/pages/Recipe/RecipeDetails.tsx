@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import {
-    ChevronLeft, Share2, Heart, Clock, Activity,
+    ChevronLeft, Heart, Clock, Activity,
     Flame, Beef, InfoIcon, CheckCircle2
 } from 'lucide-react';
 
@@ -156,9 +156,6 @@ const RecipeDetails = () => {
                         <ChevronLeft className="w-7 h-7 text-white" />
                     </button>
                     <div className="flex gap-4">
-                        <button className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors">
-                            <Share2 className="w-7 h-7 text-white" />
-                        </button>
                         <button
                             className={`w-14 h-14 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
                                     ? 'bg-[#00ff84]/20 border-[#00ff84]/50'

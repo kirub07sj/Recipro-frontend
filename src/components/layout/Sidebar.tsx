@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -47,8 +47,19 @@ const LogoutIcon = ({ className }: { className?: string }) => (
 
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
     const navigate = useNavigate();
     const { logout } = useAuth();
+
+    useEffect(() => {
+        const handleResize = () => {
+            const mobile = window.innerWidth < 768;
+            setIsMobile(mobile);
+            if (!mobile) setIsOpen(false);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const handleLogout = () => {
         logout();
@@ -90,14 +101,14 @@ const Sidebar = () => {
             <motion.aside
                 initial={false}
                 animate={{
-                    x: isOpen ? 0 : (window.innerWidth < 768 ? '-120%' : 0),
-                    transition: { type: 'spring', damping: 25, stiffness: 200 }
+                    x: isOpen ? 0 : (isMobile ? '-110%' : 0),
                 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
                 className={`
                     fixed top-4 bottom-4 left-4 z-40 w-72  
                     bg-[#0d2114]/60 backdrop-blur-xl border border-white/10
                     rounded-[2rem] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]
-                    flex flex-col md:translate-x-0
+                    flex flex-col
                 `}
             >
                 {/* Logo Section */}
