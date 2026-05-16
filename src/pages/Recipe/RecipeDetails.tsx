@@ -18,16 +18,16 @@ import { motion } from 'framer-motion';
 const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { 
-        generatedRecipes, savedRecipes, setSavedRecipes, 
-        addSavedRecipe, removeSavedRecipe, addRecentlyViewed 
+    const {
+        generatedRecipes, savedRecipes, setSavedRecipes,
+        addSavedRecipe, removeSavedRecipe, addRecentlyViewed
     } = useRecipeStore();
     const { userId } = useAuth();
 
     // State for interactive features
     const [recipeData, setRecipeData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    
+
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [currentComplexity, setCurrentComplexity] = useState("Intermediate");
     const [currentDietary, setCurrentDietary] = useState("Omnivore");
@@ -40,12 +40,12 @@ const RecipeDetails = () => {
             if (!localRecipe.id && localRecipe.recipeId) {
                 localRecipe = { ...localRecipe, id: localRecipe.recipeId };
             }
-            
+
             setRecipeData(localRecipe);
             setCurrentComplexity(localRecipe.difficulty || "Intermediate");
             setCurrentDietary(localRecipe.dietary || "Omnivore");
             setLoading(false);
-            
+
             // Record view
             if (userId) {
                 addRecentlyViewed(localRecipe);
@@ -132,11 +132,11 @@ const RecipeDetails = () => {
     }
 
     return (
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden"
+            className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden rounded-t-2xl"
         >
             {/* Hero Section */}
             <div className="relative h-[55vh] min-h-[450px] w-full">
@@ -158,15 +158,15 @@ const RecipeDetails = () => {
                     <div className="flex gap-4">
                         <button
                             className={`w-14 h-14 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
-                                    ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
-                                    : 'bg-black/40 border-white/10 hover:bg-[#00ff84]/20'
+                                ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
+                                : 'bg-black/40 border-white/10 hover:bg-[#00ff84]/20'
                                 }`}
                             onClick={handleSaveToggle}
                         >
                             <Heart
                                 className={`w-7 h-7 transition-colors ${isSaved
-                                        ? 'fill-[#00ff84] text-[#00ff84]'
-                                        : 'text-white group-hover:text-[#00ff84]'
+                                    ? 'fill-[#00ff84] text-[#00ff84]'
+                                    : 'text-white group-hover:text-[#00ff84]'
                                     }`}
                             />
                         </button>
