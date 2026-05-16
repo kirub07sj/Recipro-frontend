@@ -2,9 +2,12 @@ const envUrl = (import.meta as any).env.VITE_API_URL || '';
 const BASE_URL = envUrl ? envUrl.replace('/auth', '') : 'http://localhost:8000/api/v1';
 const API_URL = `${BASE_URL}/ai`;
 
-export const extractIngredientsFromImage = async (file: File) => {
+export const extractIngredientsFromImage = async (file: File, userId?: string | null) => {
     const formData = new FormData();
     formData.append('image', file);
+    if (userId) {
+        formData.append('userId', userId);
+    }
 
     const res = await fetch(`${API_URL}/extract-ingredients`, {
         method: 'POST',

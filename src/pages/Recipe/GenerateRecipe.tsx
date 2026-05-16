@@ -134,7 +134,7 @@ const GenerateRecipe = () => {
 
         try {
             const optimizedFile = await compressImage(file);
-            const result = await extractIngredientsFromImage(optimizedFile);
+            const result = await extractIngredientsFromImage(optimizedFile, userId);
             if (result.success && result.data) {
                 // Determine if backend returns an array of strings or array of objects with 'name'
                 const newIngredients = result.data.map((item: any) =>

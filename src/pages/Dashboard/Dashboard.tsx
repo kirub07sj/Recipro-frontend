@@ -182,6 +182,7 @@ const Dashboard = () => {
                                 <motion.div
                                     variants={itemVariants}
                                     whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                                    onClick={() => navigate('/recent-scans')}
                                     className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer"
                                 >
                                     <div className="flex items-center gap-4">
