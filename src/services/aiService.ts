@@ -16,14 +16,18 @@ export const extractIngredientsFromImage = async (file: File) => {
     return result;
 };
 
-export const generateRecipeVariants = async (userId: string | undefined | null, ingredients: string[], healthProfile: any) => {
+export const generateRecipeVariants = async (userId: string | undefined | null, ingredients: string[], healthProfile: any, isManual: boolean = false) => {
     const res = await fetch(`${API_URL}/generate-recipes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, ingredients, healthProfile })
+        body: JSON.stringify({ userId, ingredients, healthProfile, isManual })
     });
 
     const result = await res.json();
-    if (!result.success) throw new Error(result.message || 'Failed to generate recipes');
+    if (!result.success) {
+        const error = new Error(result.message || 'Failed to generate recipes') as any;
+        error.invalidIngredients = result.invalidIngredients;
+        throw error;
+    }
     return result;
 };

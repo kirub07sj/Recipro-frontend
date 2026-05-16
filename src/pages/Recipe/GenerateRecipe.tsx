@@ -17,6 +17,7 @@ const GenerateRecipe = () => {
     const [isExtracting, setIsExtracting] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [invalidTags, setInvalidTags] = useState<string[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { setGeneratedRecipes, pendingFile, setPendingFile } = useRecipeStore();
@@ -56,6 +57,9 @@ const GenerateRecipe = () => {
 
     const removeIngredient = (ing: string) => {
         setIngredients(ingredients.filter(i => i !== ing));
+        if (invalidTags.includes(ing)) {
+            setInvalidTags(invalidTags.filter(i => i !== ing));
+        }
     };
 
     const addIngredient = (ing: string) => {
@@ -164,10 +168,12 @@ const GenerateRecipe = () => {
 
         setIsGenerating(true);
         setErrorMsg('');
+        setInvalidTags([]);
 
         try {
             const healthProfileData = profile || {}; // Send available profile data
-            const result = await generateRecipeVariants(userId, ingredients, healthProfileData);
+            // We pass isManual: true because this page allows manual entry/editing
+            const result = await generateRecipeVariants(userId, ingredients, healthProfileData, true);
 
             if (result.success && result.data) {
                 setGeneratedRecipes(result.data);
@@ -176,6 +182,9 @@ const GenerateRecipe = () => {
         } catch (error: any) {
             console.error('Error generating recipes:', error);
             setErrorMsg(error.message || 'Failed to generate recipes.');
+            if (error.invalidIngredients && Array.isArray(error.invalidIngredients)) {
+                setInvalidTags(error.invalidIngredients);
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -279,14 +288,23 @@ const GenerateRecipe = () => {
                         </div>
                     ) : (
                         <div className="flex flex-wrap gap-3">
-                            {ingredients.map(ing => (
-                                <div key={ing} className="bg-[#051a10] border border-[#00ff84]/30 text-[#00ff84] px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm shadow-[#00ff84]/5">
-                                    {ing}
-                                    <button onClick={() => removeIngredient(ing)} className="hover:bg-[#00ff84]/20 rounded-full p-0.5 transition-colors text-[#00ff84]/70 hover:text-[#00ff84]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                    </button>
-                                </div>
-                            ))}
+                            {ingredients.map(ing => {
+                                const isInvalid = invalidTags.includes(ing);
+                                return (
+                                    <div key={ing} className={`border px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm ${
+                                        isInvalid 
+                                            ? 'bg-red-500/20 border-red-500/50 text-red-400 shadow-red-500/10' 
+                                            : 'bg-[#051a10] border-[#00ff84]/30 text-[#00ff84] shadow-[#00ff84]/5'
+                                    }`}>
+                                        {ing}
+                                        <button onClick={() => removeIngredient(ing)} className={`rounded-full p-0.5 transition-colors ${
+                                            isInvalid ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-[#00ff84]/70 hover:bg-[#00ff84]/20 hover:text-[#00ff84]'
+                                        }`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 

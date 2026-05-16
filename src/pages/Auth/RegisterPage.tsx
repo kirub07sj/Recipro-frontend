@@ -116,7 +116,7 @@ const RegisterPage = () => {
                                     className="w-full pl-12 pr-4 py-3.5 bg-[#0d2d18] border border-[#143d22] rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500 transition-all placeholder:text-[#8ba494]/50"
                                     type="text"
                                     value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    onChange={(e) => setFirstName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                 />
                             </div>
                             <div className="relative group flex-1">
@@ -127,7 +127,7 @@ const RegisterPage = () => {
                                     className="w-full pl-12 pr-4 py-3.5 bg-[#0d2d18] border border-[#143d22] rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-500/40 focus:border-green-500 transition-all placeholder:text-[#8ba494]/50"
                                     type="text"
                                     value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    onChange={(e) => setLastName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                 />
                             </div>
                         </div>

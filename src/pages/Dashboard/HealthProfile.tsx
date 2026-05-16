@@ -170,10 +170,11 @@ const HealthProfile = () => {
                                         <input
                                             className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.weight ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
                                             placeholder="70"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             value={weight}
                                             onChange={(e) => {
-                                                const val = e.target.value;
+                                                const val = e.target.value.replace(/\D/g, '');
                                                 setWeight(val ? Number(val) : '');
                                                 if (errors.weight) setErrors(prev => ({ ...prev, weight: '' }));
                                             }}
@@ -188,10 +189,11 @@ const HealthProfile = () => {
                                         <input
                                             className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.height ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
                                             placeholder="170"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             value={height}
                                             onChange={(e) => {
-                                                const val = e.target.value;
+                                                const val = e.target.value.replace(/\D/g, '');
                                                 setHeight(val ? Number(val) : '');
                                                 if (errors.height) setErrors(prev => ({ ...prev, height: '' }));
                                             }}
@@ -206,10 +208,11 @@ const HealthProfile = () => {
                                         <input
                                             className={`w-full bg-[#0d2214] border-none text-white text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.age ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none`}
                                             placeholder="30"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             value={age}
                                             onChange={(e) => {
-                                                const val = e.target.value;
+                                                const val = e.target.value.replace(/\D/g, '');
                                                 setAge(val ? Number(val) : '');
                                                 if (errors.age) setErrors(prev => ({ ...prev, age: '' }));
                                             }}
@@ -287,10 +290,11 @@ const HealthProfile = () => {
                                         <input
                                             className={`w-full bg-[#0d2214] border-none text-[#00ff88] text-3xl font-bold p-5 rounded-2xl focus:ring-2 ${errors.dailyGoal ? 'focus:ring-red-500/50' : 'focus:ring-[#00ff88]/50'} transition-all outline-none ${!useCustomGoal && 'opacity-70'}`}
                                             placeholder="2200"
-                                            type="number"
+                                            type="text"
+                                            inputMode="numeric"
                                             value={dailyGoal}
                                             onChange={(e) => {
-                                                const val = e.target.value;
+                                                const val = e.target.value.replace(/\D/g, '');
                                                 setDailyGoal(val ? Number(val) : '');
                                                 if (errors.dailyGoal) setErrors(prev => ({ ...prev, dailyGoal: '' }));
                                             }}
