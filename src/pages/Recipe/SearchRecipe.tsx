@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
+import { saveRecipeService } from '../../services/recipeService';
+import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import RecipeCardSkeleton from '../../components/skeletons/RecipeCardSkeleton';
 
@@ -54,11 +56,24 @@ const SearchRecipe = () => {
         const saved = localStorage.getItem('recentSearches');
         return saved ? JSON.parse(saved) : [];
     });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
+    const itemsPerPage = 12;
+    const { userId } = useAuth();
 
     useEffect(() => {
         // Initial load: fetch some default meals
         fetchMealsByLetter('c');
     }, []);
+
+    // Reset scroll position when page changes
+    useEffect(() => {
+        const mainContainer = document.getElementById('main-scroll-container');
+        if (mainContainer) {
+            mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
 
     const fetchMealsByLetter = async (letter: string) => {
         setLoading(true);
@@ -87,6 +102,7 @@ const SearchRecipe = () => {
         setLoading(true);
         const data = await searchMealsByNameService(query);
         setRecipes(data || []);
+        setCurrentPage(1);
         setLoading(false);
     };
 
@@ -103,6 +119,7 @@ const SearchRecipe = () => {
         } else {
             const data = await filterMealsByDietService(cat);
             setRecipes(data || []);
+            setCurrentPage(1);
             setLoading(false);
         }
     };
@@ -112,9 +129,32 @@ const SearchRecipe = () => {
         const meal = await getRandomMealService();
         if (meal) {
             setRecipes([meal]);
+            setCurrentPage(1);
         }
         setLoading(false);
     };
+
+    const handleSaveRecipe = async (e: React.MouseEvent, recipe: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!userId) return;
+
+        if (savedRecipeIds.has(recipe.id)) {
+            // Unsaving could be implemented here via deleteSavedRecipeService
+            // For now, let's just ignore or we could remove it from local state
+            return;
+        }
+
+        try {
+            await saveRecipeService(userId, recipe);
+            setSavedRecipeIds(prev => new Set([...prev, recipe.id]));
+        } catch (error) {
+            console.error('Error saving recipe:', error);
+        }
+    };
+
+    const totalPages = Math.ceil(recipes.length / itemsPerPage);
+    const paginatedRecipes = recipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -193,12 +233,13 @@ const SearchRecipe = () => {
                     ) : recipes.length === 0 ? (
                         <motion.div variants={itemVariants} className="text-gray-400">No recipes found. Try another search.</motion.div>
                     ) : (
-                        <motion.div
-                            layout
-                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        >
+                        <>
+                            <motion.div
+                                layout
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            >
                             <AnimatePresence mode="popLayout">
-                                {recipes.map((recipe, index) => (
+                                {paginatedRecipes.map((recipe, index) => (
                                     <motion.div
                                         key={recipe.id}
                                         layout
@@ -217,22 +258,14 @@ const SearchRecipe = () => {
                                                     alt={recipe.title}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
-                                                {/* Match Badge */}
-                                                <div className="absolute top-4 left-4 flex items-center gap-1 bg-[#00E676] px-3 py-1.5 rounded-full text-[#03100B] text-xs font-bold shadow-lg">
-                                                    <div className="w-4 h-4 flex items-center justify-center">
-                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                        </svg>
-                                                    </div>
-                                                    {recipe.match || ''}% Match
-                                                </div>
                                                 {/* Favorite Button */}
                                                 <motion.button
+                                                    onClick={(e) => handleSaveRecipe(e, recipe)}
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
                                                     className="absolute top-4 right-4 p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white hover:bg-[#00E676] hover:text-[#03100B] transition-all"
                                                 >
-                                                    <HeartIcon />
+                                                    <HeartIcon filled={savedRecipeIds.has(recipe.id)} />
                                                 </motion.button>
                                             </div>
                                             <div className="p-6 flex flex-col flex-1">
@@ -265,6 +298,28 @@ const SearchRecipe = () => {
                                 ))}
                             </AnimatePresence>
                         </motion.div>
+                        
+                        {/* Pagination Controls */}
+                        {recipes.length > itemsPerPage && (
+                            <div className="flex justify-center items-center gap-4 mt-8">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === 1 ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-gray-400 font-medium">Page {currentPage} of {totalPages}</span>
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === totalPages ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                        </>
                     )}
                 </div>
 

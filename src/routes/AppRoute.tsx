@@ -1,5 +1,5 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ScrollToTop from '../components/common/ScrollToTop';
 
 // Public imports
 import Login from '../pages/Auth/LoginPage';
@@ -28,6 +28,7 @@ import NotFound from '../pages/public/NotFound';
 const AppRoute = () => {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
