@@ -225,7 +225,7 @@ const GenerateRecipe = () => {
                 {/* Banner */}
                 <div
                     onClick={handleCameraClick}
-                    className="w-full h-56 rounded-[2rem] overflow-hidden relative border border-white/10 cursor-pointer group"
+                    className="w-full h-48 rounded-[2rem] overflow-hidden relative border border-white/10 cursor-pointer group"
                 >
                     <img
                         src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
@@ -291,7 +291,7 @@ const GenerateRecipe = () => {
                     )}
 
                     {/* Add Input */}
-                    <div className="flex items-center gap-3 pt-3">
+                    <div className="flex items-center gap-3 pt-3 -mt-4">
                         <div className="flex-1 relative">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                             <input
@@ -365,12 +365,12 @@ const GenerateRecipe = () => {
             </div>
 
             {/* Bottom Generate Button */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-[#051109] via-[#051109]/90 to-transparent z-50 pointer-events-none">
+            <div className="fixed bottom-0 left-0 md:left-[20rem] right-0 p-6 md:p-8 bg-gradient-to-t from-[#051109] via-[#051109]/90 to-transparent z-50 pointer-events-none">
                 <div className="max-w-4xl mx-auto pointer-events-auto">
                     <button
                         onClick={handleGenerate}
                         disabled={ingredients.length === 0 || isGenerating}
-                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 lg:ml-40 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
+                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
                     >
                         {isGenerating ? (
                             <>

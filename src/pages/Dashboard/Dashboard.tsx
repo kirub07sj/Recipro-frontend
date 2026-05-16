@@ -6,6 +6,7 @@ import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
 import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -14,25 +15,21 @@ const Dashboard = () => {
     const { profile, fetchProfile, todayIntake, fetchTodayIntake } = useHealthProfileStore();
     const { userId } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (userId) {
-            // Fetch recently viewed
-            getRecentlyViewedService(userId, 20)
-                .then(res => {
-                    if (res.success) {
-                        setRecentlyViewed(res.data);
-                    }
-                })
-                .catch(console.error);
+            setLoading(true);
+            const promises = [
+                getRecentlyViewedService(userId, 20).then(res => {
+                    if (res.success) setRecentlyViewed(res.data);
+                }),
+                profile ? Promise.resolve() : fetchProfile(userId),
+                fetchTodayIntake(userId)
+            ];
 
-            // Fetch health profile if not already loaded
-            if (!profile) {
-                fetchProfile(userId).catch(console.error);
-            }
-
-            // Fetch today's intake
-            fetchTodayIntake(userId).catch(console.error);
+            Promise.all(promises)
+                .finally(() => setLoading(false));
         }
     }, [userId, setRecentlyViewed, profile, fetchProfile, fetchTodayIntake]);
 
@@ -64,11 +61,21 @@ const Dashboard = () => {
         visible: { opacity: 1, y: 0 }
     };
 
+    if (loading) {
+        return (
+            <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
+                <div className="max-w-7xl mx-auto">
+                    <DashboardSkeleton />
+                </div>
+            </main>
+        );
+    }
+
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
         >
             {/* Hidden File Input */}
             <input
@@ -168,11 +175,11 @@ const Dashboard = () => {
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-white">Upload Photo</h3>
-                                            <p className="text-sm text-gray-400">Analyze gallery items</p>
+                                            <h3 className="text-xl font-bold text-white">Write List of Ingredients</h3>
+                                            <p className="text-sm text-gray-400">Type ingredients manually</p>
                                         </div>
                                     </div>
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-[#00ff84] group-hover:text-[#051109] transition-all">
