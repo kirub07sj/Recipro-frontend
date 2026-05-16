@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import {
-    ChevronLeft, Share2, Heart, Clock, Activity,
+    ChevronLeft, Heart, Clock, Activity,
     Flame, Beef, InfoIcon, CheckCircle2
 } from 'lucide-react';
 
@@ -12,6 +12,8 @@ import { getSavedRecipesService, saveRecipeService, deleteSavedRecipeService } f
 import { lookupMealByIdService } from '../../services/discoveryService';
 import { recordRecipeViewService } from '../../services/recentlyViewedService';
 import { useEffect } from 'react';
+import RecipeDetailsSkeleton from '../../components/skeletons/RecipeDetailsSkeleton';
+import { motion } from 'framer-motion';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
@@ -126,15 +128,16 @@ const RecipeDetails = () => {
     };
 
     if (loading || !recipeData) {
-        return (
-            <div className="min-h-screen bg-[#051109] text-white flex items-center justify-center">
-                <div className="text-[#00ff84] font-bold animate-pulse text-xl">Loading Recipe...</div>
-            </div>
-        );
+        return <RecipeDetailsSkeleton />;
     }
 
     return (
-        <div className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden">
+        <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden"
+        >
             {/* Hero Section */}
             <div className="relative h-[55vh] min-h-[450px] w-full">
                 {/* Background Image with Gradient Overlay */}
@@ -153,9 +156,6 @@ const RecipeDetails = () => {
                         <ChevronLeft className="w-7 h-7 text-white" />
                     </button>
                     <div className="flex gap-4">
-                        <button className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors">
-                            <Share2 className="w-7 h-7 text-white" />
-                        </button>
                         <button
                             className={`w-14 h-14 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
                                     ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
@@ -443,7 +443,7 @@ const RecipeDetails = () => {
                     Start Cooking
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

@@ -1,8 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 const LandingPage = () => {
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const fadeInUp = {
         initial: { opacity: 0, y: 20 },
@@ -18,6 +20,12 @@ const LandingPage = () => {
             }
         }
     };
+
+    const navLinks = [
+        { name: "Features", href: "#features" },
+        { name: "How It Works", href: "#how-it-works" },
+        { name: "Testimonials", href: "#testimonials" },
+    ];
 
     return (
         <div
@@ -53,28 +61,18 @@ const LandingPage = () => {
                         <span className="text-xl font-bold tracking-tight">Recipro</span>
                     </div>
                     <div className="hidden md:flex items-center gap-8">
-                        <a
-                            href="#features"
-                            className="text-white text-sm font-medium hover:text-[#00ff73] transition-colors"
-                        >
-                            Features
-                        </a>
-                        <a
-                            href="#how-it-works"
-                            className="text-white text-sm font-medium hover:text-[#00ff73] transition-colors"
-                        >
-                            How It Works
-                        </a>
-                        <a
-                            href="#testimonials"
-                            className="text-white text-sm font-medium hover:text-[#00ff73] transition-colors"
-                        >
-                            Testimonials
-                        </a>
+                        {navLinks.map((link) => (
+                            <a
+                                key={link.name}
+                                href={link.href}
+                                className="text-white text-sm font-medium hover:text-[#00ff73] transition-colors"
+                            >
+                                {link.name}
+                            </a>
+                        ))}
                         <button
                             onClick={() => navigate("/login")}
-                            className="text-sm font-medium px-5 py-2 hover:bg-white/5 rounded-full transition-all bg-black/0 border-0
-              "
+                            className="text-sm font-medium px-5 py-2 hover:bg-white/5 rounded-full transition-all bg-black/0 border-0"
                         >
                             Login
                         </button>
@@ -85,26 +83,77 @@ const LandingPage = () => {
                             Get Started
                         </button>
                     </div>
-                    <button className="md:hidden text-white">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="lucide lucide-menu"
-                            aria-hidden="true"
-                        >
-                            <path d="M4 12h16"></path>
-                            <path d="M4 18h16"></path>
-                            <path d="M4 6h16"></path>
-                        </svg>
+                    <button 
+                        className="md:hidden text-white p-2"
+                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    >
+                        {isMenuOpen ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                className="lucide lucide-menu"
+                                aria-hidden="true"
+                            >
+                                <path d="M4 12h16"></path>
+                                <path d="M4 18h16"></path>
+                                <path d="M4 6h16"></path>
+                            </svg>
+                        )}
                     </button>
                 </div>
+
+                {/* Mobile Menu Overlay */}
+                <AnimatePresence>
+                    {isMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="md:hidden bg-[#011c14]/95 backdrop-blur-xl border-b border-white/5 overflow-hidden"
+                        >
+                            <div className="flex flex-col p-6 gap-6">
+                                {navLinks.map((link) => (
+                                    <a
+                                        key={link.name}
+                                        href={link.href}
+                                        onClick={() => setIsMenuOpen(false)}
+                                        className="text-lg font-medium text-white hover:text-[#00ff73] transition-colors"
+                                    >
+                                        {link.name}
+                                    </a>
+                                ))}
+                                <div className="h-px bg-white/5 w-full my-2" />
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        navigate("/login");
+                                    }}
+                                    className="w-full py-4 text-center text-white font-medium hover:bg-white/5 rounded-2xl transition-all"
+                                >
+                                    Login
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setIsMenuOpen(false);
+                                        navigate("/register");
+                                    }}
+                                    className="w-full py-4 bg-[#00ff73] text-[#011c14] font-bold rounded-2xl shadow-lg"
+                                >
+                                    Get Started
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </motion.nav>
             <section className="pt-32 pb-20 px-6 overflow-hidden">
                 <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
