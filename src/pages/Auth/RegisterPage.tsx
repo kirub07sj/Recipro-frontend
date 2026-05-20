@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { registerService, googleLoginService } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../hooks/useAuth';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
@@ -24,10 +26,10 @@ const RegisterPage = () => {
                 email,
                 password
             });
-            localStorage.setItem('token', data.token);
             if (data.user && data.user.username) {
                 localStorage.setItem('userName', data.user.username);
             }
+            login(data.token);
             navigate("/dashboard");
         } catch (err: any) {
             setError(err.message || 'Registration failed');
@@ -42,10 +44,10 @@ const RegisterPage = () => {
         try {
             if (!tokenResponse.access_token) throw new Error('No access token received');
             const response = await googleLoginService({ accessToken: tokenResponse.access_token });
-            localStorage.setItem('token', response.token);
             if (response.user && response.user.username) {
                 localStorage.setItem('userName', response.user.username);
             }
+            login(response.token);
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Google sign up failed');

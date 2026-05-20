@@ -4,7 +4,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
-import { getRecentlyViewedService } from '../../services/recentlyViewedService';
+import { getRecentlyViewedService, clearRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
@@ -46,15 +46,17 @@ const Dashboard = () => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
+    const handleClearRecentlyViewed = async () => {
+        if (!userId) return;
+        try {
+            await clearRecentlyViewedService(userId);
+            setRecentlyViewed([]);
+        } catch (error) {
+            console.error('Failed to clear recently viewed recipes', error);
         }
     };
+
+
 
     const itemVariants = {
         hidden: { opacity: 0, y: 20 },
@@ -105,7 +107,7 @@ const Dashboard = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className=" flex items-center gap-4">
                                 {/* Calorie Notification */}
                                 <AnimatePresence>
                                     {showNotifications && profile && (
@@ -113,7 +115,7 @@ const Dashboard = () => {
                                             initial={{ opacity: 0, height: 0, marginBottom: 0 }}
                                             animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
                                             exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                            className=" z-10 bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl py-2 px-4 flex items-center gap-3 overflow-hidden"
+                                            className="max-md:absolute max-md:top-24 max-md:right-8 z-[999] bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl py-2 backdrop-blur-md px-4 flex items-center gap-3 overflow-hidden"
                                         >
                                             <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] mb-3">
                                                 {todayIntake?.totalCalories >= profile.dailyGoal ? (
@@ -190,6 +192,7 @@ const Dashboard = () => {
                                 <motion.div
                                     variants={itemVariants}
                                     whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                                    onClick={() => navigate('/recent-scans')}
                                     className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer"
                                 >
                                     <div className="flex items-center gap-4">
@@ -211,7 +214,14 @@ const Dashboard = () => {
                         <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-
+                                {recentlyViewed.length > 0 && (
+                                    <button 
+                                        onClick={handleClearRecentlyViewed}
+                                        className="text-sm font-medium text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+                                    >
+                                        Clear History
+                                    </button>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
