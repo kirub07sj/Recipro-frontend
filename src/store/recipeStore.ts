@@ -54,7 +54,7 @@ export const useRecipeStore = create<RecipeStoreState>((set) => ({
             recipeId: recipe.recipeId || recipe.id,
             viewedAt: new Date().toISOString()
         };
-        return { recentlyViewed: [newItem, ...filtered].slice(0, 20) };
+        return { recentlyViewed: [newItem, ...filtered].slice(0, 10) };
     }),
     addSavedRecipe: (recipe) => set((state) => ({ savedRecipes: [...state.savedRecipes, recipe] })),
     removeSavedRecipe: (recipeId) => set((state) => ({ 

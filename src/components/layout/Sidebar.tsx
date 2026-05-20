@@ -45,6 +45,8 @@ const LogoutIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+
+
 const Sidebar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
