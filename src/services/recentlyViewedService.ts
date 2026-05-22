@@ -13,12 +13,8 @@ export const recordRecipeViewService = async (userId: string, recipe: any) => {
     if (!userId || !resolvedId) return;
 
     const payload = {
+        ...recipe,
         recipeId: resolvedId,
-        title: recipe.title,
-        image: recipe.image,
-        time: recipe.time,
-        calories: recipe.calories,
-        dietary: recipe.dietary,
     };
 
     const res = await fetch(`${API_URL}`, {
