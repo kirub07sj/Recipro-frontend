@@ -79,7 +79,7 @@ const SavedRecipe = () => {
                             whileHover={{ y: -10 }}
                         >
                         <Link
-                            to={`/recipe/${recipe.recipeId || recipe.id}`}
+                            to={`/recipe/${recipe.recipeId}`}
                             className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
                         >
                             {/* Background Image */}

@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginService, googleLoginService } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
-import { useAuth } from '../../hooks/useAuth';
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -23,10 +21,10 @@ const LoginPage = () => {
                 throw new Error('Please fill all fields');
             }
             const response = await loginService({ email, password });
+            localStorage.setItem('token', response.token);
             if (response.user && response.user.username) {
                 localStorage.setItem('userName', response.user.username);
             }
-            login(response.token);
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Failed to sign in');
@@ -41,10 +39,10 @@ const LoginPage = () => {
         try {
             if (!tokenResponse.access_token) throw new Error('No access token received');
             const response = await googleLoginService({ accessToken: tokenResponse.access_token });
+            localStorage.setItem('token', response.token);
             if (response.user && response.user.username) {
                 localStorage.setItem('userName', response.user.username);
             }
-            login(response.token);
             navigate('/dashboard');
         } catch (err: any) {
             setError(err.message || 'Google sign in failed');

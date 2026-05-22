@@ -19,7 +19,7 @@ const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const {
-        generatedRecipes, savedRecipes, setSavedRecipes,
+        generatedRecipes, savedRecipes, setSavedRecipes, recentlyViewed,
         addSavedRecipe, removeSavedRecipe, addRecentlyViewed
     } = useRecipeStore();
     const { userId } = useAuth();
@@ -34,12 +34,18 @@ const RecipeDetails = () => {
     const [activePicker, setActivePicker] = useState<'complexity' | 'dietary' | null>(null);
 
     useEffect(() => {
-        let localRecipe = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id);
+        let localRecipe = mockRecipes.find(r => r.id === id) || 
+                          generatedRecipes.find(r => r.id === id) || 
+                          savedRecipes.find(r => r.recipeId === id) ||
+                          recentlyViewed.find(r => r.recipeId === id || r.id === id);
         if (localRecipe) {
-            // Ensure we have a standard id property (saved recipes use recipeId)
-            if (!localRecipe.id && localRecipe.recipeId) {
-                localRecipe = { ...localRecipe, id: localRecipe.recipeId };
-            }
+            // Ensure we have a standard id property and arrays for missing details
+            localRecipe = { 
+                ...localRecipe, 
+                id: localRecipe.recipeId || localRecipe.id,
+                ingredients: localRecipe.ingredients || [],
+                instructions: localRecipe.instructions || []
+            };
 
             setRecipeData(localRecipe);
             setCurrentComplexity(localRecipe.difficulty || "Intermediate");
@@ -54,7 +60,12 @@ const RecipeDetails = () => {
         } else if (id) {
             setLoading(true);
             lookupMealByIdService(id).then(res => {
-                const fetched = res || mockRecipes[0];
+                let fetched = res || mockRecipes[0];
+                fetched = {
+                    ...fetched,
+                    ingredients: fetched.ingredients || [],
+                    instructions: fetched.instructions || []
+                };
                 setRecipeData(fetched);
                 setCurrentComplexity(fetched.difficulty || "Intermediate");
                 setCurrentDietary(fetched.dietary || "Omnivore");

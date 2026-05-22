@@ -4,7 +4,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
-import { getRecentlyViewedService, clearRecentlyViewedService } from '../../services/recentlyViewedService';
+import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
@@ -44,16 +44,6 @@ const Dashboard = () => {
             navigate('/generate-recipe');
         }
         if (fileInputRef.current) fileInputRef.current.value = '';
-    };
-
-    const handleClearRecentlyViewed = async () => {
-        if (!userId) return;
-        try {
-            await clearRecentlyViewedService(userId);
-            setRecentlyViewed([]);
-        } catch (error) {
-            console.error('Failed to clear recently viewed recipes', error);
-        }
     };
 
 
@@ -214,24 +204,23 @@ const Dashboard = () => {
                         <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-                                {recentlyViewed.length > 0 && (
-                                    <button 
-                                        onClick={handleClearRecentlyViewed}
-                                        className="text-sm font-medium text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10"
-                                    >
-                                        Clear History
-                                    </button>
-                                )}
+
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
                                     <motion.div
-                                        key={item._id || item.recipeId || index}
+                                        key={item.id || index}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.1 * index }}
                                         whileHover={{ y: -10 }}
-                                        onClick={() => navigate(`/recipe/${item.recipeId}`)}
+                                        onClick={() => {
+                                            if (!item?.recipeId) {
+                                                console.error("Missing recipeId", item);
+                                                return;
+                                            }
+                                            navigate(`/recipe/${item.recipeId}`);
+                                        }}
                                         className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
                                     >
                                         <div className="relative aspect-[4/3]">
