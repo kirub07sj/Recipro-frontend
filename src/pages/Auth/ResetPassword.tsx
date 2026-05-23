@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { resetPasswordService } from '../../services/authService';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 
 const ResetPassword = () => {
     const navigate = useNavigate();
@@ -42,7 +43,7 @@ const ResetPassword = () => {
                 navigate('/login');
             }, 2000); // Route back to login automatically after success
         } catch (err: any) {
-            setError(err.message || 'Failed to reset password');
+            setError(getFriendlyErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -86,8 +87,9 @@ const ResetPassword = () => {
                     {!success && (
                         <>
                             {error && (
-                                <div className="mb-4 text-red-500 text-sm font-medium text-center">
-                                    {error}
+                                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-400 text-sm animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                                    <span className="font-medium text-left leading-relaxed">{error}</span>
                                 </div>
                             )}
 

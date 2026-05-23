@@ -44,11 +44,16 @@ export const forgotPasswordService = async (data: { email: string }) => {
     return result;
 };
 
-// The backend expects the OTP sent along with the new password.
-// This function acts as a local validator before traversing to the reset password page.
 export const verifyOtp = async (data: { email: string; otp: string }) => {
     if (data.otp.length !== 6) throw new Error("OTP must be 6 digits.");
-    return { success: true };
+    const res = await fetch(`${API_URL}/verify-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (!result.success) throw new Error(result.message || 'OTP verification failed');
+    return result;
 };
 
 export const resetPasswordService = async (data: { email: string; otp: string; newPassword: string }) => {
