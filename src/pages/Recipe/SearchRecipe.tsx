@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
-import { saveRecipeService } from '../../services/recipeService';
-import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
 import RecipeCardSkeleton from '../../components/skeletons/RecipeCardSkeleton';
 
@@ -19,11 +17,7 @@ const HistoryIcon = () => (
     </svg>
 );
 
-const HeartIcon = ({ filled }: { filled?: boolean }) => (
-    <svg className={`w-5 h-5 ${filled ? 'fill-red-500 text-red-500' : 'text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
+
 
 const ChefHatIcon = () => (
     <svg className="w-6 h-6 text-[#03100B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,9 +38,8 @@ const SearchRecipe = () => {
         return saved ? JSON.parse(saved) : [];
     });
     const [currentPage, setCurrentPage] = useState(1);
-    const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
+
     const itemsPerPage = 12;
-    const { userId } = useAuth();
 
     useEffect(() => {
         // Initial load: fetch some default meals
@@ -121,24 +114,7 @@ const SearchRecipe = () => {
         setLoading(false);
     };
 
-    const handleSaveRecipe = async (e: React.MouseEvent, recipe: any) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (!userId) return;
 
-        if (savedRecipeIds.has(recipe.id)) {
-            // Unsaving could be implemented here via deleteSavedRecipeService
-            // For now, let's just ignore or we could remove it from local state
-            return;
-        }
-
-        try {
-            await saveRecipeService(userId, recipe);
-            setSavedRecipeIds(prev => new Set([...prev, recipe.id]));
-        } catch (error) {
-            console.error('Error saving recipe:', error);
-        }
-    };
 
     const totalPages = Math.ceil(recipes.length / itemsPerPage);
     const paginatedRecipes = recipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -245,15 +221,6 @@ const SearchRecipe = () => {
                                                     alt={recipe.title}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
-                                                {/* Favorite Button */}
-                                                <motion.button
-                                                    onClick={(e) => handleSaveRecipe(e, recipe)}
-                                                    whileHover={{ scale: 1.1 }}
-                                                    whileTap={{ scale: 0.9 }}
-                                                    className="absolute top-4 right-4 p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white hover:bg-[#00E676] hover:text-[#03100B] transition-all"
-                                                >
-                                                    <HeartIcon filled={savedRecipeIds.has(recipe.id)} />
-                                                </motion.button>
                                             </div>
                                             <div className="p-6 flex flex-col flex-1">
                                                 <h3 className="text-xl text-[#fff] font-bold mb-4 line-clamp-2">{recipe.title}</h3>
