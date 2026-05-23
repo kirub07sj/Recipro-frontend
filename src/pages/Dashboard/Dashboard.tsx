@@ -6,6 +6,7 @@ import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
 import { getRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
+import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -14,6 +15,7 @@ const Dashboard = () => {
     const { profile, fetchProfile, todayIntake, fetchTodayIntake } = useHealthProfileStore();
     const { userId } = useAuth();
     const [showNotifications, setShowNotifications] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (userId) {
@@ -21,7 +23,7 @@ const Dashboard = () => {
             getRecentlyViewedService(userId, 20)
                 .then(res => {
                     if (res.success) {
-                        setRecentlyViewed(res.data); 
+                        setRecentlyViewed(res.data);
                     }
                 })
                 .catch(console.error);
@@ -33,6 +35,17 @@ const Dashboard = () => {
 
             // Fetch today's intake
             fetchTodayIntake(userId).catch(console.error);
+            setLoading(true);
+            const promises = [
+                getRecentlyViewedService(userId, 20).then(res => {
+                    if (res.success) setRecentlyViewed(res.data);
+                }),
+                profile ? Promise.resolve() : fetchProfile(userId),
+                fetchTodayIntake(userId)
+            ];
+
+            Promise.all(promises)
+                .finally(() => setLoading(false));
         }
     }, [userId, setRecentlyViewed, profile, fetchProfile, fetchTodayIntake]);
 
@@ -49,26 +62,28 @@ const Dashboard = () => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                staggerChildren: 0.1
-            }
-        }
-    };
+
 
     const itemVariants = {
         hidden: { opacity: 0, y: 20 },
         visible: { opacity: 1, y: 0 }
     };
 
+    if (loading) {
+        return (
+            <main className="flex-1 h-full overflow-y-auto custom-scrollbar p-8">
+                <div className="max-w-7xl mx-auto">
+                    <DashboardSkeleton />
+                </div>
+            </main>
+        );
+    }
+
     return (
         <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
         >
             {/* Hidden File Input */}
             <input
@@ -98,7 +113,33 @@ const Dashboard = () => {
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-4">
+                            <div className=" flex items-center gap-4">
+                                {/* Calorie Notification */}
+                                <AnimatePresence>
+                                    {showNotifications && profile && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                            animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
+                                            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                                            className="max-md:absolute max-md:top-24 max-md:right-8 z-[999] bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl py-2 backdrop-blur-md px-4 flex items-center gap-3 overflow-hidden"
+                                        >
+                                            <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] mb-3">
+                                                {todayIntake?.totalCalories >= profile.dailyGoal ? (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
+                                                ) : (
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+                                                )}
+                                            </div>
+                                            <p className="text-sm font-medium text-white/80">
+                                                {todayIntake?.totalCalories >= profile.dailyGoal ? (
+                                                    <span className="text-[#00ff84]">🎉 Daily calorie goal reached! Well done.</span>
+                                                ) : (
+                                                    <span>{profile.dailyGoal - (todayIntake?.totalCalories || 0)} kcal remaining today. Keep it up!</span>
+                                                )}
+                                            </p>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
@@ -111,32 +152,7 @@ const Dashboard = () => {
                             </div>
                         </motion.header>
 
-                        {/* Calorie Notification */}
-                        <AnimatePresence>
-                            {showNotifications && profile && (
-                                <motion.div
-                                    initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                    animate={{ opacity: 1, height: 'auto', marginBottom: 24 }}
-                                    exit={{ opacity: 0, height: 0, marginBottom: 0 }}
-                                    className="absolute top-12 right-28 z-10 bg-[#00ff84]/5 border border-[#00ff84]/10 rounded-2xl p-4 flex items-center gap-3 overflow-hidden"
-                                >
-                                    <div className="w-8 h-8 rounded-full bg-[#00ff84]/10 flex items-center justify-center text-[#00ff84] mb-3">
-                                        {todayIntake?.totalCalories >= profile.dailyGoal ? (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" /><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /></svg>
-                                        ) : (
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
-                                        )}
-                                    </div>
-                                    <p className="text-sm font-medium text-white/80">
-                                        {todayIntake?.totalCalories >= profile.dailyGoal ? (
-                                            <span className="text-[#00ff84]">🎉 Daily calorie goal reached! Well done.</span>
-                                        ) : (
-                                            <span>{profile.dailyGoal - (todayIntake?.totalCalories || 0)} kcal remaining today. Keep it up!</span>
-                                        )}
-                                    </p>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+
 
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <motion.div
@@ -168,11 +184,11 @@ const Dashboard = () => {
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className="w-14 h-14 bg-[#051109] rounded-2xl flex items-center justify-center text-[#00ff84]">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-upload" aria-hidden="true"><path d="M12 3v12"></path><path d="m17 8-5-5-5 5"></path><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path></svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-pencil" aria-hidden="true"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path><path d="m15 5 4 4"></path></svg>
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-bold text-white">Upload Photo</h3>
-                                            <p className="text-sm text-gray-400">Analyze gallery items</p>
+                                            <h3 className="text-xl font-bold text-white">Write List of Ingredients</h3>
+                                            <p className="text-sm text-gray-400">Type ingredients manually</p>
                                         </div>
                                     </div>
                                     <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-[#00ff84] group-hover:text-[#051109] transition-all">
@@ -182,6 +198,7 @@ const Dashboard = () => {
                                 <motion.div
                                     variants={itemVariants}
                                     whileHover={{ x: 5, transition: { duration: 0.2 } }}
+                                    onClick={() => navigate('/recent-scans')}
                                     className="flex-1 bg-[#0d2114] rounded-[32px] p-6 border border-white/5 flex items-center justify-between group cursor-pointer"
                                 >
                                     <div className="flex items-center gap-4">
@@ -208,12 +225,18 @@ const Dashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
                                     <motion.div
-                                        key={item._id || item.recipeId || index}
+                                        key={item.id || index}
                                         initial={{ opacity: 0, scale: 0.9 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: 0.1 * index }}
                                         whileHover={{ y: -10 }}
-                                        onClick={() => navigate(`/recipe/${item.recipeId}`)}
+                                        onClick={() => {
+                                            if (!item?.recipeId) {
+                                                console.error("Missing recipeId", item);
+                                                return;
+                                            }
+                                            navigate(`/recipe/${item.recipeId}`);
+                                        }}
                                         className="bg-[#0d2114] rounded-[2rem] overflow-hidden border border-white/5 group cursor-pointer"
                                     >
                                         <div className="relative aspect-[4/3]">

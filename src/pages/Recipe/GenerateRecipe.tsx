@@ -5,6 +5,7 @@ import { searchIngredients, type IngredientSuggestion } from '../../services/ing
 import { useRecipeStore } from '../../store/recipeStore';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { AuthContext } from '../../context/AuthContext';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 
 const GenerateRecipe = () => {
     const navigate = useNavigate();
@@ -17,6 +18,7 @@ const GenerateRecipe = () => {
     const [isExtracting, setIsExtracting] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const [errorMsg, setErrorMsg] = useState('');
+    const [invalidTags, setInvalidTags] = useState<string[]>([]);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { setGeneratedRecipes, pendingFile, setPendingFile } = useRecipeStore();
@@ -26,9 +28,14 @@ const GenerateRecipe = () => {
 
     const suggestions = ['Onion', 'Spinach', 'Feta Cheese', 'Bell Pepper', 'Cucumber', 'Greek Yogurt'];
 
+    const processingRef = useRef(false);
+
     useEffect(() => {
-        if (pendingFile) {
-            handleFileProcess(pendingFile);
+        if (pendingFile && !processingRef.current) {
+            processingRef.current = true;
+            handleFileProcess(pendingFile).finally(() => {
+                processingRef.current = false;
+            });
             setPendingFile(null); // Clear after picking up
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,6 +63,9 @@ const GenerateRecipe = () => {
 
     const removeIngredient = (ing: string) => {
         setIngredients(ingredients.filter(i => i !== ing));
+        if (invalidTags.includes(ing)) {
+            setInvalidTags(invalidTags.filter(i => i !== ing));
+        }
     };
 
     const addIngredient = (ing: string) => {
@@ -130,7 +140,7 @@ const GenerateRecipe = () => {
 
         try {
             const optimizedFile = await compressImage(file);
-            const result = await extractIngredientsFromImage(optimizedFile);
+            const result = await extractIngredientsFromImage(optimizedFile, userId);
             if (result.success && result.data) {
                 // Determine if backend returns an array of strings or array of objects with 'name'
                 const newIngredients = result.data.map((item: any) =>
@@ -142,7 +152,7 @@ const GenerateRecipe = () => {
             }
         } catch (error: any) {
             console.error('Error extracting ingredients:', error);
-            setErrorMsg(error.message || 'Failed to extract ingredients from image.');
+            setErrorMsg(getFriendlyErrorMessage(error));
         } finally {
             setIsExtracting(false);
         }
@@ -164,10 +174,12 @@ const GenerateRecipe = () => {
 
         setIsGenerating(true);
         setErrorMsg('');
+        setInvalidTags([]);
 
         try {
             const healthProfileData = profile || {}; // Send available profile data
-            const result = await generateRecipeVariants(userId, ingredients, healthProfileData);
+            // We pass isManual: true because this page allows manual entry/editing
+            const result = await generateRecipeVariants(userId, ingredients, healthProfileData, true);
 
             if (result.success && result.data) {
                 setGeneratedRecipes(result.data);
@@ -175,7 +187,10 @@ const GenerateRecipe = () => {
             }
         } catch (error: any) {
             console.error('Error generating recipes:', error);
-            setErrorMsg(error.message || 'Failed to generate recipes.');
+            setErrorMsg(getFriendlyErrorMessage(error));
+            if (error.invalidIngredients && Array.isArray(error.invalidIngredients)) {
+                setInvalidTags(error.invalidIngredients);
+            }
         } finally {
             setIsGenerating(false);
         }
@@ -207,8 +222,9 @@ const GenerateRecipe = () => {
                 </header>
 
                 {errorMsg && (
-                    <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-3 rounded-xl text-sm font-medium">
-                        {errorMsg}
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-400 text-sm animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span className="font-medium text-left leading-relaxed">{errorMsg}</span>
                     </div>
                 )}
 
@@ -225,7 +241,7 @@ const GenerateRecipe = () => {
                 {/* Banner */}
                 <div
                     onClick={handleCameraClick}
-                    className="w-full h-56 rounded-[2rem] overflow-hidden relative border border-white/10 cursor-pointer group"
+                    className="w-full h-48 rounded-[2rem] overflow-hidden relative border border-white/10 cursor-pointer group"
                 >
                     <img
                         src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80"
@@ -279,19 +295,28 @@ const GenerateRecipe = () => {
                         </div>
                     ) : (
                         <div className="flex flex-wrap gap-3">
-                            {ingredients.map(ing => (
-                                <div key={ing} className="bg-[#051a10] border border-[#00ff84]/30 text-[#00ff84] px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm shadow-[#00ff84]/5">
-                                    {ing}
-                                    <button onClick={() => removeIngredient(ing)} className="hover:bg-[#00ff84]/20 rounded-full p-0.5 transition-colors text-[#00ff84]/70 hover:text-[#00ff84]">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                                    </button>
-                                </div>
-                            ))}
+                            {ingredients.map(ing => {
+                                const isInvalid = invalidTags.includes(ing);
+                                return (
+                                    <div key={ing} className={`border px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm ${
+                                        isInvalid 
+                                            ? 'bg-red-500/20 border-red-500/50 text-red-400 shadow-red-500/10' 
+                                            : 'bg-[#051a10] border-[#00ff84]/30 text-[#00ff84] shadow-[#00ff84]/5'
+                                    }`}>
+                                        {ing}
+                                        <button onClick={() => removeIngredient(ing)} className={`rounded-full p-0.5 transition-colors ${
+                                            isInvalid ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-[#00ff84]/70 hover:bg-[#00ff84]/20 hover:text-[#00ff84]'
+                                        }`}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                                        </button>
+                                    </div>
+                                );
+                            })}
                         </div>
                     )}
 
                     {/* Add Input */}
-                    <div className="flex items-center gap-3 pt-3">
+                    <div className="flex items-center gap-3 pt-3 -mt-4">
                         <div className="flex-1 relative">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
                             <input
@@ -365,12 +390,12 @@ const GenerateRecipe = () => {
             </div>
 
             {/* Bottom Generate Button */}
-            <div className="fixed bottom-0 left-0 right-0 p-6 md:p-8 bg-gradient-to-t from-[#051109] via-[#051109]/90 to-transparent z-50 pointer-events-none">
+            <div className="fixed bottom-0 left-0 md:left-[20rem] right-0 p-6 md:p-8 bg-gradient-to-t from-[#051109] via-[#051109]/90 to-transparent z-50 pointer-events-none">
                 <div className="max-w-4xl mx-auto pointer-events-auto">
                     <button
                         onClick={handleGenerate}
                         disabled={ingredients.length === 0 || isGenerating}
-                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 lg:ml-40 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
+                        className="w-full bg-[#00ff84] text-[#051109] disabled:opacity-50 disabled:cursor-not-allowed font-extrabold text-[1.1rem] py-5 rounded-2xl flex items-center justify-center gap-2 hover:bg-[#00e676] active:scale-[0.98] transition-all shadow-[0_4px_30px_rgba(0,255,132,0.15)]"
                     >
                         {isGenerating ? (
                             <>

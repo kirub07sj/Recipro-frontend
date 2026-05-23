@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState } from 'react';
 import {
-    ChevronLeft, Share2, Heart, Clock, Activity,
+    ChevronLeft, Heart, Clock, Activity,
     Flame, Beef, InfoIcon, CheckCircle2
 } from 'lucide-react';
 
@@ -12,38 +12,48 @@ import { getSavedRecipesService, saveRecipeService, deleteSavedRecipeService } f
 import { lookupMealByIdService } from '../../services/discoveryService';
 import { recordRecipeViewService } from '../../services/recentlyViewedService';
 import { useEffect } from 'react';
+import RecipeDetailsSkeleton from '../../components/skeletons/RecipeDetailsSkeleton';
+import { motion } from 'framer-motion';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 
 const RecipeDetails = () => {
     const navigate = useNavigate();
     const { id } = useParams();
-    const { 
-        generatedRecipes, savedRecipes, setSavedRecipes, 
-        addSavedRecipe, removeSavedRecipe, addRecentlyViewed 
+    const {
+        generatedRecipes, savedRecipes, setSavedRecipes, recentlyViewed,
+        addSavedRecipe, removeSavedRecipe, addRecentlyViewed
     } = useRecipeStore();
     const { userId } = useAuth();
 
     // State for interactive features
     const [recipeData, setRecipeData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
-    
+    const [error, setError] = useState<string | null>(null);
+
     const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
     const [currentComplexity, setCurrentComplexity] = useState("Intermediate");
     const [currentDietary, setCurrentDietary] = useState("Omnivore");
     const [activePicker, setActivePicker] = useState<'complexity' | 'dietary' | null>(null);
 
     useEffect(() => {
-        let localRecipe = mockRecipes.find(r => r.id === id) || generatedRecipes.find(r => r.id === id) || savedRecipes.find(r => r.recipeId === id);
+        let localRecipe = mockRecipes.find(r => r.id === id) || 
+                          generatedRecipes.find(r => r.id === id) || 
+                          savedRecipes.find(r => r.recipeId === id) ||
+                          recentlyViewed.find(r => r.recipeId === id || r.id === id);
         if (localRecipe) {
-            // Ensure we have a standard id property (saved recipes use recipeId)
-            if (!localRecipe.id && localRecipe.recipeId) {
-                localRecipe = { ...localRecipe, id: localRecipe.recipeId };
-            }
-            
+            // Ensure we have a standard id property and arrays for missing details
+            localRecipe = { 
+                ...localRecipe, 
+                id: localRecipe.recipeId || localRecipe.id,
+                ingredients: localRecipe.ingredients || [],
+                instructions: localRecipe.instructions || []
+            };
+
             setRecipeData(localRecipe);
             setCurrentComplexity(localRecipe.difficulty || "Intermediate");
             setCurrentDietary(localRecipe.dietary || "Omnivore");
             setLoading(false);
-            
+
             // Record view
             if (userId) {
                 addRecentlyViewed(localRecipe);
@@ -52,7 +62,12 @@ const RecipeDetails = () => {
         } else if (id) {
             setLoading(true);
             lookupMealByIdService(id).then(res => {
-                const fetched = res || mockRecipes[0];
+                let fetched = res || mockRecipes[0];
+                fetched = {
+                    ...fetched,
+                    ingredients: fetched.ingredients || [],
+                    instructions: fetched.instructions || []
+                };
                 setRecipeData(fetched);
                 setCurrentComplexity(fetched.difficulty || "Intermediate");
                 setCurrentDietary(fetched.dietary || "Omnivore");
@@ -110,6 +125,7 @@ const RecipeDetails = () => {
         if (!userId) return; // Must be logged in
 
         try {
+            setError(null);
             if (isSaved) {
                 // Optimistic UI updates
                 removeSavedRecipe(recipeData.id);
@@ -119,22 +135,41 @@ const RecipeDetails = () => {
                 addSavedRecipe({ recipeId: recipeData.id, ...recipeData });
                 await saveRecipeService(userId, recipeData);
             }
-        } catch (error) {
-            console.error("Error toggling saved state:", error);
-            // In a real app we'd revert the optimistic state change here on error
+        } catch (err: any) {
+            console.error("Error toggling saved state:", err);
+            // Revert optimistic changes
+            if (isSaved) {
+                addSavedRecipe({ recipeId: recipeData.id, ...recipeData });
+            } else {
+                removeSavedRecipe(recipeData.id);
+            }
+            setError(getFriendlyErrorMessage(err));
         }
     };
 
     if (loading || !recipeData) {
-        return (
-            <div className="min-h-screen bg-[#051109] text-white flex items-center justify-center">
-                <div className="text-[#00ff84] font-bold animate-pulse text-xl">Loading Recipe...</div>
-            </div>
-        );
+        return <RecipeDetailsSkeleton />;
     }
 
     return (
-        <div className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="min-h-screen bg-[#051109] text-white pb-24 relative overflow-x-hidden rounded-t-2xl"
+        >
+            {error && (
+                <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="p-4 bg-red-500/90 backdrop-blur-md border border-red-500/20 rounded-2xl flex items-start gap-3 text-white text-sm shadow-2xl">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <div className="flex-1">
+                            <span className="font-bold block">Action Failed</span>
+                            <span className="text-white/80 text-xs leading-relaxed mt-0.5 block">{error}</span>
+                        </div>
+                        <button onClick={() => setError(null)} className="text-white/60 hover:text-white transition-colors bg-transparent border-0 outline-none p-0.5"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg></button>
+                    </div>
+                </div>
+            )}
             {/* Hero Section */}
             <div className="relative h-[55vh] min-h-[450px] w-full">
                 {/* Background Image with Gradient Overlay */}
@@ -153,20 +188,17 @@ const RecipeDetails = () => {
                         <ChevronLeft className="w-7 h-7 text-white" />
                     </button>
                     <div className="flex gap-4">
-                        <button className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 hover:bg-black/60 transition-colors">
-                            <Share2 className="w-7 h-7 text-white" />
-                        </button>
                         <button
                             className={`w-14 h-14 rounded-full backdrop-blur-md flex items-center justify-center border transition-colors group ${isSaved
-                                    ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
-                                    : 'bg-black/40 border-white/10 hover:bg-[#00ff84]/20'
+                                ? 'bg-[#00ff84]/20 border-[#00ff84]/50'
+                                : 'bg-black/40 border-white/10 hover:bg-[#00ff84]/20'
                                 }`}
                             onClick={handleSaveToggle}
                         >
                             <Heart
                                 className={`w-7 h-7 transition-colors ${isSaved
-                                        ? 'fill-[#00ff84] text-[#00ff84]'
-                                        : 'text-white group-hover:text-[#00ff84]'
+                                    ? 'fill-[#00ff84] text-[#00ff84]'
+                                    : 'text-white group-hover:text-[#00ff84]'
                                     }`}
                             />
                         </button>
@@ -443,7 +475,7 @@ const RecipeDetails = () => {
                     Start Cooking
                 </button>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

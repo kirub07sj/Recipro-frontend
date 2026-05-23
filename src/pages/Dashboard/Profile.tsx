@@ -111,7 +111,7 @@ const Profile = () => {
                             <input
                                 type="text"
                                 value={userName}
-                                onChange={(e) => setUserName(e.target.value)}
+                                onChange={(e) => setUserName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                 className="bg-[#0c2415] text-white border border-[#00ff88]/50 rounded-lg px-3 py-1 text-center font-bold text-xl outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] w-48 shadow-inner transition-all"
                                 autoFocus
                                 onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
@@ -291,7 +291,7 @@ const Profile = () => {
                                         <input
                                             type="text"
                                             value={newAllergy}
-                                            onChange={(e) => setNewAllergy(e.target.value)}
+                                            onChange={(e) => setNewAllergy(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddAllergy()}
                                             className="bg-[#0c2415] text-white border border-red-500/50 rounded-full px-4 py-1.5 text-sm outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 shadow-inner transition-all w-32"
                                             autoFocus
@@ -345,7 +345,7 @@ const Profile = () => {
                                         <input
                                             type="text"
                                             value={newDislike}
-                                            onChange={(e) => setNewDislike(e.target.value)}
+                                            onChange={(e) => setNewDislike(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
                                             onKeyDown={(e) => e.key === 'Enter' && handleAddDislike()}
                                             className="bg-[#0c2415] text-white border border-[#00ff88]/50 rounded-full px-4 py-1.5 text-sm outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] shadow-inner transition-all w-32"
                                             autoFocus

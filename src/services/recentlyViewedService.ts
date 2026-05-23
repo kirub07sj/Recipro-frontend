@@ -9,10 +9,18 @@ export const getRecentlyViewedService = async (userId: string, limit: number = 1
 };
 
 export const recordRecipeViewService = async (userId: string, recipe: any) => {
+    const resolvedId = recipe?.recipeId || recipe?.id || recipe?._id;
+    if (!userId || !resolvedId) return;
+
+    const payload = {
+        ...recipe,
+        recipeId: resolvedId,
+    };
+
     const res = await fetch(`${API_URL}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, recipe }),
+        body: JSON.stringify({ userId, recipe: payload }),
     });
     const result = await res.json();
     if (!res.ok) throw new Error(result.message || 'Failed to record recipe view');

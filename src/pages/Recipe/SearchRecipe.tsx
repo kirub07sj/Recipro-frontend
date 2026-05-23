@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { searchMealsByNameService, listMealsByLetterService, getRandomMealService, filterMealsByDietService } from '../../services/discoveryService';
+import { saveRecipeService } from '../../services/recipeService';
+import { useAuth } from '../../hooks/useAuth';
 import { motion, AnimatePresence } from 'framer-motion';
+import RecipeCardSkeleton from '../../components/skeletons/RecipeCardSkeleton';
 
 // Icons using custom SVGs to match the project's style
 const SearchIcon = () => (
@@ -10,22 +13,9 @@ const SearchIcon = () => (
     </svg>
 );
 
-const CameraIcon = () => (
-    <svg className="w-6 h-6 text-[#03100B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-);
-
 const HistoryIcon = () => (
     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-
-const FilterIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
     </svg>
 );
 
@@ -43,18 +33,34 @@ const ChefHatIcon = () => (
 );
 
 const categories = ["All", "Low Carb", "High Protein", "Vegetarian", "Vegan"];
-const recentSearches = ["Arrabiata", "Chicken Breast", "Sushi"];
 
 const SearchRecipe = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [recipes, setRecipes] = useState<any[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
+    const [history, setHistory] = useState<string[]>(() => {
+        const saved = localStorage.getItem('recentSearches');
+        return saved ? JSON.parse(saved) : [];
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [savedRecipeIds, setSavedRecipeIds] = useState<Set<string>>(new Set());
+    const itemsPerPage = 12;
+    const { userId } = useAuth();
 
     useEffect(() => {
         // Initial load: fetch some default meals
         fetchMealsByLetter('c');
     }, []);
+
+    // Reset scroll position when page changes
+    useEffect(() => {
+        const mainContainer = document.getElementById('main-scroll-container');
+        if (mainContainer) {
+            mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
 
     const fetchMealsByLetter = async (letter: string) => {
         setLoading(true);
@@ -65,15 +71,31 @@ const SearchRecipe = () => {
 
     const handleSearch = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
-            if (!searchQuery.trim()) {
-                fetchMealsByLetter('c');
-                return;
-            }
-            setLoading(true);
-            const data = await searchMealsByNameService(searchQuery);
-            setRecipes(data || []);
-            setLoading(false);
+            executeSearch(searchQuery);
         }
+    };
+
+    const executeSearch = async (query: string) => {
+        if (!query.trim()) {
+            fetchMealsByLetter('c');
+            return;
+        }
+
+        // Add to history
+        const newHistory = [query, ...history.filter(h => h !== query)].slice(0, 5);
+        setHistory(newHistory);
+        localStorage.setItem('recentSearches', JSON.stringify(newHistory));
+
+        setLoading(true);
+        const data = await searchMealsByNameService(query);
+        setRecipes(data || []);
+        setCurrentPage(1);
+        setLoading(false);
+    };
+
+    const clearHistory = () => {
+        setHistory([]);
+        localStorage.removeItem('recentSearches');
     };
 
     const handleCategoryClick = async (cat: string) => {
@@ -84,6 +106,7 @@ const SearchRecipe = () => {
         } else {
             const data = await filterMealsByDietService(cat);
             setRecipes(data || []);
+            setCurrentPage(1);
             setLoading(false);
         }
     };
@@ -93,9 +116,32 @@ const SearchRecipe = () => {
         const meal = await getRandomMealService();
         if (meal) {
             setRecipes([meal]);
+            setCurrentPage(1);
         }
         setLoading(false);
     };
+
+    const handleSaveRecipe = async (e: React.MouseEvent, recipe: any) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!userId) return;
+
+        if (savedRecipeIds.has(recipe.id)) {
+            // Unsaving could be implemented here via deleteSavedRecipeService
+            // For now, let's just ignore or we could remove it from local state
+            return;
+        }
+
+        try {
+            await saveRecipeService(userId, recipe);
+            setSavedRecipeIds(prev => new Set([...prev, recipe.id]));
+        } catch (error) {
+            console.error('Error saving recipe:', error);
+        }
+    };
+
+    const totalPages = Math.ceil(recipes.length / itemsPerPage);
+    const paginatedRecipes = recipes.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -140,13 +186,7 @@ const SearchRecipe = () => {
                         className="w-full bg-[#061B12] border border-[#0A2A1E] rounded-2xl py-5 pl-14 pr-6 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00E676]/50 transition-all"
                     />
                 </div>
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-[#00E676] p-5 rounded-2xl hover:bg-[#00C853] transition-colors shadow-[0_0_20px_rgba(0,230,118,0.2)]"
-                >
-                    <CameraIcon />
-                </motion.button>
+
             </motion.div>
 
             {/* Filter Section */}
@@ -165,14 +205,7 @@ const SearchRecipe = () => {
                         {cat}
                     </motion.button>
                 ))}
-                <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#061B12] border border-[#0A2A1E] rounded-xl text-gray-400 hover:text-white transition-all ml-auto"
-                >
-                    <FilterIcon />
-                    <span>Filters</span>
-                </motion.button>
+
             </motion.div>
 
             {/* Main Content Area */}
@@ -181,16 +214,19 @@ const SearchRecipe = () => {
                 <div className="flex-1">
                     <motion.h2 variants={itemVariants} className="text-2xl font-bold mb-6">Recommended for you</motion.h2>
                     {loading ? (
-                        <div className="text-[#00E676] font-bold animate-pulse">Loading recipes...</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <RecipeCardSkeleton cards={6} />
+                        </div>
                     ) : recipes.length === 0 ? (
                         <motion.div variants={itemVariants} className="text-gray-400">No recipes found. Try another search.</motion.div>
                     ) : (
-                        <motion.div
-                            layout
-                            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        >
+                        <>
+                            <motion.div
+                                layout
+                                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                            >
                             <AnimatePresence mode="popLayout">
-                                {recipes.map((recipe, index) => (
+                                {paginatedRecipes.map((recipe, index) => (
                                     <motion.div
                                         key={recipe.id}
                                         layout
@@ -209,26 +245,18 @@ const SearchRecipe = () => {
                                                     alt={recipe.title}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 />
-                                                {/* Match Badge */}
-                                                <div className="absolute top-4 left-4 flex items-center gap-1 bg-[#00E676] px-3 py-1.5 rounded-full text-[#03100B] text-xs font-bold shadow-lg">
-                                                    <div className="w-4 h-4 flex items-center justify-center">
-                                                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                                        </svg>
-                                                    </div>
-                                                    {recipe.match || 85}% Match
-                                                </div>
                                                 {/* Favorite Button */}
                                                 <motion.button
+                                                    onClick={(e) => handleSaveRecipe(e, recipe)}
                                                     whileHover={{ scale: 1.1 }}
                                                     whileTap={{ scale: 0.9 }}
                                                     className="absolute top-4 right-4 p-2.5 rounded-full bg-black/30 backdrop-blur-md border border-white/10 text-white hover:bg-[#00E676] hover:text-[#03100B] transition-all"
                                                 >
-                                                    <HeartIcon />
+                                                    <HeartIcon filled={savedRecipeIds.has(recipe.id)} />
                                                 </motion.button>
                                             </div>
                                             <div className="p-6 flex flex-col flex-1">
-                                                <h3 className="text-xl font-bold mb-4 line-clamp-2">{recipe.title}</h3>
+                                                <h3 className="text-xl text-[#fff] font-bold mb-4 line-clamp-2">{recipe.title}</h3>
                                                 <div className="flex items-center gap-6 text-gray-400 text-sm mb-6 mt-auto">
                                                     <div className="flex items-center gap-2">
                                                         <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -257,6 +285,28 @@ const SearchRecipe = () => {
                                 ))}
                             </AnimatePresence>
                         </motion.div>
+                        
+                        {/* Pagination Controls */}
+                        {recipes.length > itemsPerPage && (
+                            <div className="flex justify-center items-center gap-4 mt-8">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === 1 ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-gray-400 font-medium">Page {currentPage} of {totalPages}</span>
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === totalPages ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        )}
+                        </>
                     )}
                 </div>
 
@@ -266,18 +316,24 @@ const SearchRecipe = () => {
                     <div>
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-xl font-bold">Recent Searches</h2>
-                            <button className="text-[#00E676] text-xs font-bold hover:underline">Clear</button>
+                            {history.length > 0 && (
+                                <button
+                                    onClick={clearHistory}
+                                    className="text-[#041A0B] bg-[#00E676] text-xs font-bold hover:underline"
+                                >
+                                    Clear
+                                </button>
+                            )}
                         </div>
                         <div className="space-y-3">
-                            {recentSearches.map((search) => (
+                            {history.map((search) => (
                                 <motion.button
                                     key={search}
                                     whileHover={{ x: 5 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => {
                                         setSearchQuery(search);
-                                        // simulate enter press
-                                        handleSearch({ key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>);
+                                        executeSearch(search);
                                     }}
                                     className="w-full flex items-center justify-between p-5 bg-[#061B12] border border-[#0A2A1E] rounded-2xl hover:border-[#00E676]/30 transition-all group"
                                 >

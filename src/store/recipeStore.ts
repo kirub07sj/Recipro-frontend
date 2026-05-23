@@ -45,16 +45,29 @@ export const useRecipeStore = create<RecipeStoreState>((set) => ({
     recentlyViewed: [],
     pendingFile: null,
     setGeneratedRecipes: (recipes) => set({ generatedRecipes: recipes }),
-    setSavedRecipes: (recipes) => set({ savedRecipes: recipes }),
-    setRecentlyViewed: (recipes) => set({ recentlyViewed: recipes }),
-    addRecentlyViewed: (recipe) => set((state) => {
-        const filtered = state.recentlyViewed.filter(r => (r.recipeId || r.id) !== (recipe.recipeId || recipe.id));
-        const newItem = {
+    setSavedRecipes: (recipes) => set({ 
+        savedRecipes: recipes.map(recipe => ({
             ...recipe,
-            recipeId: recipe.recipeId || recipe.id,
+            id: recipe.recipeId || recipe.id || recipe._id,
+            recipeId: recipe.recipeId || recipe.id || recipe._id,
+        })) 
+    }),
+    setRecentlyViewed: (recipes) => set({ 
+        recentlyViewed: recipes.map(recipe => ({
+            ...recipe,
+            id: recipe.recipeId || recipe.id || recipe._id,
+            recipeId: recipe.recipeId || recipe.id || recipe._id,
+        })) 
+    }),
+    addRecentlyViewed: (recipe) => set((state) => {
+        const normalizedRecipe = {
+            ...recipe,
+            id: recipe.recipeId || recipe.id || recipe._id,
+            recipeId: recipe.recipeId || recipe.id || recipe._id,
             viewedAt: new Date().toISOString()
         };
-        return { recentlyViewed: [newItem, ...filtered].slice(0, 20) };
+        const filtered = state.recentlyViewed.filter(r => (r.recipeId || r.id) !== normalizedRecipe.id);
+        return { recentlyViewed: [normalizedRecipe, ...filtered].slice(0, 10) };
     }),
     addSavedRecipe: (recipe) => set((state) => ({ savedRecipes: [...state.savedRecipes, recipe] })),
     removeSavedRecipe: (recipeId) => set((state) => ({ 

@@ -1,5 +1,5 @@
-
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import ScrollToTop from '../components/common/ScrollToTop';
 
 // Public imports
 import Login from '../pages/Auth/LoginPage';
@@ -19,6 +19,7 @@ import HealthProfile from '../pages/Dashboard/HealthProfile';
 import CookingGuide from '../pages/Recipe/CookingGuide';
 import SearchRecipe from '../pages/Recipe/SearchRecipe';
 import RecipeVariants from '../pages/Recipe/RecipeVariants';
+import RecentScans from '../pages/Dashboard/RecentScans';
 
 import ProtectedRoute from './ProtectedRoute';
 import RequireHealthProfile from './RequireHealthProfile';
@@ -28,6 +29,7 @@ import NotFound from '../pages/public/NotFound';
 const AppRoute = () => {
     return (
         <BrowserRouter>
+            <ScrollToTop />
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
@@ -55,6 +57,7 @@ const AppRoute = () => {
                     <Route path="/recipe-variants" element={<RecipeVariants />} />
                     <Route path="/recipe/:id" element={<RecipeDetails />} />
                     <Route path="/saved-recipes" element={<SavedRecipe />} />
+                    <Route path="/recent-scans" element={<RecentScans />} />
                     <Route path="/cooking-guide/:id" element={<CookingGuide />} />
                 </Route>
 
