@@ -19,6 +19,22 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (userId) {
+            // Fetch recently viewed
+            getRecentlyViewedService(userId, 20)
+                .then(res => {
+                    if (res.success) {
+                        setRecentlyViewed(res.data);
+                    }
+                })
+                .catch(console.error);
+
+            // Fetch health profile if not already loaded
+            if (!profile) {
+                fetchProfile(userId).catch(console.error);
+            }
+
+            // Fetch today's intake
+            fetchTodayIntake(userId).catch(console.error);
             setLoading(true);
             const promises = [
                 getRecentlyViewedService(userId, 20).then(res => {
