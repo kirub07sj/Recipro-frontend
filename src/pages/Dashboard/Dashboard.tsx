@@ -21,7 +21,7 @@ const Dashboard = () => {
             getRecentlyViewedService(userId, 20)
                 .then(res => {
                     if (res.success) {
-                        setRecentlyViewed(res.data);
+                        setRecentlyViewed(res.data); 
                     }
                 })
                 .catch(console.error);
