@@ -4,7 +4,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
-import { getRecentlyViewedService } from '../../services/recentlyViewedService';
+import { getRecentlyViewedService, clearRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
@@ -60,6 +60,16 @@ const Dashboard = () => {
             navigate('/generate-recipe');
         }
         if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleClearHistory = async () => {
+        if (!userId) return;
+        try {
+            await clearRecentlyViewedService(userId);
+            setRecentlyViewed([]);
+        } catch (error) {
+            console.error('Failed to clear history:', error);
+        }
     };
 
 
@@ -166,8 +176,10 @@ const Dashboard = () => {
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
-
-                                        <p className="font-bold text-lg">Snap Ingredient to get recipes</p>
+                                        <p className="font-bold text-lg">
+                                            <span className="md:hidden">Snap Ingredient to get recipes</span>
+                                            <span className="hidden md:inline">Upload Ingredient to get recipes</span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
@@ -220,7 +232,15 @@ const Dashboard = () => {
                         <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-
+                                {recentlyViewed.length > 0 && (
+                                    <button
+                                        onClick={handleClearHistory}
+                                        className="text-[#00ff84] text-xs md:text-sm font-semibold hover:underline bg-transparent border-0 outline-none hover:text-green-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        Clear History
+                                    </button>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
