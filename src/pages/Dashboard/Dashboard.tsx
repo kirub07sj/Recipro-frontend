@@ -4,7 +4,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
-import { getRecentlyViewedService } from '../../services/recentlyViewedService';
+import { getRecentlyViewedService, clearRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
@@ -35,6 +35,16 @@ const Dashboard = () => {
 
     const handleSnapClick = () => {
         fileInputRef.current?.click();
+    };
+
+    const handleClearRecentlyViewed = async () => {
+        if (!userId) return;
+        try {
+            await clearRecentlyViewedService(userId);
+            setRecentlyViewed([]);
+        } catch (err) {
+            console.error('Failed to clear recently viewed:', err);
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +216,17 @@ const Dashboard = () => {
                         <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-
+                                {recentlyViewed.length > 0 && (
+                                    <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={handleClearRecentlyViewed}
+                                        className="text-xs font-semibold text-zinc-400 hover:text-[#00ff84] transition-all bg-white/5 border border-white/10 px-3.5 py-2 rounded-xl flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /><line x1="10" x2="10" y1="11" y2="17" /><line x1="14" x2="14" y1="11" y2="17" /></svg>
+                                        Clear History
+                                    </motion.button>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (
