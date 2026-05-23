@@ -150,8 +150,10 @@ const Dashboard = () => {
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
-
-                                        <p className="font-bold text-lg">Snap Ingredient to get recipes</p>
+                                        <p className="font-bold text-lg">
+                                            <span className="md:hidden">Snap Ingredient to get recipes</span>
+                                            <span className="hidden md:inline">Upload Ingredient to get recipes</span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">

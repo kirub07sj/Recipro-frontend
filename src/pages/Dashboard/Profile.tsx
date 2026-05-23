@@ -149,8 +149,21 @@ const Profile = () => {
                         {/* Daily Goal card */}
                         <motion.div
                             whileHover={{ y: -5 }}
-                            onHoverStart={() => setShowIntakeDetails(true)}
-                            onHoverEnd={() => setShowIntakeDetails(false)}
+                            onHoverStart={() => {
+                                if (window.innerWidth >= 768) {
+                                    setShowIntakeDetails(true);
+                                }
+                            }}
+                            onHoverEnd={() => {
+                                if (window.innerWidth >= 768) {
+                                    setShowIntakeDetails(false);
+                                }
+                            }}
+                            onClick={() => {
+                                if (window.innerWidth < 768) {
+                                    setShowIntakeDetails(!showIntakeDetails);
+                                }
+                            }}
                             className="bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px]"
                         >
                             <div className="flex justify-between flex-col ">

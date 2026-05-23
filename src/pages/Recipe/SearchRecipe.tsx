@@ -201,78 +201,78 @@ const SearchRecipe = () => {
                                 layout
                                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                             >
-                            <AnimatePresence mode="popLayout">
-                                {paginatedRecipes.map((recipe, index) => (
-                                    <motion.div
-                                        key={recipe.id}
-                                        layout
-                                        initial={{ opacity: 0, scale: 0.9 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        exit={{ opacity: 0, scale: 0.9 }}
-                                        transition={{ delay: index * 0.05 }}
-                                    >
-                                        <Link
-                                            to={`/recipe/${recipe.id}?source=discovery`}
-                                            className="bg-[#061B12] h-full rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all block text-left flex flex-col"
+                                <AnimatePresence mode="popLayout">
+                                    {paginatedRecipes.map((recipe, index) => (
+                                        <motion.div
+                                            key={recipe.id}
+                                            layout
+                                            initial={{ opacity: 0, scale: 0.9 }}
+                                            animate={{ opacity: 1, scale: 1 }}
+                                            exit={{ opacity: 0, scale: 0.9 }}
+                                            transition={{ delay: index * 0.05 }}
                                         >
-                                            <div className="relative aspect-[4/3] shrink-0">
-                                                <img
-                                                    src={recipe.image}
-                                                    alt={recipe.title}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                />
-                                            </div>
-                                            <div className="p-6 flex flex-col flex-1">
-                                                <h3 className="text-xl text-[#fff] font-bold mb-4 line-clamp-2">{recipe.title}</h3>
-                                                <div className="flex items-center gap-6 text-gray-400 text-sm mb-6 mt-auto">
-                                                    <div className="flex items-center gap-2">
-                                                        <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                        </svg>
-                                                        {recipe.time || '45 mins'}
+                                            <Link
+                                                to={`/recipe/${recipe.id}?source=discovery`}
+                                                className="bg-[#061B12] h-full rounded-3xl overflow-hidden border border-[#0A2A1E] group hover:border-[#00E676]/30 transition-all block text-left flex flex-col"
+                                            >
+                                                <div className="relative aspect-[4/3] shrink-0">
+                                                    <img
+                                                        src={recipe.image}
+                                                        alt={recipe.title}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    />
+                                                </div>
+                                                <div className="p-6 flex flex-col flex-1">
+                                                    <h3 className="text-xl text-[#fff] font-bold mb-4 line-clamp-2">{recipe.title}</h3>
+                                                    <div className="flex items-center gap-6 text-gray-400 text-sm mb-6 mt-auto">
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            {recipe.time || '45 mins'}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.98 7.98 0 01-2.343 5.657z" />
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14l2.828 2.828z" />
+                                                            </svg>
+                                                            {recipe.calories || '450 kcal'}
+                                                        </div>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
-                                                        <svg className="w-4 h-4 text-[#00E676]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13a7.98 7.98 0 01-2.343 5.657z" />
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14l2.828 2.828z" />
-                                                        </svg>
-                                                        {recipe.calories || '450 kcal'}
+                                                    <div className="flex gap-2 flex-wrap">
+                                                        {(recipe.tags || []).slice(0, 3).map((tag: string) => (
+                                                            <span key={tag} className="px-3 py-1.5 bg-[#03100B] border border-[#0A2A1E] rounded-lg text-[10px] font-bold tracking-wider text-gray-300">
+                                                                {tag}
+                                                            </span>
+                                                        ))}
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-2 flex-wrap">
-                                                    {(recipe.tags || []).slice(0, 3).map((tag: string) => (
-                                                        <span key={tag} className="px-3 py-1.5 bg-[#03100B] border border-[#0A2A1E] rounded-lg text-[10px] font-bold tracking-wider text-gray-300">
-                                                            {tag}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
-                        
-                        {/* Pagination Controls */}
-                        {recipes.length > itemsPerPage && (
-                            <div className="flex justify-center items-center gap-4 mt-8">
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                                    disabled={currentPage === 1}
-                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === 1 ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
-                                >
-                                    Previous
-                                </button>
-                                <span className="text-gray-400 font-medium">Page {currentPage} of {totalPages}</span>
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                                    disabled={currentPage === totalPages}
-                                    className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === totalPages ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        )}
+                                            </Link>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </motion.div>
+
+                            {/* Pagination Controls */}
+                            {recipes.length > itemsPerPage && (
+                                <div className="flex justify-center items-center gap-4 mt-8">
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                        disabled={currentPage === 1}
+                                        className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === 1 ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                    >
+                                        Previous
+                                    </button>
+                                    <span className="text-gray-400 font-medium">Page {currentPage} of {totalPages}</span>
+                                    <button
+                                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                        disabled={currentPage === totalPages}
+                                        className={`px-4 py-2 rounded-lg font-bold transition-all ${currentPage === totalPages ? 'bg-[#061B12] text-gray-600 border border-[#0A2A1E] cursor-not-allowed' : 'bg-[#00E676] text-[#03100B] hover:bg-[#00c565]'}`}
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
