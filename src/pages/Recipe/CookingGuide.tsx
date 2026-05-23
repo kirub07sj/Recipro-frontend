@@ -5,6 +5,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
 import { CheckCircle2, Flame, Loader2 } from 'lucide-react';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 
 const CookingGuide = () => {
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const CookingGuide = () => {
   const [isFinished, setIsFinished] = useState(false);
   const [isConsuming, setIsConsuming] = useState(false);
   const [hasConsumed, setHasConsumed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { consumeRecipe } = useHealthProfileStore();
 
@@ -131,11 +133,19 @@ const CookingGuide = () => {
             Cook Again
           </button>
 
+          {error && (
+            <div className="mb-4 p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-2.5 text-red-400 text-xs animate-fade-in shadow-[0_0_12px_rgba(239,68,68,0.05)]">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <span className="font-medium text-left leading-relaxed">{error}</span>
+            </div>
+          )}
+
           <button
             disabled={hasConsumed || isConsuming}
             onClick={async () => {
               try {
                 setIsConsuming(true);
+                setError(null);
                 if (!userId) throw new Error("Must be logged in to record intake");
                 await consumeRecipe(userId, {
                   id: recipeData.id,
@@ -143,9 +153,9 @@ const CookingGuide = () => {
                   calories: Number(recipeData.calories.replace(' kcal', '')) || 0
                 });
                 setHasConsumed(true);
-              } catch (error) {
-                console.error('Failed to consume:', error);
-                alert('Could not record intake. Please try again.');
+              } catch (err: any) {
+                console.error('Failed to consume:', err);
+                setError(getFriendlyErrorMessage(err));
               } finally {
                 setIsConsuming(false);
               }
