@@ -26,3 +26,12 @@ export const recordRecipeViewService = async (userId: string, recipe: any) => {
     if (!res.ok) throw new Error(result.message || 'Failed to record recipe view');
     return result;
 };
+
+export const clearRecentlyViewedService = async (userId: string) => {
+    const res = await fetch(`${API_URL}/${userId}`, {
+        method: 'DELETE',
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || 'Failed to clear recently viewed history');
+    return result;
+};
