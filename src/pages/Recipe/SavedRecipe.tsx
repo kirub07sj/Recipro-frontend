@@ -78,35 +78,35 @@ const SavedRecipe = () => {
                             variants={itemVariants}
                             whileHover={{ y: -10 }}
                         >
-                        <Link
-                            to={`/recipe/${recipe.recipeId}`}
-                            className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
-                        >
-                            {/* Background Image */}
-                            <img
-                                src={recipe.image}
-                                alt={recipe.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
+                            <Link
+                                to={`/recipe/${recipe.recipeId}`}
+                                className="group relative aspect-[3/4] rounded-[2rem] overflow-hidden border border-[#0A2A1E] hover:border-[#00E676]/30 transition-all cursor-pointer block text-left"
+                            >
+                                {/* Background Image */}
+                                <img
+                                    src={recipe.image}
+                                    alt={recipe.title}
+                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                />
 
-                            {/* Gradient Overlay */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
+                                {/* Gradient Overlay */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
 
-                            {/* Content Overlay */}
-                            <div className="absolute inset-0 p-6 flex flex-col justify-end">
-                                <div className="flex items-center gap-1.5 text-[#00E676] font-bold text-[0.65rem] tracking-widest mb-2">
-                                    <ClockIcon />
-                                    <span>{recipe.time}</span>
+                                {/* Content Overlay */}
+                                <div className="absolute inset-0 p-6 flex flex-col justify-end">
+                                    <div className="flex items-center gap-1.5 text-[#00E676] font-bold text-[0.65rem] tracking-widest mb-2">
+                                        <ClockIcon />
+                                        <span>{recipe.time}</span>
+                                    </div>
+                                    <h3 className="text-white text-lg font-bold leading-tight group-hover:text-[#00E676] transition-colors">
+                                        {recipe.title}
+                                    </h3>
                                 </div>
-                                <h3 className="text-white text-lg font-bold leading-tight group-hover:text-[#00E676] transition-colors">
-                                    {recipe.title}
-                                </h3>
-                            </div>
 
-                            {/* Subtle Border Glow on Hover */}
-                            <div className="absolute inset-0 border-2 border-[#00E676]/0 group-hover:border-[#00E676]/10 rounded-[2rem] transition-all pointer-events-none"></div>
-                        </Link>
-                    </motion.div>
+                                {/* Subtle Border Glow on Hover */}
+                                <div className="absolute inset-0 border-2 border-[#00E676]/0 group-hover:border-[#00E676]/10 rounded-[2rem] transition-all pointer-events-none"></div>
+                            </Link>
+                        </motion.div>
                     ))
                 )}
             </div>
