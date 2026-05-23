@@ -21,7 +21,7 @@ const Dashboard = () => {
         if (userId) {
             setLoading(true);
             const promises = [
-                getRecentlyViewedService(userId, 20).then(res => {
+                getRecentlyViewedService(userId, 20).then((res: { success: any; data: any[]; }) => {
                     if (res.success) setRecentlyViewed(res.data);
                 }),
                 profile ? Promise.resolve() : fetchProfile(userId),
