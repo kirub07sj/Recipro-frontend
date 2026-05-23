@@ -38,7 +38,7 @@ const Dashboard = () => {
             setLoading(true);
             const promises = [
                 getRecentlyViewedService(userId, 20).then(res => {
-                    if (res.success) setRecentlyViewed(res.data);
+                    if (res.success) setRecentlyViewed(res.data); 
                 }),
                 profile ? Promise.resolve() : fetchProfile(userId),
                 fetchTodayIntake(userId)
