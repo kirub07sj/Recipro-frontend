@@ -14,7 +14,7 @@ describe('Saved Recipes Flow', () => {
 
     test('Save recipe and verify in saved section', async () => {
         // Go directly to a known recipe or explore section
-        await driver.get(`${BASE_URL}/saved`);
+        await driver.get(`${BASE_URL}/saved-recipes`);
         await driver.sleep(2000); // Wait for fetch
 
         // Get initial count of saved recipes
@@ -40,7 +40,7 @@ describe('Saved Recipes Flow', () => {
             await driver.sleep(1000); // Wait for API response
 
             // Go back to saved section
-            await driver.get(`${BASE_URL}/saved`);
+            await driver.get(`${BASE_URL}/saved-recipes`);
             await driver.sleep(2000); // Wait for fetch
             
             const newCards = await driver.findElements(By.css('.recipe-card, [class*="card"]'));
