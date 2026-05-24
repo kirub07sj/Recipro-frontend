@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:selenium": "jest --config=jest.config.cjs"
+    "test:selenium": "jest --config=jest.config.cjs --runInBand"
   },
   "dependencies": {
     "@react-oauth/google": "^0.13.5",

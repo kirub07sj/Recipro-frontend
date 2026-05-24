@@ -8,7 +8,7 @@ const createDriver = async () => {
     if (!driver) {
         const options = new chrome.Options();
         // Optional headless mode
-        // options.addArguments('--headless=new');
+        options.addArguments('--headless=new');
         options.addArguments('--window-size=1280,800');
         options.addArguments('--disable-gpu');
         options.addArguments('--no-sandbox');

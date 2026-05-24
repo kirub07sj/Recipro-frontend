@@ -14,7 +14,7 @@ describe('Recipe Generation Flow', () => {
 
     test('Full Recipe Generation Workflow', async () => {
         // 1. Go to Generate Recipe page
-        await driver.get(`${BASE_URL}/generate`);
+        await driver.get(`${BASE_URL}/generate-recipe`);
         
         // 2. Enter ingredients
         const input = await waitForElement(driver, By.css('input[placeholder="Add an ingredient manually..."]'));
@@ -28,14 +28,17 @@ describe('Recipe Generation Flow', () => {
         const generateBtn = await driver.findElement(By.xpath('//button[contains(text(), "Generate Recipe") or contains(text(), "Create Recipe")]'));
         await generateBtn.click();
 
-        // 4. Wait for recipe generation to complete
-        // This might take a while if it hits an AI backend
-        await driver.wait(async () => {
-            const url = await driver.getCurrentUrl();
-            return url.includes('/recipe/') && !url.includes('/generate');
-        }, 30000); // 30 seconds timeout for AI generation
+        // 4. Wait for recipe variants page to load
+        await driver.wait(until.urlContains('/recipe-variants'), 30000);
+
+        // Click on the first recipe card to view its details
+        const firstCard = await waitForElement(driver, By.css('.grid.gap-6 > div, [class*="recipe-card"], [class*="card"]'));
+        await firstCard.click();
+
+        // 5. Wait for the recipe details page to load
+        await driver.wait(until.urlContains('/recipe/'), 10000);
         
-        // 5. Verify elements on the page
+        // 6. Verify elements on the page
         const pageText = await driver.findElement(By.tagName('body')).getText();
         
         // Should have ingredients section
@@ -46,5 +49,5 @@ describe('Recipe Generation Flow', () => {
         
         // Should have nutrition
         expect(pageText.toLowerCase()).toContain('nutrition');
-    });
+    }, 60000);
 });

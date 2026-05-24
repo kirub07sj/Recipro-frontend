@@ -44,7 +44,7 @@ describe('Authentication Flow', () => {
         await driver.wait(until.urlContains('/dashboard'), 10000);
 
         // Click on profile to find logout
-        await clickButton(driver, By.css('a[href="/dashboard/profile"]')); // Nav link
+        await clickButton(driver, By.css('a[href="/profile"]')); // Nav link
         
         // Find logout button on profile
         // Usually contains "Sign Out" or "Log Out"

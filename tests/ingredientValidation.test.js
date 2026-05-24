@@ -15,7 +15,7 @@ describe('Ingredient Input Validation', () => {
 
     beforeEach(async () => {
         // Go to recipe generation page
-        await driver.get(`${BASE_URL}/generate`);
+        await driver.get(`${BASE_URL}/generate-recipe`);
         // Wait for input to be ready
         await waitForElement(driver, By.css('input[placeholder="Add an ingredient manually..."]'));
     });
