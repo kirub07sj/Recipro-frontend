@@ -214,71 +214,7 @@ const ResetPassword = () => {
                                     )}
                                 </div>
 
-                                {password && (
-                                    <div className=" absolute z-50 p-4 bg-[#0d2d18]/70 border backdrop-blur-2xl border-[#143d22]/50 rounded-2xl text-xs space-y-2.5 text-left transition-all">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[#8ba494]">Password Strength:</span>
-                                            <span className={`font-bold uppercase tracking-wider ${passwordScore === 4 ? 'text-green-400' :
-                                                passwordScore >= 2 ? 'text-yellow-400' :
-                                                    'text-red-400'
-                                                }`}>
-                                                {passwordScore === 4 ? 'Strong' :
-                                                    passwordScore >= 2 ? 'Medium' :
-                                                        'Weak'}
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-[#143d22] h-1.5 rounded-full overflow-hidden">
-                                            <div
-                                                className={`h-full transition-all duration-300 ${passwordScore === 4 ? 'bg-green-500 w-full' :
-                                                    passwordScore >= 2 ? 'bg-yellow-500 w-2/3' :
-                                                        'bg-red-500 w-1/3'
-                                                    }`}
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 mt-2 text-[11px] text-[#8ba494]">
-                                            <div className="flex items-center gap-1.5">
-                                                <svg className={`w-3.5 h-3.5 ${hasLength ? 'text-green-400' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                                    {hasLength ? (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    ) : (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    )}
-                                                </svg>
-                                                <span>8+ characters</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <svg className={`w-3.5 h-3.5 ${hasUpper ? 'text-green-400' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                                    {hasUpper ? (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    ) : (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    )}
-                                                </svg>
-                                                <span>Uppercase letter</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <svg className={`w-3.5 h-3.5 ${hasNumber ? 'text-green-400' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                                    {hasNumber ? (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    ) : (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    )}
-                                                </svg>
-                                                <span>At least one number</span>
-                                            </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <svg className={`w-3.5 h-3.5 ${hasSpecial ? 'text-green-400' : 'text-gray-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
-                                                    {hasSpecial ? (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                                    ) : (
-                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                                    )}
-                                                </svg>
-                                                <span>Special character</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
+
 
                                 <div className="relative group">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#8ba494] group-focus-within:text-green-500 transition-colors" aria-hidden="true">
