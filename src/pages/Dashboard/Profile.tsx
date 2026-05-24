@@ -74,7 +74,6 @@ const Profile = () => {
     };
 
 
-    const healthScore = profile?.healthScore || 85;
     const dailyGoal = profile?.dailyGoal || 2200;
     const dietMode = profile?.dietMode || 'Paleo';
     const weight = profile?.weight || 72;
