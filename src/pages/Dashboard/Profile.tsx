@@ -84,6 +84,8 @@ const Profile = () => {
     const allergies = profile?.allergies?.length ? profile.allergies : [];
     const dislikes = profile?.dislikes?.length ? profile.dislikes : [];
 
+    const goalReached = (todayIntake?.totalCalories || 0) >= dailyGoal;
+
     const handleRemoveAllergy = async (item: string) => {
         if (!userId || !profile) return;
         const newAllergies = profile.allergies.filter((a: string) => a !== item);
@@ -259,9 +261,19 @@ const Profile = () => {
                                     setShowIntakeDetails(!showIntakeDetails);
                                 }
                             }}
-                            className="bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px]"
+                            className={`bg-gradient-to-br from-[#0c2415] to-[#081a0f] border rounded-3xl p-5 relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px] ${goalReached ? 'border-[#00ff88] shadow-[0_0_30px_rgba(0,255,136,0.3)]' : 'border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'}`}
                         >
-                            <div className="flex justify-between flex-col ">
+                            {goalReached && (
+                                <motion.div 
+                                    animate={{ y: [0, -8, 0], scale: [1, 1.05, 1] }} 
+                                    transition={{ repeat: Infinity, duration: 2 }}
+                                    className="absolute top-4 right-4 bg-[#00ff88]/20 text-[#00ff88] text-[10px] font-extrabold px-3 py-1.5 rounded-full border border-[#00ff88]/40 flex items-center gap-1.5 backdrop-blur-sm shadow-[0_0_15px_rgba(0,255,136,0.4)] z-20"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                    GOAL MET!
+                                </motion.div>
+                            )}
+                            <div className="flex justify-between flex-col relative z-10">
                                 <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest">Daily Goal</h3>
                                 <div className="flex items-end gap-2">
                                     <span className="text-4xl text-white font-extrabold">{dailyGoal.toLocaleString()}</span>
@@ -275,7 +287,7 @@ const Profile = () => {
                                     initial={{ width: 0 }}
                                     animate={{ width: `${Math.min(100, ((todayIntake?.totalCalories || 0) / (dailyGoal || 1)) * 100)}%` }}
                                     transition={{ duration: 1, ease: 'easeOut' }}
-                                    className="h-full bg-[#00ff88] rounded-full shadow-[0_0_10px_#00ff88]"
+                                    className={`h-full rounded-full ${goalReached ? 'bg-[#00ff88] shadow-[0_0_15px_#00ff88] animate-pulse' : 'bg-[#00ff88] shadow-[0_0_10px_#00ff88]'}`}
                                 ></motion.div>
                             </div>
 
