@@ -1,5 +1,5 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { extractIngredientsFromImage, generateRecipeVariants } from '../../services/aiService';
 import { searchIngredients, type IngredientSuggestion } from '../../services/ingredientService';
 import { useRecipeStore } from '../../store/recipeStore';
@@ -26,10 +26,17 @@ const GenerateRecipe = () => {
     const { profile } = useHealthProfileStore(); // Get the health profile if available
     const authContext = useContext(AuthContext);
     const userId = authContext?.userId;
+    const location = useLocation();
 
     const suggestions = ['Onion', 'Spinach', 'Feta Cheese', 'Bell Pepper', 'Cucumber', 'Greek Yogurt'];
 
     const processingRef = useRef(false);
+
+    useEffect(() => {
+        if (location.state?.ingredients) {
+            setIngredients(location.state.ingredients);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (pendingFile && !processingRef.current) {
