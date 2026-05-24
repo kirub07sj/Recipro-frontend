@@ -22,6 +22,15 @@ export interface GeneratedRecipe {
         tip?: string;
     }[];
     tags: string[];
+    nutrition?: {
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+        fiber: number;
+        sugar: number;
+    };
+    healthInsight?: string;
 }
 
 interface RecipeStoreState {

@@ -4,6 +4,7 @@ import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useAuth } from '../../hooks/useAuth';
 import { calculateEstimatedCalories, type Gender, type ActivityLevel, type FitnessGoal } from '../../utils/calorieCalculator';
 import { cuisines } from '../../data/cuisine';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 
 const HealthProfile = () => {
     const navigate = useNavigate();
@@ -113,7 +114,7 @@ const HealthProfile = () => {
             navigate('/profile');
         } catch (err: any) {
             console.error("Failed to save profile:", err);
-            setErrors({ submit: err.message || "Failed to save profile. Please check your inputs." });
+            setErrors({ submit: getFriendlyErrorMessage(err) });
         }
     };
 
@@ -439,7 +440,12 @@ const HealthProfile = () => {
                             )}
                         </button>
                     </div>
-                    {errors.submit && <p className="max-w-4xl mx-auto text-red-500 text-sm mt-4 text-center bg-red-500/10 p-3 rounded-xl border border-red-500/20">{errors.submit}</p>}
+                    {errors.submit && (
+                        <div className="max-w-4xl mx-auto mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-400 text-sm animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span className="font-medium text-left leading-relaxed">{errors.submit}</span>
+                        </div>
+                    )}
                 </footer>
             </div>
         </div>

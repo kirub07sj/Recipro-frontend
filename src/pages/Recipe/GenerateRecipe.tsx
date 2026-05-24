@@ -1,10 +1,12 @@
 import { useState, useRef, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { extractIngredientsFromImage, generateRecipeVariants } from '../../services/aiService';
 import { searchIngredients, type IngredientSuggestion } from '../../services/ingredientService';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { AuthContext } from '../../context/AuthContext';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
+import { ArrowLeft } from 'lucide-react';
 
 const GenerateRecipe = () => {
     const navigate = useNavigate();
@@ -24,10 +26,17 @@ const GenerateRecipe = () => {
     const { profile } = useHealthProfileStore(); // Get the health profile if available
     const authContext = useContext(AuthContext);
     const userId = authContext?.userId;
+    const location = useLocation();
 
     const suggestions = ['Onion', 'Spinach', 'Feta Cheese', 'Bell Pepper', 'Cucumber', 'Greek Yogurt'];
 
     const processingRef = useRef(false);
+
+    useEffect(() => {
+        if (location.state?.ingredients) {
+            setIngredients(location.state.ingredients);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (pendingFile && !processingRef.current) {
@@ -151,7 +160,7 @@ const GenerateRecipe = () => {
             }
         } catch (error: any) {
             console.error('Error extracting ingredients:', error);
-            setErrorMsg(error.message || 'Failed to extract ingredients from image.');
+            setErrorMsg(getFriendlyErrorMessage(error));
         } finally {
             setIsExtracting(false);
         }
@@ -186,7 +195,7 @@ const GenerateRecipe = () => {
             }
         } catch (error: any) {
             console.error('Error generating recipes:', error);
-            setErrorMsg(error.message || 'Failed to generate recipes.');
+            setErrorMsg(getFriendlyErrorMessage(error));
             if (error.invalidIngredients && Array.isArray(error.invalidIngredients)) {
                 setInvalidTags(error.invalidIngredients);
             }
@@ -201,10 +210,10 @@ const GenerateRecipe = () => {
                 {/* Header */}
                 <header className="flex items-center gap-4 mb-8">
                     <button
-                        onClick={() => navigate(-1)}
-                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"
+                        onClick={() => window.history.length > 2 ? navigate(-1) : navigate('/dashboard')}
+                        className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors relative z-10"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
+                        <ArrowLeft size={20} color='white' />
                     </button>
                     <div className="flex-1 flex justify-between items-center">
                         <div>
@@ -221,8 +230,9 @@ const GenerateRecipe = () => {
                 </header>
 
                 {errorMsg && (
-                    <div className="bg-red-500/20 border border-red-500/50 text-red-100 px-4 py-3 rounded-xl text-sm font-medium">
-                        {errorMsg}
+                    <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-400 text-sm animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                        <span className="font-medium text-left leading-relaxed">{errorMsg}</span>
                     </div>
                 )}
 
@@ -296,15 +306,13 @@ const GenerateRecipe = () => {
                             {ingredients.map(ing => {
                                 const isInvalid = invalidTags.includes(ing);
                                 return (
-                                    <div key={ing} className={`border px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm ${
-                                        isInvalid 
-                                            ? 'bg-red-500/20 border-red-500/50 text-red-400 shadow-red-500/10' 
-                                            : 'bg-[#051a10] border-[#00ff84]/30 text-[#00ff84] shadow-[#00ff84]/5'
-                                    }`}>
-                                        {ing}
-                                        <button onClick={() => removeIngredient(ing)} className={`rounded-full p-0.5 transition-colors ${
-                                            isInvalid ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-[#00ff84]/70 hover:bg-[#00ff84]/20 hover:text-[#00ff84]'
+                                    <div key={ing} className={`border px-5 py-2.5 rounded-full flex items-center gap-2.5 text-sm font-semibold shadow-sm ${isInvalid
+                                        ? 'bg-red-500/20 border-red-500/50 text-red-400 shadow-red-500/10'
+                                        : 'bg-[#051a10] border-[#00ff84]/30 text-[#00ff84] shadow-[#00ff84]/5'
                                         }`}>
+                                        {ing}
+                                        <button onClick={() => removeIngredient(ing)} className={`rounded-full p-0.5 transition-colors ${isInvalid ? 'text-red-400 hover:bg-red-500/20 hover:text-red-300' : 'text-[#00ff84]/70 hover:bg-[#00ff84]/20 hover:text-[#00ff84]'
+                                            }`}>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                                         </button>
                                     </div>

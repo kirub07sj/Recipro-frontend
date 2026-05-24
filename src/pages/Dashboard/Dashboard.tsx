@@ -4,7 +4,7 @@ import { useRecipeStore } from '../../store/recipeStore';
 import { useAuth } from '../../hooks/useAuth';
 import { useHealthProfileStore } from '../../store/healthProfileStore';
 import { useEffect } from 'react';
-import { getRecentlyViewedService } from '../../services/recentlyViewedService';
+import { getRecentlyViewedService, clearRecentlyViewedService } from '../../services/recentlyViewedService';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardSkeleton from '../../components/skeletons/DashboardSkeleton';
 
@@ -17,8 +17,26 @@ const Dashboard = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const goalReached = profile && todayIntake?.totalCalories >= profile.dailyGoal;
+
     useEffect(() => {
         if (userId) {
+            // Fetch recently viewed
+            getRecentlyViewedService(userId, 20)
+                .then(res => {
+                    if (res.success) {
+                        setRecentlyViewed(res.data);
+                    }
+                })
+                .catch(console.error);
+
+            // Fetch health profile if not already loaded
+            if (!profile) {
+                fetchProfile(userId).catch(console.error);
+            }
+
+            // Fetch today's intake
+            fetchTodayIntake(userId).catch(console.error);
             setLoading(true);
             const promises = [
                 getRecentlyViewedService(userId, 20).then(res => {
@@ -44,6 +62,16 @@ const Dashboard = () => {
             navigate('/generate-recipe');
         }
         if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const handleClearHistory = async () => {
+        if (!userId) return;
+        try {
+            await clearRecentlyViewedService(userId);
+            setRecentlyViewed([]);
+        } catch (error) {
+            console.error('Failed to clear history:', error);
+        }
     };
 
 
@@ -127,11 +155,13 @@ const Dashboard = () => {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
+                                    animate={goalReached && !showNotifications ? { rotate: [0, -15, 15, -15, 15, 0] } : {}}
+                                    transition={goalReached && !showNotifications ? { repeat: Infinity, duration: 1, repeatDelay: 1.5 } : {}}
                                     onClick={() => setShowNotifications(!showNotifications)}
-                                    className={`p-2.5 rounded-full transition-colors relative ${showNotifications ? 'bg-[#00ff84] text-[#051109]' : 'bg-[#0d2114] text-gray-400 hover:text-[#00ff84]'}`}
+                                    className={`p-2.5 rounded-full transition-colors relative ${showNotifications ? 'bg-[#00ff84] text-[#051109]' : 'bg-[#0d2114] text-gray-400 hover:text-[#00ff84]'} ${goalReached && !showNotifications ? 'shadow-[0_0_15px_rgba(0,255,132,0.4)] border border-[#00ff84]/50' : ''}`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
-                                    <span className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full border-2 ${showNotifications ? 'bg-[#051109] border-[#00ff84]' : 'bg-[#00ff84] border-[#051109]'}`}></span>
+                                    <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full border-2 ${showNotifications ? 'bg-[#051109] border-[#00ff84]' : 'bg-[#00ff84] border-[#051109]'} ${goalReached && !showNotifications ? 'animate-pulse scale-125' : ''}`}></span>
                                 </motion.button>
                             </div>
                         </motion.header>
@@ -150,8 +180,10 @@ const Dashboard = () => {
                                         What's in your<br />fridge today?
                                     </h2>
                                     <div className="mt-8 flex items-center gap-4 bg-[#051109] text-[#00ff84] px-6 py-4 rounded-2xl w-fit group-hover:scale-105 transition-transform">
-
-                                        <p className="font-bold text-lg">Snap Ingredient to get recipes</p>
+                                        <p className="font-bold text-lg">
+                                            <span className="md:hidden">Snap Ingredient to get recipes</span>
+                                            <span className="hidden md:inline">Upload Ingredient to get recipes</span>
+                                        </p>
                                     </div>
                                 </div>
                                 <div className="absolute right-[-20px] bottom-[-20px] opacity-10 group-hover:opacity-20 transition-opacity">
@@ -204,7 +236,15 @@ const Dashboard = () => {
                         <motion.section variants={itemVariants}>
                             <div className="flex items-center justify-between mb-6">
                                 <h2 className="text-2xl font-bold text-white">Recently Viewed</h2>
-
+                                {recentlyViewed.length > 0 && (
+                                    <button
+                                        onClick={handleClearHistory}
+                                        className="text-[#00ff84] text-xs md:text-sm font-semibold hover:underline bg-transparent border-0 outline-none hover:text-green-400 transition-colors flex items-center gap-1.5 cursor-pointer"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-trash-2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                                        Clear History
+                                    </button>
+                                )}
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {recentlyViewed.length > 0 ? recentlyViewed.map((item, index) => (

@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginService, googleLoginService } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
+import { getFriendlyErrorMessage } from '../../utils/errorHelper';
+import { useAuth } from '../../hooks/useAuth';
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const auth = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +24,13 @@ const LoginPage = () => {
                 throw new Error('Please fill all fields');
             }
             const response = await loginService({ email, password });
-            localStorage.setItem('token', response.token);
+            auth.login(response.token);
             if (response.user && response.user.username) {
                 localStorage.setItem('userName', response.user.username);
             }
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Failed to sign in');
+            setError(getFriendlyErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -39,13 +42,13 @@ const LoginPage = () => {
         try {
             if (!tokenResponse.access_token) throw new Error('No access token received');
             const response = await googleLoginService({ accessToken: tokenResponse.access_token });
-            localStorage.setItem('token', response.token);
+            auth.login(response.token);
             if (response.user && response.user.username) {
                 localStorage.setItem('userName', response.user.username);
             }
             navigate('/dashboard');
         } catch (err: any) {
-            setError(err.message || 'Google sign in failed');
+            setError(getFriendlyErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -53,7 +56,7 @@ const LoginPage = () => {
 
     const loginWithGoogle = useGoogleLogin({
         onSuccess: handleGoogleSuccess,
-        onError: () => setError('Google Sign In failed'),
+        onError: () => setError(getFriendlyErrorMessage('Google Sign In failed')),
     });
 
     return (
@@ -98,8 +101,9 @@ const LoginPage = () => {
                     </div>
 
                     {error && (
-                        <div className="mb-4 text-red-500 text-sm font-medium text-center">
-                            {error}
+                        <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-start gap-3 text-red-400 text-sm animate-fade-in shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-alert-circle shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            <span className="font-medium text-left leading-relaxed">{error}</span>
                         </div>
                     )}
 

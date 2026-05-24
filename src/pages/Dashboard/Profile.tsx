@@ -3,6 +3,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { updateUserProfile } from '../../services/userService';
 
 const Profile = () => {
     const {
@@ -20,6 +21,11 @@ const Profile = () => {
     const [newDislike, setNewDislike] = useState('');
     const [isAddingDislike, setIsAddingDislike] = useState(false);
     const [showIntakeDetails, setShowIntakeDetails] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [updateError, setUpdateError] = useState('');
+    const [isUpdating, setIsUpdating] = useState(false);
 
     useEffect(() => {
         if (userId) {
@@ -27,13 +33,47 @@ const Profile = () => {
         }
     }, [userId, fetchTodayIntake]);
 
-    const handleNameSave = () => {
-        localStorage.setItem('userName', userName);
-        setIsEditingName(false);
+    const handleProfileSave = async () => {
+        if (!userId) return;
+        setUpdateError('');
+
+        if (userName.trim().length < 2) {
+            setUpdateError('Name must be at least 2 characters.');
+            return;
+        }
+
+        const data: any = { username: userName };
+
+        if (newPassword || currentPassword || confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                setUpdateError('New passwords do not match.');
+                return;
+            }
+            if (!currentPassword) {
+                setUpdateError('Current password is required to change password.');
+                return;
+            }
+            data.currentPassword = currentPassword;
+            data.newPassword = newPassword;
+        }
+
+        try {
+            setIsUpdating(true);
+            const res = await updateUserProfile(userId, data);
+            localStorage.setItem('userName', res.user.name);
+            setUserName(res.user.name);
+            setIsEditingName(false);
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err: any) {
+            setUpdateError(err.message || 'Failed to update profile');
+        } finally {
+            setIsUpdating(false);
+        }
     };
 
 
-    const healthScore = profile?.healthScore || 85;
     const dailyGoal = profile?.dailyGoal || 2200;
     const dietMode = profile?.dietMode || 'Paleo';
     const weight = profile?.weight || 72;
@@ -43,6 +83,8 @@ const Profile = () => {
     const conditions = profile?.conditions || [];
     const allergies = profile?.allergies?.length ? profile.allergies : [];
     const dislikes = profile?.dislikes?.length ? profile.dislikes : [];
+
+    const goalReached = (todayIntake?.totalCalories || 0) >= dailyGoal;
 
     const handleRemoveAllergy = async (item: string) => {
         if (!userId || !profile) return;
@@ -105,20 +147,81 @@ const Profile = () => {
                     </motion.div>
                 </div>
 
-                <div className="mt-4 flex items-center justify-center gap-2 h-8">
+                <div className={`absolute z-50 mt-24 flex items-center justify-center gap-2 ${isEditingName ? 'w-full max-w-sm' : 'h-8'}`}>
                     {isEditingName ? (
-                        <div className="flex items-center gap-2">
-                            <input
-                                type="text"
-                                value={userName}
-                                onChange={(e) => setUserName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
-                                className="bg-[#0c2415] text-white border border-[#00ff88]/50 rounded-lg px-3 py-1 text-center font-bold text-xl outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] w-48 shadow-inner transition-all"
-                                autoFocus
-                                onKeyDown={(e) => e.key === 'Enter' && handleNameSave()}
-                            />
-                            <button onClick={handleNameSave} className="text-[#00ff88] hover:text-green-400 p-1 hover:bg-[#00ff88]/10 rounded-full transition-colors flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
-                            </button>
+                        <div className="flex flex-col items-center gap-4 w-full bg-[#05160b]/10 border border-[#00ff88]/30 p-6 rounded-3xl shadow-2xl mt-4 z-10 relative backdrop-blur-2xl">
+                            <h3 className="text-xl font-extrabold text-white mb-2">Edit Profile</h3>
+
+                            {updateError && (
+                                <div className="w-full p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-medium text-center">
+                                    {updateError}
+                                </div>
+                            )}
+
+                            <div className="w-full space-y-1">
+                                <label className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest pl-2">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={userName}
+                                    onChange={(e) => setUserName(e.target.value.replace(/[^a-zA-Z\s]/g, ''))}
+                                    className="w-full bg-[#0c2415] text-white border border-[#00ff88]/30 rounded-xl px-4 py-3 outline-none focus:border-[#00ff88] focus:ring-1 focus:ring-[#00ff88] shadow-inner transition-all text-sm font-bold"
+                                    placeholder="Your Name"
+                                />
+                            </div>
+
+                            <div className="w-full space-y-1 mt-2">
+                                <label className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest pl-2">Change Password (Optional)</label>
+                                <input
+                                    type="password"
+                                    value={currentPassword}
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    className="w-full bg-[#0c2415] text-white border border-white/5 rounded-xl px-4 py-3 outline-none focus:border-[#00ff88] shadow-inner transition-all text-sm mb-2"
+                                    placeholder="Current Password"
+                                />
+                                <input
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    className="w-full bg-[#0c2415] text-white border border-white/5 rounded-xl px-4 py-3 outline-none focus:border-[#00ff88] shadow-inner transition-all text-sm mb-2"
+                                    placeholder="New Password"
+                                />
+                                <input
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    className="w-full bg-[#0c2415] text-white border border-white/5 rounded-xl px-4 py-3 outline-none focus:border-[#00ff88] shadow-inner transition-all text-sm"
+                                    placeholder="Confirm New Password"
+                                />
+                            </div>
+
+                            <div className="flex gap-3 w-full mt-4">
+                                <button
+                                    onClick={() => {
+                                        setIsEditingName(false);
+                                        setUpdateError('');
+                                        setCurrentPassword('');
+                                        setNewPassword('');
+                                        setConfirmPassword('');
+                                        setUserName(localStorage.getItem('userName') || 'Alex Doe');
+                                    }}
+                                    className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white font-semibold text-sm transition-colors border border-white/10"
+                                    disabled={isUpdating}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleProfileSave}
+                                    className="flex-1 py-3 rounded-xl bg-[#00ff88] hover:bg-green-400 text-[#05160b] font-bold text-sm transition-colors flex items-center justify-center shadow-[0_0_15px_rgba(0,255,136,0.3)]"
+                                    disabled={isUpdating}
+                                >
+                                    {isUpdating ? (
+                                        <svg className="animate-spin h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    ) : 'Save Profile'}
+                                </button>
+                            </div>
                         </div>
                     ) : (
                         <div className="flex items-center gap-2 cursor-pointer group px-3 py-1 rounded-lg hover:bg-white/5 transition-colors" onClick={() => setIsEditingName(true)}>
@@ -128,13 +231,7 @@ const Profile = () => {
                     )}
                 </div>
 
-                <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="flex items-center gap-1.5 mt-2 bg-[#05160b] border border-[#00ff88]/30 px-3 py-1 rounded-full shadow-inner"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="#00ff88" stroke="#00ff88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
-                    <span className="text-[#00ff88] text-xs font-bold tracking-wide">Health Score: {healthScore}</span>
-                </motion.div>
+
             </motion.div>
 
             <div className="max-w-3xl md:mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 text-white">
@@ -149,11 +246,34 @@ const Profile = () => {
                         {/* Daily Goal card */}
                         <motion.div
                             whileHover={{ y: -5 }}
-                            onHoverStart={() => setShowIntakeDetails(true)}
-                            onHoverEnd={() => setShowIntakeDetails(false)}
-                            className="bg-gradient-to-br from-[#0c2415] to-[#081a0f] border border-white/5 rounded-3xl p-5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px]"
+                            onHoverStart={() => {
+                                if (window.innerWidth >= 768) {
+                                    setShowIntakeDetails(true);
+                                }
+                            }}
+                            onHoverEnd={() => {
+                                if (window.innerWidth >= 768) {
+                                    setShowIntakeDetails(false);
+                                }
+                            }}
+                            onClick={() => {
+                                if (window.innerWidth < 768) {
+                                    setShowIntakeDetails(!showIntakeDetails);
+                                }
+                            }}
+                            className={`bg-gradient-to-br from-[#0c2415] to-[#081a0f] border rounded-3xl p-5 relative overflow-hidden flex flex-col justify-center cursor-pointer transition-all min-h-[140px] ${goalReached ? 'border-[#00ff88] shadow-[0_0_30px_rgba(0,255,136,0.3)]' : 'border-white/5 shadow-[0_4px_20px_rgba(0,0,0,0.5)]'}`}
                         >
-                            <div className="flex justify-between flex-col ">
+                            {goalReached && (
+                                <motion.div 
+                                    animate={{ y: [0, -8, 0], scale: [1, 1.05, 1] }} 
+                                    transition={{ repeat: Infinity, duration: 2 }}
+                                    className="absolute top-4 right-4 bg-[#00ff88]/20 text-[#00ff88] text-[10px] font-extrabold px-3 py-1.5 rounded-full border border-[#00ff88]/40 flex items-center gap-1.5 backdrop-blur-sm shadow-[0_0_15px_rgba(0,255,136,0.4)] z-20"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                                    GOAL MET!
+                                </motion.div>
+                            )}
+                            <div className="flex justify-between flex-col relative z-10">
                                 <h3 className="text-[10px] font-bold text-[#8ba494] uppercase tracking-widest">Daily Goal</h3>
                                 <div className="flex items-end gap-2">
                                     <span className="text-4xl text-white font-extrabold">{dailyGoal.toLocaleString()}</span>
@@ -167,7 +287,7 @@ const Profile = () => {
                                     initial={{ width: 0 }}
                                     animate={{ width: `${Math.min(100, ((todayIntake?.totalCalories || 0) / (dailyGoal || 1)) * 100)}%` }}
                                     transition={{ duration: 1, ease: 'easeOut' }}
-                                    className="h-full bg-[#00ff88] rounded-full shadow-[0_0_10px_#00ff88]"
+                                    className={`h-full rounded-full ${goalReached ? 'bg-[#00ff88] shadow-[0_0_15px_#00ff88] animate-pulse' : 'bg-[#00ff88] shadow-[0_0_10px_#00ff88]'}`}
                                 ></motion.div>
                             </div>
 
