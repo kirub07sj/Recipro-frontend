@@ -17,6 +17,8 @@ const Dashboard = () => {
     const [showNotifications, setShowNotifications] = useState(false);
     const [loading, setLoading] = useState(true);
 
+    const goalReached = profile && todayIntake?.totalCalories >= profile.dailyGoal;
+
     useEffect(() => {
         if (userId) {
             // Fetch recently viewed
@@ -153,11 +155,13 @@ const Dashboard = () => {
                                 <motion.button
                                     whileHover={{ scale: 1.05 }}
                                     whileTap={{ scale: 0.95 }}
+                                    animate={goalReached && !showNotifications ? { rotate: [0, -15, 15, -15, 15, 0] } : {}}
+                                    transition={goalReached && !showNotifications ? { repeat: Infinity, duration: 1, repeatDelay: 1.5 } : {}}
                                     onClick={() => setShowNotifications(!showNotifications)}
-                                    className={`p-2.5 rounded-full transition-colors relative ${showNotifications ? 'bg-[#00ff84] text-[#051109]' : 'bg-[#0d2114] text-gray-400 hover:text-[#00ff84]'}`}
+                                    className={`p-2.5 rounded-full transition-colors relative ${showNotifications ? 'bg-[#00ff84] text-[#051109]' : 'bg-[#0d2114] text-gray-400 hover:text-[#00ff84]'} ${goalReached && !showNotifications ? 'shadow-[0_0_15px_rgba(0,255,132,0.4)] border border-[#00ff84]/50' : ''}`}
                                 >
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-bell" aria-hidden="true"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
-                                    <span className={`absolute top-2.5 right-2.5 w-2 h-2 rounded-full border-2 ${showNotifications ? 'bg-[#051109] border-[#00ff84]' : 'bg-[#00ff84] border-[#051109]'}`}></span>
+                                    <span className={`absolute top-2.5 right-2.5 w-2.5 h-2.5 rounded-full border-2 ${showNotifications ? 'bg-[#051109] border-[#00ff84]' : 'bg-[#00ff84] border-[#051109]'} ${goalReached && !showNotifications ? 'animate-pulse scale-125' : ''}`}></span>
                                 </motion.button>
                             </div>
                         </motion.header>
