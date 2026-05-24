@@ -20,20 +20,7 @@ const ResetPassword = () => {
     const [success, setSuccess] = useState(false);
     const [isPasswordFocused, setIsPasswordFocused] = useState(false);
 
-    const hasLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    const hasSpecial = /[^A-Za-z0-9]/.test(password);
 
-    const getPasswordScore = () => {
-        let score = 0;
-        if (hasLength) score++;
-        if (hasUpper) score++;
-        if (hasNumber) score++;
-        if (hasSpecial) score++;
-        return score;
-    };
-    const passwordScore = getPasswordScore();
 
     const hasLength = password.length >= 8;
     const hasUpper = /[A-Z]/.test(password);
