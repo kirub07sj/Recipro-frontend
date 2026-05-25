@@ -23,6 +23,10 @@ const LoginPage = () => {
             if (!email || !password) {
                 throw new Error('Please fill all fields');
             }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                throw new Error('Please enter a valid email address (e.g., user@example.com)');
+            }
             const response = await loginService({ email, password });
             auth.login(response.token);
             if (response.user && response.user.username) {
