@@ -43,6 +43,13 @@ const RegisterPage = () => {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            setError('Please enter a valid email address (e.g., user@example.com)');
+            setLoading(false);
+            return;
+        }
+
         try {
             const data = await registerService({
                 name: `${firstName} ${lastName}`.trim(),
