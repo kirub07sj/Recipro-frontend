@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { forgotPasswordService } from '../../services/authService';
 import { getFriendlyErrorMessage } from '../../utils/errorHelper';
+import { validateEmail } from '../../utils/validators';
 
 const ForgotPasswordPage = () => {
     const navigate = useNavigate();
@@ -15,6 +16,10 @@ const ForgotPasswordPage = () => {
         setLoading(true);
         setError('');
         try {
+            const emailError = validateEmail(email);
+            if (emailError) {
+                throw new Error(emailError);
+            }
             await forgotPasswordService({ email });
             setIsSubmitted(true);
             setTimeout(() => {
@@ -73,7 +78,7 @@ const ForgotPasswordPage = () => {
                                 </div>
                             )}
 
-                            <form className="space-y-4" onSubmit={onSubmit}>
+                            <form className="space-y-4" noValidate onSubmit={onSubmit}>
                                 <div className="relative group">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail absolute left-4 top-1/2 -translate-y-1/2 text-[#8ba494] group-focus-within:text-green-500 transition-colors" aria-hidden="true">
                                         <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>

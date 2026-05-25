@@ -4,6 +4,7 @@ import { loginService, googleLoginService } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { getFriendlyErrorMessage } from '../../utils/errorHelper';
 import { useAuth } from '../../hooks/useAuth';
+import { validateEmail } from '../../utils/validators';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -22,6 +23,10 @@ const LoginPage = () => {
         try {
             if (!email || !password) {
                 throw new Error('Please fill all fields');
+            }
+            const emailError = validateEmail(email);
+            if (emailError) {
+                throw new Error(emailError);
             }
             const response = await loginService({ email, password });
             auth.login(response.token);
@@ -107,7 +112,7 @@ const LoginPage = () => {
                         </div>
                     )}
 
-                    <form className="space-y-4" onSubmit={onFinish}>
+                    <form className="space-y-4" noValidate onSubmit={onFinish}>
                         <div className="relative group">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-mail absolute left-4 top-1/2 -translate-y-1/2 text-[#8ba494] group-focus-within:text-green-500 transition-colors" aria-hidden="true">
                                 <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>

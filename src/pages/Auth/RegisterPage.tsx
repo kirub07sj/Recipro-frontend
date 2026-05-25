@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { registerService, googleLoginService } from '../../services/authService';
 import { useGoogleLogin } from '@react-oauth/google';
 import { getFriendlyErrorMessage } from '../../utils/errorHelper';
+import { validateEmail } from '../../utils/validators';
 
 const RegisterPage = () => {
     const navigate = useNavigate();
@@ -36,6 +37,13 @@ const RegisterPage = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
+        const emailError = validateEmail(email);
+        if (emailError) {
+            setError(emailError);
+            setLoading(false);
+            return;
+        }
 
         if (!hasLength || !hasUpper || !hasNumber || !hasSpecial) {
             setError("Password is too weak. Make sure all requirements are checked.");
@@ -132,7 +140,7 @@ const RegisterPage = () => {
                         </div>
                     )}
 
-                    <form className="space-y-4" onSubmit={onFinish}>
+                    <form className="space-y-4" noValidate onSubmit={onFinish}>
                         <div className="flex gap-4">
                             <div className="relative group flex-1">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-user absolute left-4 top-1/2 -translate-y-1/2 text-[#8ba494] group-focus-within:text-green-500 transition-colors" aria-hidden="true"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
